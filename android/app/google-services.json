@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "1024812024678",
+    "project_id": "innerfive",
+    "storage_bucket": "innerfive.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1024812024678:android:72bcbac71206656a8abea7",
+        "android_client_info": {
+          "package_name": "com.example.innerfive"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1024812024678-47giamu140tfn8al5jgjaf2720hb7gp0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBKBBNLV-LoatdlANot-0b_Z44Hm4U7N4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1024812024678-47giamu140tfn8al5jgjaf2720hb7gp0.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1024812024678-fkq9o43g9pkjhv3fqushljio0k1b517h.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.innerfive"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1024812024678:android:4193eadba38c06378abea7",
+        "android_client_info": {
+          "package_name": "com.lscitech.innerfive"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1024812024678-47giamu140tfn8al5jgjaf2720hb7gp0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBKBBNLV-LoatdlANot-0b_Z44Hm4U7N4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1024812024678-47giamu140tfn8al5jgjaf2720hb7gp0.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1024812024678-fkq9o43g9pkjhv3fqushljio0k1b517h.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.innerfive"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

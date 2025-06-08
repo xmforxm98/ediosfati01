@@ -1,0 +1,6 @@
+{
+  "buildCommand": "flutter build web",
+  "outputDirectory": "build/web",
+  "installCommand": "flutter pub get",
+  "framework": null
+} 
