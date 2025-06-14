@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:innerfive/models/user_data.dart';
 import 'package:innerfive/widgets/animation_extensions.dart';
 import 'package:innerfive/widgets/custom_button.dart';
+import 'package:innerfive/widgets/custom_error_message.dart';
 
 class GenderStep extends StatefulWidget {
   final UserData userData;
@@ -26,12 +27,7 @@ class _GenderStepState extends State<GenderStep> {
 
   void _handleNext() {
     if (_selectedGender == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a gender to continue.'),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
+      CustomErrorMessage.show(context, 'Please select a gender to continue.');
       return;
     }
     widget.userData.gender = _selectedGender;

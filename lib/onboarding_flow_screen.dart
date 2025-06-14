@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:innerfive/widgets/custom_button.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
-import 'package:innerfive/services/api_service.dart';
 import 'package:innerfive/services/auth_service.dart';
 import 'package:provider/provider.dart';
 import 'package:innerfive/screens/auth_for_analysis_screen.dart';
+import 'package:innerfive/services/image_service.dart';
+import 'package:innerfive/widgets/gradient_blurred_background.dart';
 
 // Import step widgets which we will create next
+import 'onboarding_steps/nickname_step.dart';
 import 'onboarding_steps/name_step.dart';
 import 'onboarding_steps/birth_date_step.dart';
 import 'onboarding_steps/birth_time_step.dart';
@@ -25,12 +26,12 @@ class OnboardingFlowScreen extends StatefulWidget {
 
 class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
   final PageController _pageController = PageController();
-  final ApiService _apiService = ApiService();
   final UserData _userData = UserData();
   double _progress = 0.2;
+  String? _backgroundUrl;
 
   void _nextPage() {
-    if (_pageController.page! < 4) {
+    if (_pageController.page! < 5) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 400),
         curve: Curves.easeInOut,
@@ -79,12 +80,22 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
   @override
   void initState() {
     super.initState();
+    _loadBackground();
     _pageController.addListener(() {
       setState(() {
-        // 5 steps, so progress is (page + 1) / 5
-        _progress = (_pageController.page! + 1) / 5.0;
+        // 6 steps, so progress is (page + 1) / 6
+        _progress = (_pageController.page! + 1) / 6.0;
       });
     });
+  }
+
+  Future<void> _loadBackground() async {
+    final url = await ImageService.getInputBackgroundUrl();
+    if (mounted) {
+      setState(() {
+        _backgroundUrl = url;
+      });
+    }
   }
 
   @override
@@ -96,6 +107,7 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> onboardingSteps = [
+      NicknameStep(userData: _userData, onContinue: _nextPage),
       NameStep(userData: _userData, onContinue: _nextPage),
       BirthDateStep(userData: _userData, onNextStep: _nextPage),
       BirthTimeStep(userData: _userData, onComplete: _nextPage),
@@ -116,39 +128,37 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
                 )
                 : null,
       ),
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset('assets/images/input_bg.png', fit: BoxFit.cover),
-          SafeArea(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24.0,
-                    vertical: 20.0,
-                  ),
-                  child: LinearPercentIndicator(
-                    percent: _progress,
-                    lineHeight: 8,
-                    backgroundColor: Colors.white24,
-                    progressColor: Colors.white,
-                    barRadius: const Radius.circular(10),
-                    animation: true,
-                    animateFromLastPercent: true,
-                  ),
+      body: GradientBlurredBackground(
+        imageUrl: _backgroundUrl,
+        isLoading: _backgroundUrl == null,
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 20.0,
                 ),
-                Expanded(
-                  child: PageView(
-                    controller: _pageController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: onboardingSteps,
-                  ),
+                child: LinearPercentIndicator(
+                  percent: _progress,
+                  lineHeight: 8,
+                  backgroundColor: Colors.white24,
+                  progressColor: Colors.white,
+                  barRadius: const Radius.circular(10),
+                  animation: true,
+                  animateFromLastPercent: true,
                 ),
-              ],
-            ),
+              ),
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: onboardingSteps,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

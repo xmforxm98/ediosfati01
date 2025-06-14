@@ -1,0 +1,22 @@
+{
+  "ui": {
+    "continue_to": "https://storage.googleapis.com/innerfive.firebasestorage.app/images/ui/continue_to.png"
+  },
+  "backgrounds": {
+    "login_bg": "https://storage.googleapis.com/innerfive.firebasestorage.app/images/backgrounds/login_bg.png",
+    "name_input_bg": "https://storage.googleapis.com/innerfive.firebasestorage.app/images/backgrounds/name_input_bg.png",
+    "second_bg": "https://storage.googleapis.com/innerfive.firebasestorage.app/images/backgrounds/second_bg.png",
+    "city_bg": "https://storage.googleapis.com/innerfive.firebasestorage.app/images/backgrounds/city_bg.png",
+    "birth_input_bg": "https://storage.googleapis.com/innerfive.firebasestorage.app/images/backgrounds/birth_input_bg.png",
+    "loading_bg": "https://storage.googleapis.com/innerfive.firebasestorage.app/images/backgrounds/loading_bg.png",
+    "login2": "https://storage.googleapis.com/innerfive.firebasestorage.app/images/backgrounds/login2.png",
+    "login3": "https://storage.googleapis.com/innerfive.firebasestorage.app/images/backgrounds/login3.png",
+    "login1": "https://storage.googleapis.com/innerfive.firebasestorage.app/images/backgrounds/login1.png",
+    "login4": "https://storage.googleapis.com/innerfive.firebasestorage.app/images/backgrounds/login4.png",
+    "gender_bg": "https://storage.googleapis.com/innerfive.firebasestorage.app/images/backgrounds/gender_bg.png",
+    "input_bg": "https://storage.googleapis.com/innerfive.firebasestorage.app/images/backgrounds/input_bg.png"
+  },
+  "icons": {
+    "birth_time": "https://storage.googleapis.com/innerfive.firebasestorage.app/images/icons/birth_time.png"
+  }
+}

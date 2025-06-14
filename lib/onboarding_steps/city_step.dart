@@ -1,12 +1,10 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:csc_picker_plus/csc_picker_plus.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:innerfive/models/user_data.dart';
 import 'package:innerfive/widgets/custom_button.dart';
-import 'package:innerfive/widgets/animation_extensions.dart';
+import 'package:innerfive/widgets/custom_error_message.dart';
 
 class CityStep extends StatefulWidget {
   final UserData userData;
@@ -49,9 +47,7 @@ class _CityStepState extends State<CityStep> {
 
   void _showError(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
-    );
+    CustomErrorMessage.show(context, message);
   }
 
   @override

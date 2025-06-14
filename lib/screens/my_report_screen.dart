@@ -12,7 +12,7 @@ class MyReportScreen extends StatefulWidget {
 }
 
 class _MyReportScreenState extends State<MyReportScreen> {
-  Future<NarrativeReport?>? _reportFuture;
+  Future<Map<String, dynamic>?>? _reportFuture;
 
   @override
   void initState() {
@@ -29,7 +29,7 @@ class _MyReportScreenState extends State<MyReportScreen> {
     }
   }
 
-  Future<NarrativeReport?> _getReportFromFirestore(String userId) async {
+  Future<Map<String, dynamic>?> _getReportFromFirestore(String userId) async {
     try {
       print("Fetching report for user: $userId");
       final readingsQuery =
@@ -49,10 +49,8 @@ class _MyReportScreenState extends State<MyReportScreen> {
         final latestReadingData = readingsQuery.docs.first.data();
         print("Latest reading data keys: ${latestReadingData.keys.toList()}");
         if (latestReadingData.containsKey('report')) {
-          print("Report found, creating NarrativeReport");
-          return NarrativeReport.fromJson(
-            latestReadingData['report'] as Map<String, dynamic>,
-          );
+          print("Report found, returning full data");
+          return latestReadingData; // 전체 데이터 반환
         } else {
           print("No 'report' key found in reading data");
         }
@@ -69,10 +67,10 @@ class _MyReportScreenState extends State<MyReportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('My Report', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
           IconButton(
@@ -81,7 +79,7 @@ class _MyReportScreenState extends State<MyReportScreen> {
           ),
         ],
       ),
-      body: FutureBuilder<NarrativeReport?>(
+      body: FutureBuilder<Map<String, dynamic>?>(
         future: _reportFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -112,8 +110,8 @@ class _MyReportScreenState extends State<MyReportScreen> {
             );
           }
 
-          final report = snapshot.data;
-          if (report == null) {
+          final reportData = snapshot.data;
+          if (reportData == null) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -132,8 +130,16 @@ class _MyReportScreenState extends State<MyReportScreen> {
             );
           }
 
-          // Re-use the body of NewAnalysisReportScreen
-          return NewAnalysisReportScreen(report: report);
+          // Create NarrativeReport from the report data
+          final report = NarrativeReport.fromJson(
+            reportData['report'] as Map<String, dynamic>,
+          );
+
+          // Pass both report and analysisData (the original report data)
+          return NewAnalysisReportScreen(
+            report: report,
+            analysisData: reportData['report'] as Map<String, dynamic>,
+          );
         },
       ),
     );

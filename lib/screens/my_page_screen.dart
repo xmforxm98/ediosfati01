@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:innerfive/onboarding_flow_screen.dart';
 import 'package:innerfive/screens/privacy_settings_screen.dart';
+import 'package:innerfive/screens/support_screen.dart';
 import 'package:innerfive/models/analysis_report.dart';
 import 'package:innerfive/services/notification_service.dart';
 
@@ -96,22 +97,39 @@ class _MyPageScreenState extends State<MyPageScreen> {
     return 'Member since ${DateFormat('MMMM yyyy').format(timestamp.toDate())}';
   }
 
+  String _formatBirthDate(dynamic birthDate) {
+    if (birthDate == null || birthDate == '' || birthDate == 'null') {
+      return 'Not Set';
+    }
+    return birthDate.toString();
+  }
+
+  String _formatBirthTime(dynamic birthTime) {
+    if (birthTime == null ||
+        birthTime == '' ||
+        birthTime == 'null' ||
+        birthTime == 'null:null') {
+      return 'Not Set';
+    }
+    return birthTime.toString();
+  }
+
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context, listen: false);
 
     if (_user == null) {
       return const Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.transparent,
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('My Page', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.transparent,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -146,7 +164,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 radius: 30,
                 backgroundColor: Colors.grey[800],
                 child: Text(
-                  _getInitials(_user?.displayName),
+                  _getInitials(_userData?['nickname'] ?? _user?.displayName),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 24,
@@ -160,7 +178,8 @@ class _MyPageScreenState extends State<MyPageScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _userData?['displayName'] ??
+                      _userData?['nickname'] ??
+                          _userData?['displayName'] ??
                           _user?.displayName ??
                           'No Name',
                       style: const TextStyle(
@@ -171,7 +190,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      _eidosTitle ?? 'No analysis yet',
+                      _eidosTitle ?? 'The Essence of Your Eidos',
                       style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 16,
@@ -216,7 +235,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _userData?['birthDate'] ?? 'Not Set',
+                    _formatBirthDate(_userData?['birthDate']),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -233,7 +252,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _userData?['birthTime'] ?? 'Not Set',
+                    _formatBirthTime(_userData?['birthTime']),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -270,6 +289,11 @@ class _MyPageScreenState extends State<MyPageScreen> {
           'Support',
           'Get help and contact us',
           Icons.help_outline,
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const SupportScreen()),
+            );
+          },
         ),
       ],
     );

@@ -44,6 +44,7 @@ class NarrativeReport {
   final Map<String, dynamic> rawDataForDev;
   final Map<String, dynamic> fiveElementsStrength;
   final Map<String, dynamic> nameOhaengEnglish;
+  final String? eidosType;
 
   NarrativeReport({
     required this.eidosSummary,
@@ -57,6 +58,7 @@ class NarrativeReport {
     required this.rawDataForDev,
     required this.fiveElementsStrength,
     required this.nameOhaengEnglish,
+    this.eidosType,
   });
 
   factory NarrativeReport.fromJson(Map<String, dynamic> json) {
@@ -76,6 +78,7 @@ class NarrativeReport {
       rawDataForDev: json['raw_data_for_dev'] ?? {},
       fiveElementsStrength: json['five_elements_strength'] ?? {},
       nameOhaengEnglish: json['name_ohaeng_english'] ?? {},
+      eidosType: json['eidos_type'],
     );
   }
 }
@@ -86,6 +89,7 @@ class EidosSummary {
   final String summaryText;
   final String currentEnergyTitle;
   final String currentEnergyText;
+  final String? eidosType;
 
   EidosSummary({
     required this.title,
@@ -93,6 +97,7 @@ class EidosSummary {
     required this.summaryText,
     required this.currentEnergyTitle,
     required this.currentEnergyText,
+    this.eidosType,
   });
 
   factory EidosSummary.fromJson(Map<String, dynamic> json) {
@@ -102,6 +107,7 @@ class EidosSummary {
       summaryText: json['summary_text'] ?? 'N/A',
       currentEnergyTitle: json['current_energy_title'] ?? 'N/A',
       currentEnergyText: json['current_energy_text'] ?? 'N/A',
+      eidosType: json['eidos_type'],
     );
   }
 }

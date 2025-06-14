@@ -1,0 +1,38 @@
+{
+  "WoodEnergy": [
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/WoodEnergy1.jpg",
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/WoodEnergy2.jpg",
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/WoodEnergy3.jpg",
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/WoodEnergy4.jpg"
+  ],
+  "FireEnergy": [
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/FireEnergy1.jpg",
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/FireEnergy2.jpg",
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/FireEnergy3.jpg",
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/FireEnergy4.jpg"
+  ],
+  "EarthEnergy": [
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/EarthEnergy1.jpg",
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/EarthEnergy2.jpg",
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/EarthEnergy3.jpg",
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/EarthEnergy4.jpg"
+  ],
+  "MetalEnergy": [
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/MetalEnergy1.jpg",
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/MetalEnergy2.jpg",
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/MetalEnergy3.jpg",
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/MetalEnergy4.jpg"
+  ],
+  "WaterEnergy": [
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/WaterEnergy1.jpg",
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/WaterEnergy2.jpg",
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/WaterEnergy3.jpg",
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/WaterEnergy4.jpg"
+  ],
+  "NeutralEnergy": [
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/NeutralEnergy1.jpg",
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/NeutralEnergy2.jpg",
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/NeutralEnergy3.jpg",
+    "https://storage.googleapis.com/innerfive.firebasestorage.app/tag_images/NeutralEnergy4.jpg"
+  ]
+}

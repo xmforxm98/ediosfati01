@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'widgets/custom_button.dart';
+import 'widgets/random_login_background.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -75,140 +76,141 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          // Background Image
-          Image.asset('assets/images/login_bg.png', fit: BoxFit.cover),
-          // Back button
-          Positioned(
-            top: 50,
-            left: 20,
-            child: SafeArea(
-              child: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back,
-                  color: Colors.white,
-                  size: 28,
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: RandomLoginBackground(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                const Text(
+                  'Reset Password',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ),
-          ),
-          // Content centered
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  const Text(
-                    'Reset Password',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                const SizedBox(height: 16),
+                const Text(
+                  'Enter your email address and we\'ll send you a link to reset your password.',
+                  style: TextStyle(fontSize: 16, color: Colors.white70),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 40),
+                TextField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Email Address',
+                    labelStyle: const TextStyle(color: Colors.white70),
+                    filled: true,
+                    fillColor: Colors.white10,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
                     ),
+                    prefixIcon: const Icon(Icons.email, color: Colors.white70),
                   ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Enter your email address and we\'ll send you a link to reset your password.',
-                    style: TextStyle(fontSize: 16, color: Colors.white70),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 40),
-                  TextField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      labelText: 'Email Address',
-                      labelStyle: const TextStyle(color: Colors.white70),
-                      filled: true,
-                      fillColor: Colors.white10,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      prefixIcon: const Icon(
-                        Icons.email,
-                        color: Colors.white70,
+                  keyboardType: TextInputType.emailAddress,
+                  style: const TextStyle(color: Colors.white),
+                  enabled: !_isLoading,
+                ),
+                const SizedBox(height: 24),
+                if (_message != null) ...[
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color:
+                          _isSuccess
+                              ? Colors.green.withOpacity(0.2)
+                              : Colors.red.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: _isSuccess ? Colors.green : Colors.red,
+                        width: 1,
                       ),
                     ),
-                    keyboardType: TextInputType.emailAddress,
-                    style: const TextStyle(color: Colors.white),
-                    enabled: !_isLoading,
-                  ),
-                  const SizedBox(height: 24),
-                  if (_message != null) ...[
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color:
-                            _isSuccess
-                                ? Colors.green.withOpacity(0.2)
-                                : Colors.red.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
+                    child: Row(
+                      children: [
+                        Icon(
+                          _isSuccess ? Icons.check_circle : Icons.error,
                           color: _isSuccess ? Colors.green : Colors.red,
-                          width: 1,
+                          size: 20,
                         ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            _isSuccess ? Icons.check_circle : Icons.error,
-                            color: _isSuccess ? Colors.green : Colors.red,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              _message!,
-                              style: TextStyle(
-                                color: _isSuccess ? Colors.green : Colors.red,
-                                fontSize: 14,
-                              ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            _message!,
+                            style: TextStyle(
+                              color: _isSuccess ? Colors.green : Colors.red,
+                              fontSize: 14,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 24),
-                  ],
-                  CustomButton(
-                    text: _isLoading ? 'Sending...' : 'Send Reset Email',
-                    onPressed:
-                        _isLoading ? () {} : () => _handleResetPassword(),
-                    backgroundColor: Colors.white,
-                    textColor: Colors.black,
-                    isOutlined: false,
                   ),
-                  const SizedBox(height: 20),
-                  if (_isSuccess) ...[
-                    CustomButton(
-                      text: 'Back to Login',
-                      onPressed: () => Navigator.of(context).pop(),
-                      isOutlined: true,
-                      textColor: Colors.white,
-                    ),
-                  ] else ...[
-                    TextButton(
-                      onPressed:
-                          _isLoading ? null : () => Navigator.of(context).pop(),
+                  const SizedBox(height: 24),
+                ],
+                const SizedBox(height: 20),
+                _isLoading
+                    ? const CircularProgressIndicator()
+                    : ElevatedButton(
+                      onPressed: _handleResetPassword,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0f3460),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 50,
+                          vertical: 15,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30.0),
+                        ),
+                      ),
                       child: const Text(
-                        'Back to Login',
+                        'Send Reset Email',
                         style: TextStyle(
-                          color: Colors.white70,
+                          color: Colors.white,
                           fontSize: 16,
-                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                  ],
+                const SizedBox(height: 20),
+                if (_isSuccess) ...[
+                  CustomButton(
+                    text: 'Back to Login',
+                    onPressed: () => Navigator.of(context).pop(),
+                    isOutlined: true,
+                    textColor: Colors.white,
+                  ),
+                ] else ...[
+                  TextButton(
+                    onPressed:
+                        _isLoading ? null : () => Navigator.of(context).pop(),
+                    child: const Text(
+                      'Back to Login',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 16,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
                 ],
-              ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

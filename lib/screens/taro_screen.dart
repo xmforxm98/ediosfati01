@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:innerfive/models/analysis_report.dart';
+import 'package:innerfive/services/tarot_service.dart';
 
 class TaroScreen extends StatefulWidget {
   const TaroScreen({super.key});
@@ -12,6 +13,7 @@ class TaroScreen extends StatefulWidget {
 
 class _TaroScreenState extends State<TaroScreen> {
   TarotInsight? _tarotInsight;
+  Map<String, String>? _cardInfo;
   bool _isLoading = true;
   String? _errorMessage;
 
@@ -49,6 +51,10 @@ class _TaroScreenState extends State<TaroScreen> {
           );
           setState(() {
             _tarotInsight = report.tarotInsight;
+            // Get tarot card image info based on the card title
+            if (_tarotInsight?.cardTitle != null) {
+              _cardInfo = TarotService.getCardInfo(_tarotInsight!.cardTitle);
+            }
             _isLoading = false;
           });
         } else {
@@ -75,10 +81,10 @@ class _TaroScreenState extends State<TaroScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('Taro', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
           IconButton(
@@ -152,7 +158,7 @@ class _TaroScreenState extends State<TaroScreen> {
   Widget _buildTarotCard() {
     return Container(
       width: double.infinity,
-      height: 300,
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -167,16 +173,12 @@ class _TaroScreenState extends State<TaroScreen> {
         border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.auto_awesome,
-            size: 80,
-            color: Colors.white.withOpacity(0.9),
-          ),
-          const SizedBox(height: 16),
+          // Card Title
           Text(
-            _tarotInsight?.cardTitle ?? 'Your Tarot Card',
+            _cardInfo?['displayName'] ??
+                _tarotInsight?.cardTitle ??
+                'Your Tarot Card',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 24,
@@ -184,12 +186,154 @@ class _TaroScreenState extends State<TaroScreen> {
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
+
+          // Card Image
+          if (_cardInfo?['imageUrl'] != null) ...[
+            Container(
+              height: 300,
+              width: 200,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  _cardInfo!['imageUrl']!,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      height: 300,
+                      width: 200,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[800],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          value:
+                              loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      height: 300,
+                      width: 200,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[800],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.auto_awesome,
+                            size: 80,
+                            color: Colors.white.withOpacity(0.7),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Tarot Card',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.7),
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ] else ...[
+            Container(
+              height: 300,
+              width: 200,
+              decoration: BoxDecoration(
+                color: Colors.grey[800],
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.auto_awesome,
+                    size: 80,
+                    color: Colors.white.withOpacity(0.7),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Tarot Card',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.7),
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
+          const SizedBox(height: 16),
           Text(
-            'Card of Destiny',
+            'Your Card of Destiny',
             style: TextStyle(
               color: Colors.white.withOpacity(0.7),
               fontSize: 16,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // New Card Button
+          ElevatedButton.icon(
+            onPressed: () {
+              if (_tarotInsight?.cardTitle != null) {
+                setState(() {
+                  _cardInfo = TarotService.getCardInfo(
+                    _tarotInsight!.cardTitle,
+                  );
+                });
+              }
+            },
+            icon: const Icon(Icons.refresh, color: Colors.black),
+            label: const Text(
+              'Draw New Variation',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.amber,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
           ),
         ],

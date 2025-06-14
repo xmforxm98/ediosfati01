@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 class ApiService {
   // Real Cloud Function URL after successful deployment
   static const String _baseUrl = 'https://analyze-all-nkggwr652q-uc.a.run.app';
+  static const String _eidosUrl =
+      'https://us-central1-eidosfati.cloudfunctions.net/analyze_eidos';
 
   // 로컬 에뮬레이터 테스트용 URL 예시:
   // static const String _baseUrl = 'http://10.0.2.2:5001/your-project-id/us-central1/analyze_all';
@@ -33,6 +35,43 @@ class ApiService {
       // Catch network or other errors
       final errorBody = 'Request Body: ${jsonEncode(userData)}\n\nError: $e';
       print('Error calling API:\n$errorBody');
+      throw Exception('Network Error:\n$errorBody');
+    }
+  }
+
+  static Future<Map<String, dynamic>> analyzeEidos({
+    required String userInput,
+    required String userName,
+    required Map<String, dynamic> analysisData,
+  }) async {
+    final url = Uri.parse(_eidosUrl);
+    try {
+      final requestBody = {
+        'userInput': userInput,
+        'userName': userName,
+        'analysisData': analysisData,
+      };
+
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        final errorBody =
+            'Request Body: ${jsonEncode(requestBody)}\n\n'
+            'Response Code: ${response.statusCode}\n\n'
+            'Response Body: ${response.body}';
+        print('Eidos API Failed:\n$errorBody');
+        throw Exception('Eidos Analysis Failed:\n$errorBody');
+      }
+    } catch (e) {
+      final errorBody =
+          'Request Body: ${jsonEncode({'userInput': userInput, 'userName': userName})}\n\nError: $e';
+      print('Error calling Eidos API:\n$errorBody');
       throw Exception('Network Error:\n$errorBody');
     }
   }

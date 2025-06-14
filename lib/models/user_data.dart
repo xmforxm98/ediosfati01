@@ -1,6 +1,7 @@
 enum Gender { male, female }
 
 class UserData {
+  String? nickname;
   String? firstName;
   String? middleName;
   String? lastName;
@@ -15,6 +16,7 @@ class UserData {
   String? city;
 
   UserData({
+    this.nickname,
     this.firstName,
     this.middleName,
     this.lastName,
@@ -31,6 +33,7 @@ class UserData {
 
   Map<String, dynamic> toJson() {
     return {
+      'nickname': nickname,
       'firstName': firstName,
       'middleName': middleName,
       'lastName': lastName,

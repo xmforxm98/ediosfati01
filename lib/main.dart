@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:innerfive/initial_screen.dart';
 import 'package:innerfive/screens/main_screen.dart';
 import 'services/notification_service.dart';
+import 'services/image_service.dart';
 import 'widgets/mobile_web_wrapper.dart';
 
 void main() async {
@@ -16,6 +17,11 @@ void main() async {
 
   // Initialize notification service
   await NotificationService().init();
+
+  // 이미지 프리로딩 (백그라운드에서 실행)
+  ImageService.preloadLoginBackgrounds().catchError((e) {
+    debugPrint('Image preloading failed: $e');
+  });
 
   runApp(const MyApp());
 }
@@ -33,22 +39,21 @@ class MyApp extends StatelessWidget {
           initialData: null,
         ),
       ],
-      child: MobileWebWrapper(
-        child: MaterialApp(
-          title: 'Eidos Fati',
-          theme: ThemeData(
-            brightness: Brightness.dark,
-            primaryColor: const Color(0xFF1a1a1a),
-            scaffoldBackgroundColor: const Color(0xFF1a1a1a),
-            colorScheme: const ColorScheme.dark(
-              primary: Colors.white,
-              secondary: Colors.blueAccent,
-              surface: Color(0xFF2c2c2c),
-            ),
-            fontFamily: 'Roboto',
+      child: MaterialApp(
+        title: 'Eidos Fati',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          brightness: Brightness.dark,
+          primaryColor: const Color(0xFF1a1a1a),
+          scaffoldBackgroundColor: const Color(0xFF1a1a1a),
+          colorScheme: const ColorScheme.dark(
+            primary: Colors.white,
+            secondary: Colors.blueAccent,
+            surface: Color(0xFF2c2c2c),
           ),
-          home: const AuthWrapper(),
+          fontFamily: 'Roboto',
         ),
+        home: const MobileWebWrapper(child: AuthWrapper()),
       ),
     );
   }

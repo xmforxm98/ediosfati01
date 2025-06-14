@@ -35,6 +35,7 @@ class AuthService {
         final Map<String, dynamic> userProfileData = {
           'uid': user.uid,
           'email': user.email,
+          'nickname': userData.nickname,
           'displayName': displayName,
           'birthDate': '${userData.year}-${userData.month}-${userData.day}',
           'birthTime': '${userData.hour}:${userData.minute}',
@@ -118,6 +119,7 @@ class AuthService {
         '${userData.firstName ?? ''} ${userData.lastName ?? ''}'.trim();
 
     final Map<String, dynamic> profileData = {
+      'nickname': userData.nickname,
       'displayName': displayName,
       'birthDate': '${userData.year}-${userData.month}-${userData.day}',
       'birthTime': '${userData.hour}:${userData.minute}',
