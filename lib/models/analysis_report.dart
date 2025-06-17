@@ -91,6 +91,15 @@ class EidosSummary {
   final String currentEnergyText;
   final String? eidosType;
 
+  // 새로운 Enhanced API 필드들
+  final String? personalizedExplanation;
+  final List<String>? groupTraits;
+  final List<String>? strengths;
+  final List<String>? growthAreas;
+  final String? lifeGuidance;
+  final String? classificationReason;
+  final String? groupId;
+
   EidosSummary({
     required this.title,
     required this.summaryTitle,
@@ -98,16 +107,39 @@ class EidosSummary {
     required this.currentEnergyTitle,
     required this.currentEnergyText,
     this.eidosType,
+    this.personalizedExplanation,
+    this.groupTraits,
+    this.strengths,
+    this.growthAreas,
+    this.lifeGuidance,
+    this.classificationReason,
+    this.groupId,
   });
 
   factory EidosSummary.fromJson(Map<String, dynamic> json) {
     return EidosSummary(
       title: json['title'] ?? 'N/A',
-      summaryTitle: json['summary_title'] ?? 'N/A',
-      summaryText: json['summary_text'] ?? 'N/A',
-      currentEnergyTitle: json['current_energy_title'] ?? 'N/A',
-      currentEnergyText: json['current_energy_text'] ?? 'N/A',
-      eidosType: json['eidos_type'],
+      summaryTitle: json['summary_title'] ?? json['summaryTitle'] ?? 'N/A',
+      summaryText: json['summary_text'] ?? json['summaryText'] ?? 'N/A',
+      currentEnergyTitle:
+          json['current_energy_title'] ?? json['currentEnergyTitle'] ?? 'N/A',
+      currentEnergyText:
+          json['current_energy_text'] ?? json['currentEnergyText'] ?? 'N/A',
+      eidosType: json['eidos_type'] ?? json['eidosType'],
+      // 새로운 Enhanced API 필드들
+      personalizedExplanation: json['personalizedExplanation'],
+      groupTraits: json['groupTraits'] != null
+          ? List<String>.from(json['groupTraits'])
+          : null,
+      strengths: json['strengths'] != null
+          ? List<String>.from(json['strengths'])
+          : null,
+      growthAreas: json['growthAreas'] != null
+          ? List<String>.from(json['growthAreas'])
+          : null,
+      lifeGuidance: json['lifeGuidance'],
+      classificationReason: json['classificationReason'],
+      groupId: json['groupId'],
     );
   }
 }

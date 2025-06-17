@@ -1,93 +1,81 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:innerfive/models/daily_tarot.dart';
 
 class ApiService {
-  // Real Cloud Function URL after successful deployment
-  static const String _baseUrl = 'https://analyze-all-nkggwr652q-uc.a.run.app';
-  static const String _eidosUrl =
-      'https://us-central1-eidosfati.cloudfunctions.net/analyze_eidos';
+  // NOTE: The documentation specifies the full URL for each function.
+  final String _analyzeAllUrl = 'https://analyze-all-nkggwr652q-uc.a.run.app';
+  final String _dailyTarotUrl =
+      'https://generate-daily-fortune-nkggwr652q-uc.a.run.app';
 
-  // 로컬 에뮬레이터 테스트용 URL 예시:
-  // static const String _baseUrl = 'http://10.0.2.2:5001/your-project-id/us-central1/analyze_all';
+  final http.Client _client;
 
-  Future<String> getAnalysisReport(Map<String, dynamic> userData) async {
-    final url = Uri.parse(_baseUrl);
+  ApiService({http.Client? client}) : _client = client ?? http.Client();
+
+  Future<Map<String, dynamic>> getAnalysisReport(
+    Map<String, dynamic> userData,
+  ) async {
+    final url = Uri.parse(_analyzeAllUrl);
     try {
-      final response = await http.post(
+      print('🌐 API Request to: $url');
+      print('🌐 Request Data: ${jsonEncode(userData)}');
+
+      final response = await _client.post(
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(userData),
       );
 
+      print('🌐 API Response Status: ${response.statusCode}');
+
       if (response.statusCode == 200) {
-        // The API returns the full report JSON directly.
-        return response.body;
+        final decodedBody = jsonDecode(utf8.decode(response.bodyBytes));
+        // Inject raw_data_for_dev for compatibility with existing models
+        decodedBody['raw_data_for_dev'] = decodedBody;
+        return decodedBody;
       } else {
-        // Detailed error for debugging
-        final errorBody =
-            'Request Body: ${jsonEncode(userData)}\n\n'
-            'Response Code: ${response.statusCode}\n\n'
-            'Response Body: ${response.body}';
-        print('API Failed:\n$errorBody');
-        throw Exception('API Call Failed:\n$errorBody');
+        print('❌ API Call Failed with status ${response.statusCode}');
+        print('❌ Response body: ${response.body}');
+        throw Exception('API Call Failed: ${response.statusCode}');
       }
     } catch (e) {
-      // Catch network or other errors
-      final errorBody = 'Request Body: ${jsonEncode(userData)}\n\nError: $e';
-      print('Error calling API:\n$errorBody');
-      throw Exception('Network Error:\n$errorBody');
+      print('💥 Network Error: $e');
+      throw Exception('Network Error: $e');
     }
   }
 
-  static Future<Map<String, dynamic>> analyzeEidos({
-    required String userInput,
-    required String userName,
-    required Map<String, dynamic> analysisData,
-  }) async {
-    final url = Uri.parse(_eidosUrl);
-    try {
-      final requestBody = {
-        'userInput': userInput,
-        'userName': userName,
-        'analysisData': analysisData,
-      };
+  /// Fetches the daily tarot reading based on the user's profile.
+  Future<DailyTarot> getDailyTarot(Map<String, dynamic> userProfile) async {
+    final url = Uri.parse(_dailyTarotUrl);
+    final requestBody = {
+      'fortune_type': 'tarot',
+      'user_profile': userProfile,
+    };
 
-      final response = await http.post(
+    print('🌐 API Request to: $url');
+    print('🌐 Request Data: ${jsonEncode(requestBody)}');
+
+    try {
+      final response = await _client.post(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(requestBody),
+        body: json.encode(requestBody),
       );
 
+      print('🌐 API Response Status: ${response.statusCode}');
+
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        final decodedBody = json.decode(utf8.decode(response.bodyBytes));
+        return DailyTarot.fromJson(decodedBody);
       } else {
-        final errorBody =
-            'Request Body: ${jsonEncode(requestBody)}\n\n'
-            'Response Code: ${response.statusCode}\n\n'
-            'Response Body: ${response.body}';
-        print('Eidos API Failed:\n$errorBody');
-        throw Exception('Eidos Analysis Failed:\n$errorBody');
+        print('❌ Failed to get daily tarot: ${response.statusCode}');
+        print('❌ Response body: ${response.body}');
+        throw Exception(
+            'Failed to get daily tarot reading: ${response.statusCode}');
       }
     } catch (e) {
-      final errorBody =
-          'Request Body: ${jsonEncode({'userInput': userInput, 'userName': userName})}\n\nError: $e';
-      print('Error calling Eidos API:\n$errorBody');
-      throw Exception('Network Error:\n$errorBody');
-    }
-  }
-
-  Future<Map<String, dynamic>> fetchReport(
-    Map<String, dynamic> userData,
-  ) async {
-    final response = await http.post(
-      Uri.parse('https://YOUR_CLOUD_FUNCTION_URL'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(userData),
-    );
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception('Failed to load report');
+      print('💥 Error calling getDailyTarot API: $e');
+      throw Exception('Error calling getDailyTarot API: $e');
     }
   }
 }

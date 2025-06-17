@@ -115,9 +115,9 @@ class _GenderStepState extends State<GenderStep> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.3),
+        color: Colors.black.withAlpha(128),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withAlpha(64)),
       ),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,

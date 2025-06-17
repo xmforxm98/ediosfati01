@@ -19,50 +19,47 @@ class GradientBlurredBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageStack =
-        imageUrl == null
-            ? <Widget>[Container(color: Colors.black)]
-            : <Widget>[
-              // 1. Fully blurred background
-              ImageFiltered(
-                imageFilter: ImageFilter.blur(
-                  sigmaX: blurStrength,
-                  sigmaY: blurStrength,
-                ),
-                child: Image.network(
-                  imageUrl!,
-                  key: ValueKey('${imageUrl!}-blur'),
-                  fit: BoxFit.cover,
-                  errorBuilder:
-                      (context, error, stackTrace) =>
-                          Container(color: Colors.black),
-                ),
+    final imageStack = imageUrl == null
+        ? <Widget>[Container(color: Colors.black)]
+        : <Widget>[
+            // 1. Fully blurred background
+            ImageFiltered(
+              imageFilter: ImageFilter.blur(
+                sigmaX: blurStrength,
+                sigmaY: blurStrength,
               ),
+              child: Image.network(
+                imageUrl!,
+                key: ValueKey('${imageUrl!}-blur'),
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    Container(color: Colors.black),
+              ),
+            ),
 
-              // 2. The original image on top, masked to create a gradient blur effect
-              ShaderMask(
-                shaderCallback: (rect) {
-                  return const LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    colors: [Colors.transparent, Colors.black],
-                    stops: [
-                      0.0,
-                      0.5,
-                    ], // The blur will be full at the bottom, and gone by 50% height
-                  ).createShader(rect);
-                },
-                blendMode: BlendMode.dstIn,
-                child: Image.network(
-                  imageUrl!,
-                  key: ValueKey('${imageUrl!}-clear'),
-                  fit: BoxFit.cover,
-                  errorBuilder:
-                      (context, error, stackTrace) =>
-                          Container(color: Colors.black),
-                ),
+            // 2. The original image on top, masked to create a gradient blur effect
+            ShaderMask(
+              shaderCallback: (rect) {
+                return const LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [Colors.transparent, Colors.black],
+                  stops: [
+                    0.0,
+                    0.5,
+                  ], // The blur will be full at the bottom, and gone by 50% height
+                ).createShader(rect);
+              },
+              blendMode: BlendMode.dstIn,
+              child: Image.network(
+                imageUrl!,
+                key: ValueKey('${imageUrl!}-clear'),
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    Container(color: Colors.black),
               ),
-            ];
+            ),
+          ];
 
     return Stack(
       fit: StackFit.expand,
@@ -75,7 +72,7 @@ class GradientBlurredBackground extends StatelessWidget {
               begin: Alignment.bottomCenter,
               end: Alignment.topCenter,
               colors: [
-                Colors.black.withOpacity(overlayOpacity),
+                Colors.black.withAlpha((255 * overlayOpacity).round()),
                 Colors.transparent,
               ],
               stops: const [0.0, 0.6],

@@ -156,7 +156,7 @@ class _BirthTimeStepState extends State<BirthTimeStep> {
             onPressed: _handleSkip,
             style: OutlinedButton.styleFrom(
               foregroundColor: Colors.white,
-              side: BorderSide(color: Colors.white.withOpacity(0.5)),
+              side: BorderSide(color: Colors.white.withAlpha(128)),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -173,12 +173,12 @@ class _BirthTimeStepState extends State<BirthTimeStep> {
       labelText: label,
       labelStyle: const TextStyle(color: Colors.white70),
       filled: true,
-      fillColor: Colors.black.withOpacity(0.4),
+      fillColor: Colors.black.withAlpha(128),
       hintText: hintText,
-      hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+      hintStyle: TextStyle(color: Colors.white.withAlpha(128)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+        borderSide: BorderSide(color: Colors.white.withAlpha(64)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),

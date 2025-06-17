@@ -101,13 +101,13 @@ class _CityStepState extends State<CityStep> {
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: Colors.black.withOpacity(0.3),
-          hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+          fillColor: Colors.black.withAlpha(128),
+          hintStyle: TextStyle(color: Colors.white.withAlpha(128)),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
-          prefixIconColor: Colors.white.withOpacity(0.7),
+          prefixIconColor: Colors.white.withAlpha(128),
         ),
       ),
       child: CSCPickerPlus(
@@ -119,13 +119,13 @@ class _CityStepState extends State<CityStep> {
         cityDropdownLabel: _city ?? "City",
         dropdownDecoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          color: Colors.black.withOpacity(0.4),
-          border: Border.all(color: Colors.white.withOpacity(0.3)),
+          color: Colors.black.withAlpha(128),
+          border: Border.all(color: Colors.white.withAlpha(128)),
         ),
         disabledDropdownDecoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          color: Colors.black.withOpacity(0.2),
-          border: Border.all(color: Colors.white.withOpacity(0.1)),
+          color: Colors.black.withAlpha(64),
+          border: Border.all(color: Colors.white.withAlpha(64)),
         ),
         selectedItemStyle: const TextStyle(color: Colors.white, fontSize: 16),
         dropdownItemStyle: const TextStyle(color: Colors.white, fontSize: 16),

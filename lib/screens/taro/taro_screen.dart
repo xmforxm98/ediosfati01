@@ -6,6 +6,7 @@ import 'package:innerfive/models/daily_tarot.dart';
 import 'package:innerfive/services/api_service.dart';
 import 'package:innerfive/services/tarot_service.dart';
 import 'package:innerfive/widgets/home/fortune_card.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class TaroScreen extends StatefulWidget {
   const TaroScreen({super.key});
@@ -185,7 +186,7 @@ class _TaroScreenState extends State<TaroScreen> {
           ),
         ),
         SliverToBoxAdapter(
-          child: _buildTabBar(),
+          child: _buildTabBar().animate().fadeIn(duration: 500.ms),
         ),
         SliverToBoxAdapter(
           child: SizedBox(
@@ -212,7 +213,11 @@ class _TaroScreenState extends State<TaroScreen> {
                     fortuneType: fortune['type'],
                     backgroundImageUrl: fortune['backgroundImageUrl'],
                   ),
-                );
+                )
+                    .animate(key: ValueKey(index))
+                    .scaleXY(
+                        end: 1, duration: 500.ms, curve: Curves.easeOutCubic)
+                    .fadeIn();
               },
             ),
           ),

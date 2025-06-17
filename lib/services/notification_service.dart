@@ -3,10 +3,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:timezone/timezone.dart' as tz;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationService extends ChangeNotifier {
   static final NotificationService _instance = NotificationService._internal();
@@ -51,10 +51,10 @@ class NotificationService extends ChangeNotifier {
 
     const DarwinInitializationSettings iOSInitSettings =
         DarwinInitializationSettings(
-          requestAlertPermission: true,
-          requestBadgePermission: true,
-          requestSoundPermission: true,
-        );
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
 
     const InitializationSettings initSettings = InitializationSettings(
       android: androidInitSettings,
@@ -111,12 +111,12 @@ class NotificationService extends ChangeNotifier {
 
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
-          'innerfive_channel',
-          'Inner Five Notifications',
-          channelDescription: 'Notifications from Inner Five app',
-          importance: Importance.max,
-          priority: Priority.high,
-        );
+      'innerfive_channel',
+      'Inner Five Notifications',
+      channelDescription: 'Notifications from Inner Five app',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
 
     const DarwinNotificationDetails iOSDetails = DarwinNotificationDetails();
 

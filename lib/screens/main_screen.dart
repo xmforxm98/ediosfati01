@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
-import 'package:innerfive/screens/home_dashboard_screen.dart';
-import 'package:innerfive/screens/my_report_screen.dart';
-import 'package:innerfive/screens/taro_screen.dart';
-import 'package:innerfive/screens/my_page_screen.dart';
+import 'package:innerfive/screens/home/home_dashboard_screen.dart';
+import 'package:innerfive/screens/eidos/eidos_group_screen.dart';
+import 'package:innerfive/screens/taro/taro_screen.dart';
+import 'package:innerfive/screens/profile/my_page_screen.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
@@ -17,18 +17,10 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   late int _selectedIndex;
 
-  late final List<Widget> _widgetOptions;
-
   @override
   void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
-    _widgetOptions = <Widget>[
-      HomeDashboardScreen(onNavigateToReport: () => _onItemTapped(1)),
-      const MyReportScreen(),
-      const TaroScreen(),
-      const MyPageScreen(),
-    ];
   }
 
   void _onItemTapped(int index) {
@@ -51,7 +43,15 @@ class _MainScreenState extends State<MainScreen> {
         backgroundColor: Colors.transparent,
         extendBody: true,
         extendBodyBehindAppBar: true,
-        body: IndexedStack(index: _selectedIndex, children: _widgetOptions),
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: <Widget>[
+            HomeDashboardScreen(onNavigateToReport: () => _onItemTapped(1)),
+            const EidosGroupScreen(),
+            const TaroScreen(),
+            const MyPageScreen(),
+          ],
+        ),
         bottomNavigationBar: _buildFloatingBottomNavBar(),
       ),
     );
@@ -70,14 +70,14 @@ class _MainScreenState extends State<MainScreen> {
               child: Container(
                 width: 248,
                 height: 64,
-                color: Colors.white.withOpacity(0.4),
+                color: Colors.white.withAlpha((255 * 0.4).round()),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _buildNavItem(0, Icons.home_filled),
-                      _buildNavItem(1, Icons.article_outlined),
+                      _buildNavItem(1, Icons.explore_outlined),
                       _buildNavItem(2, Icons.star_outline),
                       _buildNavItem(3, Icons.more_horiz),
                     ],
@@ -95,7 +95,9 @@ class _MainScreenState extends State<MainScreen> {
     final isSelected = _selectedIndex == index;
     return GestureDetector(
       onTap: () => _onItemTapped(index),
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
         width: 50,
         height: 50,
         decoration: BoxDecoration(
@@ -104,7 +106,9 @@ class _MainScreenState extends State<MainScreen> {
         ),
         child: Icon(
           icon,
-          color: isSelected ? Colors.white : Colors.white.withOpacity(0.8),
+          color: isSelected
+              ? Colors.white
+              : Colors.white.withAlpha((255 * 0.8).round()),
           size: 24,
         ),
       ),

@@ -1,8 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:innerfive/models/user_data.dart';
+import 'package:flutter/foundation.dart';
 
-class AuthService {
+class AuthService extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -110,7 +111,11 @@ class AuthService {
 
   // Sign Out
   Future<void> signOut() async {
-    await _auth.signOut();
+    try {
+      await _auth.signOut();
+    } catch (e) {
+      // It's rare for signOut to fail, but we log or handle it here if needed.
+    }
   }
 
   // Update user profile data in Firestore
@@ -138,6 +143,24 @@ class AuthService {
         .set(profileData, SetOptions(merge: true));
   }
 
+  // Get user profile data from Firestore
+  Future<Map<String, dynamic>?> getUserProfile() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      try {
+        final docSnapshot =
+            await _firestore.collection('users').doc(user.uid).get();
+        if (docSnapshot.exists) {
+          return docSnapshot.data();
+        }
+      } catch (e) {
+        print("Error getting user profile: $e");
+        return null;
+      }
+    }
+    return null;
+  }
+
   // Helper to save user analysis data
   Future<void> saveUserData(String userId, Map<String, dynamic> data) async {
     try {
@@ -149,16 +172,49 @@ class AuthService {
           .doc(userId)
           .collection('readings')
           .add({
-            'timestamp': FieldValue.serverTimestamp(),
-            'userInput': data['userInput'],
-            'report': data['report'],
-          });
+        'timestamp': FieldValue.serverTimestamp(),
+        'userInput': data['userInput'],
+        'report': data['report'],
+      });
 
       print("Successfully saved data with document ID: ${docRef.id}");
     } catch (e, stackTrace) {
       print("Error saving user data: $e");
       print("Stack trace: $stackTrace");
       rethrow;
+    }
+  }
+
+  Future<void> deleteUserAccount(String password) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('No user is currently signed in.');
+    }
+
+    try {
+      // Re-authenticate the user
+      final cred = EmailAuthProvider.credential(
+        email: user.email!,
+        password: password,
+      );
+      await user.reauthenticateWithCredential(cred);
+
+      // After successful re-authentication, delete user data from Firestore
+      await _firestore.collection('users').doc(user.uid).delete();
+
+      // Finally, delete the user from Firebase Authentication
+      await user.delete();
+
+      print('User account deleted successfully.');
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'wrong-password') {
+        throw Exception('Incorrect password. Please try again.');
+      } else {
+        throw Exception(
+            'An error occurred while deleting your account: ${e.message}');
+      }
+    } catch (e) {
+      throw Exception('An unexpected error occurred: $e');
     }
   }
 }

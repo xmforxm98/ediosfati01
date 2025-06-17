@@ -43,10 +43,9 @@ class _NameStepState extends State<NameStep> {
   void _handleContinue() {
     if (_formKey.currentState!.validate()) {
       widget.userData.firstName = _firstNameController.text.trim();
-      widget.userData.middleName =
-          _middleNameController.text.trim().isNotEmpty
-              ? _middleNameController.text.trim()
-              : null;
+      widget.userData.middleName = _middleNameController.text.trim().isNotEmpty
+          ? _middleNameController.text.trim()
+          : null;
       widget.userData.lastName = _lastNameController.text.trim();
       widget.onContinue();
     }
@@ -135,12 +134,12 @@ class _NameStepState extends State<NameStep> {
   InputDecoration _inputDecoration(String hintText) {
     return InputDecoration(
       filled: true,
-      fillColor: Colors.black.withOpacity(0.4),
+      fillColor: Colors.black.withAlpha(128),
       hintText: hintText,
-      hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+      hintStyle: TextStyle(color: Colors.white.withAlpha(128)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+        borderSide: BorderSide(color: Colors.white.withAlpha(64)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),

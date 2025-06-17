@@ -135,7 +135,7 @@ class _NicknameStepState extends State<NicknameStep> {
                         style: TextStyle(color: Colors.white70),
                       ),
                       style: TextButton.styleFrom(
-                        backgroundColor: Colors.white.withOpacity(0.1),
+                        backgroundColor: Colors.white.withAlpha(128),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 12,
@@ -143,7 +143,7 @@ class _NicknameStepState extends State<NicknameStep> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                           side: BorderSide(
-                            color: Colors.white.withOpacity(0.3),
+                            color: Colors.white.withAlpha(192),
                           ),
                         ),
                       ),
@@ -170,12 +170,12 @@ class _NicknameStepState extends State<NicknameStep> {
   InputDecoration _inputDecoration(String hintText) {
     return InputDecoration(
       filled: true,
-      fillColor: Colors.black.withOpacity(0.4),
+      fillColor: Colors.black.withAlpha(128),
       hintText: hintText,
-      hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+      hintStyle: TextStyle(color: Colors.white.withAlpha(128)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+        borderSide: BorderSide(color: Colors.white.withAlpha(192)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),

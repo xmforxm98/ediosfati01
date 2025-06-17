@@ -1,8 +1,21 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/analysis_report.dart';
+import 'package:innerfive/services/api_service.dart';
+import 'package:intl/intl.dart';
 
 class DailyFortuneService {
+  static final Map<String, String> _lastFetchedDates = {};
+
+  static String? getLastFetchedDate(String fortuneType) {
+    return _lastFetchedDates[fortuneType];
+  }
+
+  static void _setLastFetchedDate(String fortuneType) {
+    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    _lastFetchedDates[fortuneType] = today;
+  }
+
   static const String _baseUrl =
       'https://us-central1-eidosfati.cloudfunctions.net';
 
@@ -32,6 +45,7 @@ class DailyFortuneService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        _setLastFetchedDate(fortuneType);
         return data;
       } else {
         throw Exception(

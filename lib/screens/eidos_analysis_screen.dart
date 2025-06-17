@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:innerfive/models/user_data.dart';
-import 'package:innerfive/widgets/random_login_background.dart';
 import 'package:innerfive/widgets/gradient_blurred_background.dart';
 import 'package:innerfive/services/api_service.dart';
 import 'package:innerfive/widgets/custom_button.dart';
@@ -21,6 +20,7 @@ class EidosAnalysisScreen extends StatefulWidget {
 
 class _EidosAnalysisScreenState extends State<EidosAnalysisScreen> {
   final _inputController = TextEditingController();
+  final _apiService = ApiService();
   bool _isLoading = false;
   Map<String, dynamic>? _eidosCard;
   String? _errorMessage;
@@ -39,12 +39,10 @@ class _EidosAnalysisScreenState extends State<EidosAnalysisScreen> {
     });
 
     try {
-      final eidosData = await ApiService.analyzeEidos(
-        userInput: _inputController.text.trim(),
-        userName:
-            widget.userData.nickname ??
+      final eidosData = await _apiService.getEidosAnalysis(
+        _inputController.text.trim(),
+        widget.userData.nickname ??
             '${widget.userData.firstName} ${widget.userData.lastName}',
-        analysisData: widget.analysisData,
       );
 
       setState(() {
@@ -63,9 +61,9 @@ class _EidosAnalysisScreenState extends State<EidosAnalysisScreen> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withAlpha(128),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+        border: Border.all(color: Colors.white.withAlpha(64), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,16 +88,16 @@ class _EidosAnalysisScreenState extends State<EidosAnalysisScreen> {
             decoration: InputDecoration(
               hintText:
                   "Express your thoughts, concerns, dreams, or questions about your path...",
-              hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+              hintStyle: TextStyle(color: Colors.white.withAlpha(64)),
               filled: true,
-              fillColor: Colors.white.withOpacity(0.1),
+              fillColor: Colors.white.withAlpha(32),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                borderSide: BorderSide(color: Colors.white.withAlpha(64)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -137,16 +135,16 @@ class _EidosAnalysisScreenState extends State<EidosAnalysisScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.purple.withOpacity(0.3),
-            Colors.blue.withOpacity(0.3),
-            Colors.indigo.withOpacity(0.3),
+            Colors.purple.withAlpha(64),
+            Colors.blue.withAlpha(64),
+            Colors.indigo.withAlpha(64),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+        border: Border.all(color: Colors.white.withAlpha(64), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withAlpha(64),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -163,7 +161,7 @@ class _EidosAnalysisScreenState extends State<EidosAnalysisScreen> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withAlpha(32),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -193,7 +191,7 @@ class _EidosAnalysisScreenState extends State<EidosAnalysisScreen> {
             _eidosCard!['main_type'] ?? '',
             style: TextStyle(
               fontSize: 16,
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withAlpha(128),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -201,24 +199,24 @@ class _EidosAnalysisScreenState extends State<EidosAnalysisScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withAlpha(32),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
               _eidosCard!['core_characteristics'] ?? '',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withAlpha(192),
                 height: 1.5,
               ),
             ),
           ),
           const SizedBox(height: 16),
-          Row(
+          const Row(
             children: [
-              const Icon(Icons.palette, color: Colors.amber, size: 16),
-              const SizedBox(width: 8),
-              const Text(
+              Icon(Icons.palette, color: Colors.amber, size: 16),
+              SizedBox(width: 8),
+              Text(
                 'Symbols:',
                 style: TextStyle(
                   color: Colors.white,
@@ -233,7 +231,7 @@ class _EidosAnalysisScreenState extends State<EidosAnalysisScreen> {
             _eidosCard!['symbol_keywords'] ?? '',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withAlpha(128),
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -245,8 +243,8 @@ class _EidosAnalysisScreenState extends State<EidosAnalysisScreen> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Colors.amber.withOpacity(0.2),
-                  Colors.orange.withOpacity(0.2),
+                  Colors.amber.withAlpha(64),
+                  Colors.orange.withAlpha(64),
                 ],
               ),
               borderRadius: BorderRadius.circular(12),
@@ -315,7 +313,7 @@ class _EidosAnalysisScreenState extends State<EidosAnalysisScreen> {
                 "Based on your birth data and numerological profile, we'll analyze your deepest thoughts to reveal your unique Eidos destiny type from 60 possible essences.",
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withAlpha(128),
                   height: 1.5,
                 ),
               ),

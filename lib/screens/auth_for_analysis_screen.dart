@@ -3,8 +3,8 @@ import 'package:innerfive/models/user_data.dart';
 import 'package:innerfive/services/auth_service.dart';
 import 'package:provider/provider.dart';
 import 'package:innerfive/widgets/custom_button.dart';
-import 'package:innerfive/screens/analysis_loading_screen.dart';
-import 'package:innerfive/login_screen.dart';
+import 'analysis/analysis_loading_screen.dart';
+import 'auth/login_screen.dart';
 import 'package:innerfive/widgets/random_login_background.dart';
 
 class AuthForAnalysisScreen extends StatefulWidget {
@@ -53,8 +53,8 @@ class _AuthForAnalysisScreenState extends State<AuthForAnalysisScreen> {
         if (mounted) {
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
-              builder:
-                  (context) => AnalysisLoadingScreen(userData: widget.userData),
+              builder: (context) =>
+                  AnalysisLoadingScreen(userData: widget.userData),
             ),
             (route) => route.isFirst,
           );
@@ -83,8 +83,8 @@ class _AuthForAnalysisScreenState extends State<AuthForAnalysisScreen> {
         // User successfully logged in, proceed to analysis
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder:
-                (context) => AnalysisLoadingScreen(userData: widget.userData),
+            builder: (context) =>
+                AnalysisLoadingScreen(userData: widget.userData),
           ),
         );
       }

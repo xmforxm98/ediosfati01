@@ -86,12 +86,13 @@ class _EidosCardState extends State<EidosCard>
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.amber.withOpacity(0.3 * _glowAnimation.value),
+                    color: Colors.amber
+                        .withAlpha((255 * 0.3 * _glowAnimation.value).round()),
                     blurRadius: 20 + (10 * _glowAnimation.value),
                     spreadRadius: 2 + (3 * _glowAnimation.value),
                   ),
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.black.withAlpha((255 * 0.5).round()),
                     blurRadius: 15,
                     offset: const Offset(0, 8),
                   ),
@@ -108,10 +109,9 @@ class _EidosCardState extends State<EidosCard>
                     if (_flipAnimation.value >= 0.5)
                       Transform(
                         alignment: Alignment.center,
-                        transform:
-                            Matrix4.identity()
-                              ..setEntry(3, 2, 0.001)
-                              ..rotateY(math.pi),
+                        transform: Matrix4.identity()
+                          ..setEntry(3, 2, 0.001)
+                          ..rotateY(math.pi),
                         child: _buildCardFront(),
                       ),
 
@@ -120,7 +120,7 @@ class _EidosCardState extends State<EidosCard>
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: Colors.amber.withOpacity(0.6),
+                          color: Colors.amber.withAlpha((255 * 0.6).round()),
                           width: 2,
                         ),
                       ),
@@ -135,9 +135,9 @@ class _EidosCardState extends State<EidosCard>
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              Colors.white.withOpacity(0.1),
+                              Colors.white.withAlpha((255 * 0.1).round()),
                               Colors.transparent,
-                              Colors.amber.withOpacity(0.1),
+                              Colors.amber.withAlpha((255 * 0.1).round()),
                             ],
                           ),
                         ),
@@ -161,14 +161,14 @@ class _EidosCardState extends State<EidosCard>
 
   Widget _buildCardBack() {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFF1a1a2e),
-            const Color(0xFF16213e),
-            const Color(0xFF0f3460),
+            Color(0xFF1a1a2e),
+            Color(0xFF16213e),
+            Color(0xFF0f3460),
           ],
         ),
       ),
@@ -189,8 +189,8 @@ class _EidosCardState extends State<EidosCard>
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
                       colors: [
-                        Colors.amber.withOpacity(0.8),
-                        Colors.amber.withOpacity(0.3),
+                        Colors.amber.withAlpha((255 * 0.8).round()),
+                        Colors.amber.withAlpha((255 * 0.3).round()),
                         Colors.transparent,
                       ],
                     ),
@@ -246,8 +246,8 @@ class _EidosCardState extends State<EidosCard>
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Colors.amber.withOpacity(0.8),
-                  Colors.orange.withOpacity(0.6),
+                  Colors.amber.withAlpha((255 * 0.8).round()),
+                  Colors.orange.withAlpha((255 * 0.6).round()),
                 ],
               ),
             ),
@@ -271,7 +271,7 @@ class _EidosCardState extends State<EidosCard>
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withAlpha((255 * 0.2).round()),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -288,11 +288,10 @@ class _EidosCardState extends State<EidosCard>
                       color: Colors.grey.shade200,
                       child: Center(
                         child: CircularProgressIndicator(
-                          value:
-                              loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
-                                  : null,
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                              : null,
                           valueColor: const AlwaysStoppedAnimation<Color>(
                             Colors.amber,
                           ),
@@ -337,8 +336,8 @@ class _EidosCardState extends State<EidosCard>
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Colors.amber.withOpacity(0.3),
-                  Colors.orange.withOpacity(0.2),
+                  Colors.amber.withAlpha((255 * 0.3).round()),
+                  Colors.orange.withAlpha((255 * 0.2).round()),
                 ],
               ),
             ),
@@ -360,8 +359,8 @@ class _EidosCardState extends State<EidosCard>
         shape: BoxShape.circle,
         gradient: RadialGradient(
           colors: [
-            Colors.amber.withOpacity(0.8),
-            Colors.amber.withOpacity(0.3),
+            Colors.amber.withAlpha((255 * 0.8).round()),
+            Colors.amber.withAlpha((255 * 0.3).round()),
           ],
         ),
       ),
@@ -373,11 +372,10 @@ class _EidosCardState extends State<EidosCard>
 class MysticPatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = Colors.amber.withOpacity(0.1)
-          ..strokeWidth = 1
-          ..style = PaintingStyle.stroke;
+    final paint = Paint()
+      ..color = Colors.amber.withAlpha((255 * 0.1).round())
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
 
     final center = Offset(size.width / 2, size.height / 2);
 
