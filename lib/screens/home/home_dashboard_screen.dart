@@ -844,55 +844,176 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
 
   Widget _buildInitialPrompt() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 64.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // 상단 여백
+          const SizedBox(height: 40),
+
+          // 메인 타이틀
           const Text(
             'Welcome to Eidos Fati',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 24,
+              fontSize: 32,
               fontWeight: FontWeight.bold,
               color: Colors.white,
+              height: 1.2,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
+
+          // 서브 타이틀
           const Text(
             'Begin your journey of self-discovery. Let\'s analyze your unique energetic blueprint.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 18,
               color: Colors.white70,
-              height: 1.5,
+              height: 1.6,
             ),
           ),
-          const SizedBox(height: 40),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const OnboardingFlowScreen(),
+          const SizedBox(height: 48),
+
+          // 기능 소개 카드들
+          _buildFeatureCard(
+            icon: Icons.auto_awesome,
+            title: 'Discover Your Eidos Type',
+            description: 'Uncover your unique cosmic personality archetype',
+          ),
+          const SizedBox(height: 16),
+
+          _buildFeatureCard(
+            icon: Icons.favorite,
+            title: 'Daily Fortune Insights',
+            description:
+                'Get personalized guidance for love, career, and growth',
+          ),
+          const SizedBox(height: 16),
+
+          _buildFeatureCard(
+            icon: Icons.psychology,
+            title: 'Tarot Wisdom',
+            description: 'Receive your personal tarot card and daily readings',
+          ),
+          const SizedBox(height: 48),
+
+          // CTA 버튼
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const OnboardingFlowScreen(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
                 ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black,
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
+                elevation: 8,
+                shadowColor: Colors.white.withOpacity(0.3),
+              ),
+              child: const Text(
+                'Explore My Destiny',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-            child: const Text(
-              'Explore My Destiny',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 24),
+
+          // 하단 안내 텍스트
+          Text(
+            'It only takes 3 minutes to complete',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.white.withOpacity(0.6),
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+
+          // 하단 여백
+          const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeatureCard({
+    required IconData icon,
+    required String title,
+    required String description,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: Colors.white,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white.withOpacity(0.7),
+                    height: 1.3,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
-    );
+    )
+        .animate()
+        .slideX(duration: 600.ms, begin: 0.3, curve: Curves.easeOutCubic)
+        .fadeIn(delay: 200.ms);
   }
 
   Widget _buildTopHeader() {
