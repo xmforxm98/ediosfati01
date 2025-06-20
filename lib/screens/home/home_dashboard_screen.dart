@@ -16,6 +16,8 @@ import 'package:innerfive/widgets/home/fortune_card.dart';
 import 'package:innerfive/widgets/home/summary_card.dart';
 import 'package:innerfive/screens/onboarding/onboarding_flow_screen.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:innerfive/widgets/firebase_image.dart';
 
 class HomeDashboardScreen extends StatefulWidget {
   final Function(NarrativeReport) onNavigateToReport;
@@ -49,6 +51,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
   Map<String, dynamic>? _currentFortuneData; // 현재 운세 데이터
   bool _isLoadingFortune = false; // 운세 로딩 상태
   final ScrollController _scrollController = ScrollController(); // 스크롤 컨트롤러 추가
+  Map<String, dynamic>? _dailyEidosInsights; // 오늘의 Eidos 운세 데이터
+  bool _isLoadingEidosInsights = false; // Eidos 운세 로딩 상태
+  String? _todaysEnergyImageUrl; // 오늘의 에너지 이미지 URL
 
   @override
   void initState() {
@@ -101,6 +106,15 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
         _setupImageCarousel(); // 데이터 로드 후 캐러셀 설정
       });
     }
+
+    // 초기 운세 데이터 로드
+    _loadFortuneData(_selectedFortuneType);
+
+    // 오늘의 Eidos 운세 로드
+    _loadDailyEidosInsights();
+
+    // 오늘의 에너지 이미지 로드
+    _loadTodaysEnergyImage();
   }
 
   void _loadDateData() {
@@ -243,7 +257,16 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
       }
     }
     if (mounted) {
-      setState(() {});
+      setState(() {
+        _latestReport = _latestReport;
+        _isLoading = false;
+      });
+
+      // 초기 운세 데이터 로드
+      _loadFortuneData(_selectedFortuneType);
+
+      // 오늘의 Eidos 운세 로드
+      _loadDailyEidosInsights();
     }
   }
 
@@ -269,6 +292,167 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
         _isLoadingFortune = false;
       });
       print('Error loading fortune data: $e');
+    }
+  }
+
+  Future<void> _loadDailyEidosInsights() async {
+    if (_latestReport == null) {
+      print('⚠️ No user report available for Eidos insights');
+      return;
+    }
+
+    setState(() {
+      _isLoadingEidosInsights = true;
+      _dailyEidosInsights = null;
+    });
+
+    try {
+      // Extract user data for API call
+      String birthDate = '';
+      String dayMaster = 'Fire';
+      int lifePathNumber = 3;
+
+      // Get birth date from user data
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+        if (userDoc.exists) {
+          final userData = userDoc.data() as Map<String, dynamic>;
+          if (userData['birthDate'] != null) {
+            try {
+              // Handle both Timestamp and String formats
+              if (userData['birthDate'] is Timestamp) {
+                final birthDateTime =
+                    (userData['birthDate'] as Timestamp).toDate();
+                birthDate =
+                    '${birthDateTime.year}-${birthDateTime.month.toString().padLeft(2, '0')}-${birthDateTime.day.toString().padLeft(2, '0')}';
+              } else if (userData['birthDate'] is String) {
+                // If it's already a string in the correct format, use it directly
+                birthDate = userData['birthDate'] as String;
+              }
+              print('🗓️ Birth date extracted: $birthDate');
+            } catch (e) {
+              print('⚠️ Error parsing birth date: $e, using default');
+              birthDate = '1990-01-01'; // Default fallback
+            }
+          }
+        }
+      }
+
+      // Get day master and life path number from report
+      if (_latestReport!.rawDataForDev.isNotEmpty) {
+        dayMaster =
+            _latestReport!.rawDataForDev['day_master']?.toString() ?? 'Fire';
+        lifePathNumber = int.tryParse(
+                _latestReport!.rawDataForDev['life_path_number']?.toString() ??
+                    '3') ??
+            3;
+      }
+
+      print('🌟 Loading Eidos Daily Fortune with:');
+      print('   - userName: $_userNickname');
+      print('   - birthDate: $birthDate');
+      print('   - dayMaster: $dayMaster');
+      print('   - lifePathNumber: $lifePathNumber');
+
+      // Validate required data
+      if (birthDate.isEmpty) {
+        print('⚠️ Birth date is empty, using default');
+        birthDate = '1990-01-01';
+      }
+
+      // Call the new Eidos API
+      final fortuneService = DailyFortuneService();
+      final eidosData = await fortuneService.generateEidosDailyFortune(
+        _userNickname,
+        birthDate,
+        dayMaster,
+        lifePathNumber,
+      );
+
+      setState(() {
+        _isLoadingEidosInsights = false;
+        _dailyEidosInsights = eidosData;
+      });
+
+      print('✅ Eidos Daily Fortune loaded successfully');
+    } catch (e) {
+      print('❌ Error loading Eidos daily fortune: $e');
+      setState(() {
+        _isLoadingEidosInsights = false;
+        _dailyEidosInsights = {
+          'title': "Today's Eidos Insights",
+          'description':
+              'Unable to load your daily Eidos guidance. Please try again later.',
+          'archetype_name': 'Your Eidos',
+          'theme': 'Eidos Essence',
+        };
+      });
+    }
+  }
+
+  /// 오늘의 날짜 기운에 맞는 에너지 이미지 선택
+  String _getTodaysEnergyImage() {
+    final today = DateTime.now();
+    final dateString =
+        '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+
+    // 5개 에너지 타입
+    final energyTypes = [
+      'EarthEnergy',
+      'FireEnergy',
+      'MetalEnergy',
+      'WaterEnergy',
+      'WoodEnergy'
+    ];
+
+    // 날짜를 기반으로 일관된 에너지 선택
+    final energyIndex = dateString.hashCode.abs() % energyTypes.length;
+    final selectedEnergy = energyTypes[energyIndex];
+
+    // 각 에너지별로 4장 중 하나 선택
+    final imageIndex =
+        (dateString.hashCode.abs() ~/ energyTypes.length) % 4 + 1;
+    final imageName = '$selectedEnergy$imageIndex.jpg';
+
+    print(
+        '🎨 Today\'s Energy Image: $imageName (Energy: $selectedEnergy, Index: $imageIndex)');
+
+    return imageName;
+  }
+
+  /// tag_images에서 이미지 URL 가져오기
+  Future<String?> _getTodaysEnergyImageUrl() async {
+    try {
+      final imageName = _getTodaysEnergyImage();
+      final path = 'tag_images/$imageName';
+
+      print('🎨 Fetching energy image: $path');
+
+      final ref = FirebaseStorage.instance.ref().child(path);
+      final url = await ref.getDownloadURL();
+
+      print('✅ Got energy image URL: $url');
+      return url;
+    } catch (e) {
+      print('❌ Error getting energy image URL: $e');
+      return null;
+    }
+  }
+
+  /// 오늘의 에너지 이미지 로드
+  Future<void> _loadTodaysEnergyImage() async {
+    try {
+      final imageUrl = await _getTodaysEnergyImageUrl();
+      setState(() {
+        _todaysEnergyImageUrl = imageUrl;
+      });
+    } catch (e) {
+      print('❌ Error loading today\'s energy image: $e');
     }
   }
 
@@ -316,26 +500,327 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                                       curve: Curves.easeOut)
                                   .fadeIn(),
                               const SizedBox(height: 16),
-                              SummaryCard(
-                                title:
-                                    _latestReport?.eidosSummary.summaryTitle ??
-                                        "Eidos Summary",
-                                description:
-                                    _latestReport?.eidosSummary.eidosType ??
-                                        "Tap to see details",
-                                imageUrl: '',
-                                onTap: () {
-                                  if (_latestReport != null) {
-                                    widget.onNavigateToReport(_latestReport!);
-                                  }
-                                },
-                              )
-                                  .animate()
-                                  .slideX(
-                                      duration: 500.ms,
-                                      begin: -0.2,
-                                      curve: Curves.easeOut)
-                                  .fadeIn(delay: 200.ms),
+                              // 첫 번째 위젯: 오늘의 에너지 카드 (FortuneCard 스타일)
+                              AspectRatio(
+                                aspectRatio: 0.5, // FortuneCard와 동일한 비율
+                                child: Container(
+                                  margin:
+                                      const EdgeInsets.symmetric(horizontal: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[900],
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withAlpha(20),
+                                        blurRadius: 15,
+                                        offset: const Offset(0, 5),
+                                      ),
+                                    ],
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: Stack(
+                                      children: [
+                                        // 1. Background Image
+                                        if (_todaysEnergyImageUrl != null)
+                                          Positioned.fill(
+                                            child: FirebaseImage(
+                                              storageUrl: _todaysEnergyImageUrl,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          )
+                                        else
+                                          Positioned.fill(
+                                              child: Container(
+                                                  color: Colors.grey[900])),
+
+                                        // 2. Loading Indicator
+                                        if (_todaysEnergyImageUrl == null)
+                                          const Positioned.fill(
+                                            child: Center(
+                                              child: CircularProgressIndicator(
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                        Color>(Colors.white),
+                                              ),
+                                            ),
+                                          ),
+
+                                        // 3. Content Scrim
+                                        if (_todaysEnergyImageUrl != null)
+                                          Positioned.fill(
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  begin: Alignment.topCenter,
+                                                  end: Alignment.bottomCenter,
+                                                  colors: [
+                                                    Colors.transparent,
+                                                    Colors.black.withAlpha(128),
+                                                    Colors.black.withAlpha(240),
+                                                  ],
+                                                  stops: const [0.3, 0.6, 1.0],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+
+                                        // 2. Loading Indicator for Eidos Content
+                                        if (_isLoadingEidosInsights)
+                                          const Positioned.fill(
+                                            child: Center(
+                                              child: CircularProgressIndicator(
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                        Color>(Colors.white),
+                                              ),
+                                            ),
+                                          ),
+
+                                        // 4. Content
+                                        if (_todaysEnergyImageUrl != null &&
+                                            !_isLoadingEidosInsights)
+                                          Padding(
+                                            padding: const EdgeInsets.all(24.0),
+                                            child: Builder(
+                                              builder: (context) {
+                                                // Use Eidos API data if available
+                                                if (_dailyEidosInsights !=
+                                                    null) {
+                                                  final title =
+                                                      _dailyEidosInsights![
+                                                              'title'] ??
+                                                          "Today's Eidos Insights";
+                                                  final archetypeName =
+                                                      _dailyEidosInsights![
+                                                              'archetype_name'] ??
+                                                          'Your Eidos';
+                                                  final dailyAlignment =
+                                                      _dailyEidosInsights![
+                                                              'daily_alignment'] ??
+                                                          'Cosmic Energy';
+                                                  final description =
+                                                      _dailyEidosInsights![
+                                                              'description'] ??
+                                                          'Your Eidos guidance is ready.';
+
+                                                  return Column(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      const Spacer(
+                                                          flex: 3), // 상단 여백
+                                                      Row(
+                                                        children: [
+                                                          Icon(
+                                                            Icons.auto_awesome,
+                                                            color: Colors.white
+                                                                .withAlpha(150),
+                                                            size: 16,
+                                                          ),
+                                                          const SizedBox(
+                                                              width: 8),
+                                                          Expanded(
+                                                            child: Text(
+                                                              dailyAlignment,
+                                                              style: TextStyle(
+                                                                color: Colors
+                                                                    .white
+                                                                    .withAlpha(
+                                                                        150),
+                                                                fontSize: 14,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                              ),
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      const SizedBox(
+                                                          height: 12),
+                                                      Text(
+                                                        title,
+                                                        style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 18,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          height: 1.3,
+                                                        ),
+                                                        maxLines: 2,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                      const SizedBox(height: 8),
+                                                      Text(
+                                                        "🌟 $archetypeName",
+                                                        style: TextStyle(
+                                                          color: Colors.white
+                                                              .withAlpha(128),
+                                                          fontSize: 13,
+                                                          height: 1.4,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(
+                                                          height: 16),
+                                                      Container(
+                                                        height: 1,
+                                                        width: 50,
+                                                        color: Colors.white
+                                                            .withAlpha(64),
+                                                      ),
+                                                      const SizedBox(
+                                                          height: 16),
+                                                      Expanded(
+                                                        child:
+                                                            SingleChildScrollView(
+                                                          child: Text(
+                                                            description,
+                                                            style: TextStyle(
+                                                              color: Colors
+                                                                  .white
+                                                                  .withAlpha(
+                                                                      136),
+                                                              fontSize: 13,
+                                                              height: 1.5,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  );
+                                                }
+
+                                                // Fallback content while loading or if no data
+                                                String title =
+                                                    "Today's Energy Insights";
+                                                String description =
+                                                    "Your daily cosmic energy guidance is being prepared...";
+                                                String energyType =
+                                                    "Cosmic Energy";
+
+                                                if (_latestReport != null) {
+                                                  final eidosType =
+                                                      _latestReport!
+                                                              .eidosSummary
+                                                              .eidosType ??
+                                                          _latestReport!
+                                                              .eidosType ??
+                                                          "Your Eidos";
+                                                  title =
+                                                      "Today's $eidosType Energy";
+                                                  description =
+                                                      "Experience today's cosmic energy through your unique Eidos perspective.";
+
+                                                  // 오늘의 에너지 타입 추출
+                                                  final todaysImage =
+                                                      _getTodaysEnergyImage();
+                                                  if (todaysImage
+                                                      .contains('Earth'))
+                                                    energyType = "Earth Energy";
+                                                  else if (todaysImage
+                                                      .contains('Fire'))
+                                                    energyType = "Fire Energy";
+                                                  else if (todaysImage
+                                                      .contains('Metal'))
+                                                    energyType = "Metal Energy";
+                                                  else if (todaysImage
+                                                      .contains('Water'))
+                                                    energyType = "Water Energy";
+                                                  else if (todaysImage
+                                                      .contains('Wood'))
+                                                    energyType = "Wood Energy";
+                                                }
+
+                                                return Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    const Spacer(
+                                                        flex: 3), // 상단 여백
+                                                    Row(
+                                                      children: [
+                                                        Icon(
+                                                          Icons.auto_awesome,
+                                                          color: Colors.white
+                                                              .withAlpha(150),
+                                                          size: 16,
+                                                        ),
+                                                        const SizedBox(
+                                                            width: 8),
+                                                        Text(
+                                                          energyType,
+                                                          style: TextStyle(
+                                                            color: Colors.white
+                                                                .withAlpha(150),
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    const SizedBox(height: 12),
+                                                    Text(
+                                                      title,
+                                                      style: const TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 18,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        height: 1.3,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 8),
+                                                    Text(
+                                                      "Daily Guidance",
+                                                      style: TextStyle(
+                                                        color: Colors.white
+                                                            .withAlpha(128),
+                                                        fontSize: 13,
+                                                        height: 1.4,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 16),
+                                                    Container(
+                                                      height: 1,
+                                                      width: 50,
+                                                      color: Colors.white
+                                                          .withAlpha(64),
+                                                    ),
+                                                    const SizedBox(height: 16),
+                                                    Expanded(
+                                                      child: Text(
+                                                        description,
+                                                        style: TextStyle(
+                                                          color: Colors.white
+                                                              .withAlpha(136),
+                                                          fontSize: 13,
+                                                          height: 1.5,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
                               const SizedBox(height: 16),
                               _buildDailyFortuneSection()
                                   .animate()

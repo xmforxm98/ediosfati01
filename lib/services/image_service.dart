@@ -83,7 +83,39 @@ class ImageService {
 
       // Firebase Storage에서 이미지 URL 가져오기 (images/ 폴더 안에 있음)
       final path = 'images/$selectedImage';
-      final url = await getImageUrl(path, isFullPath: true);
+      String? url = await getImageUrl(path, isFullPath: true);
+
+      // 선택된 이미지가 존재하지 않는 경우 대체 이미지 시도
+      if (url == null && backgrounds.length > 1) {
+        if (kDebugMode) {
+          print(
+              'ImageService: $selectedImage not found, trying fallback images');
+        }
+
+        // 다른 이미지들을 순서대로 시도
+        for (final fallbackImage in backgrounds) {
+          if (fallbackImage != selectedImage) {
+            final fallbackPath = 'images/$fallbackImage';
+            url = await getImageUrl(fallbackPath, isFullPath: true);
+            if (url != null) {
+              if (kDebugMode) {
+                print('ImageService: Using fallback image: $fallbackImage');
+              }
+              break;
+            }
+          }
+        }
+      }
+
+      // 모든 이미지가 실패한 경우 기본 이미지 사용
+      if (url == null) {
+        if (kDebugMode) {
+          print(
+              'ImageService: All images failed, using default golden sage image');
+        }
+        url =
+            'https://storage.googleapis.com/innerfive-storage/golden_sage/The%20visionary%20verdant%20oracle%20of%20golden%20sage2.jpg';
+      }
 
       if (kDebugMode) {
         print('ImageService: Final URL: $url');

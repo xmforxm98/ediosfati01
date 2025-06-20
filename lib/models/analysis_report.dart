@@ -117,15 +117,47 @@ class EidosSummary {
   });
 
   factory EidosSummary.fromJson(Map<String, dynamic> json) {
+    print('🔧 EidosSummary.fromJson Debug:');
+    print('   - Raw json keys: ${json.keys.toList()}');
+    print('   - title: "${json['title']}"');
+    print('   - summary_title: "${json['summary_title']}"');
+    print('   - summaryTitle: "${json['summaryTitle']}"');
+    print('   - summary_text: "${json['summary_text']}"');
+    print('   - summaryText: "${json['summaryText']}"');
+    print('   - description: "${json['description']}"');
+    print('   - group_name: "${json['group_name']}"');
+    print('   - eidos_type: "${json['eidos_type']}"');
+    print('   - eidosType: "${json['eidosType']}"');
+
+    // 실제 JSON 구조에 맞춰 필드 매핑
+    final title = json['title'] ?? json['group_name'] ?? 'Eidos Summary';
+    final summaryTitle = json['summary_title'] ??
+        json['summaryTitle'] ??
+        json['group_name'] ??
+        'Your Eidos Type';
+    final summaryText = json['summary_text'] ??
+        json['summaryText'] ??
+        json['description'] ??
+        'Tap to see details';
+    final eidosType = (json['eidos_type'] ?? json['eidosType'])?.toString();
+
+    print('   - Final title: "$title"');
+    print('   - Final summaryTitle: "$summaryTitle"');
+    print('   - Final summaryText: "$summaryText"');
+    print('   - Final eidosType: "$eidosType"');
+
     return EidosSummary(
-      title: json['title'] ?? 'N/A',
-      summaryTitle: json['summary_title'] ?? json['summaryTitle'] ?? 'N/A',
-      summaryText: json['summary_text'] ?? json['summaryText'] ?? 'N/A',
-      currentEnergyTitle:
-          json['current_energy_title'] ?? json['currentEnergyTitle'] ?? 'N/A',
-      currentEnergyText:
-          json['current_energy_text'] ?? json['currentEnergyText'] ?? 'N/A',
-      eidosType: (json['eidos_type'] ?? json['eidosType'])?.toString(),
+      title: title,
+      summaryTitle: summaryTitle,
+      summaryText: summaryText,
+      currentEnergyTitle: json['current_energy_title'] ??
+          json['currentEnergyTitle'] ??
+          'Current Energy',
+      currentEnergyText: json['current_energy_text'] ??
+          json['currentEnergyText'] ??
+          json['description'] ??
+          'N/A',
+      eidosType: eidosType,
       // 새로운 Enhanced API 필드들
       personalizedExplanation: json['personalizedExplanation']?.toString(),
       groupTraits: json['groupTraits'] != null

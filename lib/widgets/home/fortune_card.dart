@@ -148,7 +148,7 @@ class FortuneCard extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  fortuneData!['subtitle'] ?? '',
+                                  fortuneData!['theme'] ?? '',
                                   style: TextStyle(
                                     color: Colors.white.withAlpha(128),
                                     fontSize: 13,
@@ -164,7 +164,8 @@ class FortuneCard extends StatelessWidget {
                                 const SizedBox(height: 16),
                                 Expanded(
                                   child: Text(
-                                    fortuneData!['message'] as String? ?? '',
+                                    fortuneData!['description'] as String? ??
+                                        '',
                                     style: TextStyle(
                                       color: Colors.white.withAlpha(136),
                                       fontSize: 13,
