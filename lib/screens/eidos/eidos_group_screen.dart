@@ -116,6 +116,7 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
       future: eidosGroupDataFuture,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
+          print('❌ EidosGroupScreen Error: ${snapshot.error}');
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -129,10 +130,12 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
         }
 
         if (snapshot.connectionState == ConnectionState.waiting) {
+          print('⏳ EidosGroupScreen: Loading data...');
           return const Center(child: CircularProgressIndicator());
         }
 
         if (!snapshot.hasData || snapshot.data == null) {
+          print('❌ EidosGroupScreen: No data available');
           return const Center(
             child: Text(
               'Failed to load data. No data available.',
@@ -142,6 +145,23 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
         }
 
         final eidosData = snapshot.data!;
+
+        // 🔍 DETAILED DEBUG: Print UI display data
+        print('🖥️🖥️🖥️ === EIDOS GROUP SCREEN UI DEBUG ===');
+        print('🖥️ EidosData Summary:');
+        print('   - eidosType: "${eidosData.summary.eidosType}"');
+        print('   - summaryTitle: "${eidosData.summary.summaryTitle}"');
+        print('   - title: "${eidosData.summary.title}"');
+        print('   - summaryText: "${eidosData.summary.summaryText}"');
+        print('   - cardImageUrl: "${eidosData.summary.cardImageUrl}"');
+        print('🖥️ Background Image URL: "${eidosData.backgroundImageUrl}"');
+        print('🖥️ Card Image URLs:');
+        eidosData.cardImageUrls.forEach((key, value) {
+          print('   - $key: $value');
+        });
+        print('🖥️ Eidos Types in Group: ${eidosData.eidosTypesInGroup}');
+        print('🖥️🖥️🖥️ === END UI DEBUG ===');
+
         setupPageData(eidosData);
 
         return Stack(
@@ -211,29 +231,49 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Spacer(flex: 5),
-                          Text(
-                            eidosData.summary.summaryTitle,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              height: 1.3,
-                              shadows: [
-                                Shadow(blurRadius: 10.0, color: Colors.black)
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            eidosData.summary.eidosType,
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 16,
-                              fontStyle: FontStyle.italic,
-                              shadows: [
-                                Shadow(blurRadius: 8.0, color: Colors.black)
-                              ],
-                            ),
+                          Builder(
+                            builder: (context) {
+                              print('📺📺📺 === SCREEN HEADER DEBUG ===');
+                              print(
+                                  '📺 Main Title (summaryTitle): "${eidosData.summary.summaryTitle}"');
+                              print(
+                                  '📺 Subtitle (eidosType): "${eidosData.summary.eidosType}"');
+                              print('📺📺📺 === END SCREEN HEADER DEBUG ===');
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    eidosData.summary.summaryTitle,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      height: 1.3,
+                                      shadows: [
+                                        Shadow(
+                                            blurRadius: 10.0,
+                                            color: Colors.black)
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    eidosData.summary.eidosType,
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 16,
+                                      fontStyle: FontStyle.italic,
+                                      shadows: [
+                                        Shadow(
+                                            blurRadius: 8.0,
+                                            color: Colors.black)
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                           const Spacer(flex: 1),
                           const Center(
@@ -438,8 +478,34 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
   }
 
   Widget _buildUniqueEidosTypeCard(EidosGroupData eidosData) {
+    print('🎴🎴🎴 === _buildUniqueEidosTypeCard CALLED ===');
+    print(
+        '🎴 Method called with eidosData: ${eidosData != null ? 'NOT NULL' : 'NULL'}');
+
     final summary = eidosData.summary;
-    final cardImageUrl = eidosData.cardImageUrls[summary.eidosType] ?? '';
+    print('🎴 Summary extracted: ${summary != null ? 'NOT NULL' : 'NULL'}');
+
+    // 🔧 FIX: Use the correct image URL from summary.cardImageUrl
+    final cardImageUrl =
+        summary.cardImageUrl.isNotEmpty ? summary.cardImageUrl : '';
+    print('🎴 Using summary.cardImageUrl: "$cardImageUrl"');
+    print(
+        '🎴 Original cardImageUrls lookup would have been: "${eidosData.cardImageUrls[summary.eidosType] ?? ''}"');
+    print(
+        '🎴 Available cardImageUrls keys: ${eidosData.cardImageUrls.keys.toList()}');
+
+    // 🔍 DETAILED DEBUG: Print card display data
+    print('🎴🎴🎴 === UNIQUE EIDOS TYPE CARD DEBUG ===');
+    print('🎴 Card Title Logic:');
+    print('   - summary.eidosType: "${summary.eidosType}"');
+    print('   - summary.summaryTitle: "${summary.summaryTitle}"');
+    print('   - Final title: "${summary.eidosType ?? summary.summaryTitle}"');
+    print('🎴 Card Image URL: "$cardImageUrl"');
+    print('🎴 Card Description Sources:');
+    print('   - personalizedExplanation: "${summary.personalizedExplanation}"');
+    print('   - classificationReason: "${summary.classificationReason}"');
+    print('   - currentEnergyText: "${summary.currentEnergyText}"');
+    print('   - summaryText: "${summary.summaryText}"');
 
     // 백엔드에서 상세한 설명 가져오기 (폴백 대신 실제 데이터 사용)
     String description = "Your unique essence is being revealed...";
@@ -449,35 +515,52 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
     if (summary.personalizedExplanation.isNotEmpty &&
         summary.personalizedExplanation != 'N/A') {
       description = summary.personalizedExplanation;
+      print('🎴 Using personalizedExplanation for description');
     }
     // 2. 분류 이유 사용
     else if (summary.classificationReason.isNotEmpty &&
         summary.classificationReason != 'N/A') {
       description = summary.classificationReason;
+      print('🎴 Using classificationReason for description');
     }
     // 3. 핵심 정체성 설명 사용
     else if (summary.currentEnergyText.isNotEmpty &&
         summary.currentEnergyText != 'N/A') {
       description = summary.currentEnergyText;
+      print('🎴 Using currentEnergyText for description');
     }
     // 4. 요약 텍스트 사용
     else if (summary.summaryText.isNotEmpty && summary.summaryText != 'N/A') {
       description = summary.summaryText;
+      print('🎴 Using summaryText for description');
     }
+
+    print('🎴 Final description: "$description"');
 
     // 백엔드에서 실제 키워드 가져오기
     if (summary.strengths.isNotEmpty) {
       keywords = summary.strengths.take(3).toList();
+      print('🎴 Using strengths for keywords: $keywords');
     } else if (summary.groupTraits.isNotEmpty) {
       keywords = summary.groupTraits.take(3).toList();
+      print('🎴 Using groupTraits for keywords: $keywords');
     }
 
-    return UniqueEidosTypeCard(
+    print('🎴🎴🎴 === CREATING UniqueEidosTypeCard WIDGET ===');
+    print('🎴 About to create UniqueEidosTypeCard with:');
+    print('🎴   - title: "${summary.eidosType ?? summary.summaryTitle}"');
+    print('🎴   - imageUrl: "$cardImageUrl"');
+    print('🎴   - description length: ${description.length}');
+    print('🎴   - keywords count: ${keywords.length}');
+    print('🎴🎴🎴 === END UNIQUE EIDOS TYPE CARD DEBUG ===');
+
+    final cardWidget = UniqueEidosTypeCard(
       title: summary.eidosType ?? summary.summaryTitle,
       imageUrl: cardImageUrl,
       description: description,
       keywords: keywords,
       onTap: () async {
+        print('🎴 UniqueEidosTypeCard onTap called!');
         // 기존에 저장된 상세 분석 데이터 확인
         try {
           final userAnalysisQuery = await _firestore
@@ -532,6 +615,9 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
         }
       },
     );
+
+    print('🎴 UniqueEidosTypeCard widget created successfully, returning it');
+    return cardWidget;
   }
 
   Widget _buildTabSelector() {

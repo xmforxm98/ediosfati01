@@ -305,21 +305,20 @@ class _TaroScreenState extends State<TaroScreen> {
       slivers: [
         const SliverAppBar(
           backgroundColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: true,
           title: Text(
             'Tarot Guidance',
             style: TextStyle(
+              fontWeight: FontWeight.normal,
               color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+              fontSize: 16,
             ),
           ),
-          centerTitle: true,
-          elevation: 0,
           scrolledUnderElevation: 0,
           floating: false,
           snap: false,
           pinned: false,
-          expandedHeight: 120,
           automaticallyImplyLeading: false,
         ),
         SliverToBoxAdapter(
@@ -1038,5 +1037,43 @@ class _TaroScreenState extends State<TaroScreen> {
     print(
         '🎴 No mapping found for: "$normalizedCardId", using default: foolcrown');
     return 'foolcrown';
+  }
+
+  // 🎴 홈 화면 FortuneCard와 동일한 스타일의 타로 카드
+  Widget _buildTarotCardWithFortuneStyle(Map<String, dynamic> tarot) {
+    // Daily Tarot인 경우 추가 정보 추출
+    String title = tarot['title'] ?? 'Tarot Card';
+    String subtitle = tarot['subtitle'] ?? 'Your Reading';
+    String message = tarot['message'] ?? 'No message available';
+    String backgroundImageUrl = tarot['backgroundImageUrl'] ?? '';
+
+    // Daily Tarot 객체가 있는 경우 더 풍부한 정보 사용
+    if (tarot.containsKey('dailyTarot')) {
+      final dailyTarot = tarot['dailyTarot'] as DailyTarot;
+      title = dailyTarot.cardNameDisplay;
+      subtitle = dailyTarot.themeKeyword.isNotEmpty
+          ? dailyTarot.themeKeyword
+          : 'Your Personalized Tarot for Today';
+      message = dailyTarot.message.content;
+      backgroundImageUrl =
+          _getFirebaseImageUrl(dailyTarot.cardImageUrl, dailyTarot.cardId);
+    }
+
+    return FractionallySizedBox(
+      widthFactor: 0.9,
+      child: FortuneCard(
+        isLoading: false,
+        fortuneData: {
+          'title': title,
+          'subtitle': subtitle,
+          'message': message,
+        },
+        fortuneType: tarot['type'] ?? 'Tarot',
+        backgroundImageUrl: backgroundImageUrl,
+      ),
+    )
+        .animate()
+        .scaleXY(end: 1, duration: 500.ms, curve: Curves.easeOutCubic)
+        .fadeIn();
   }
 }

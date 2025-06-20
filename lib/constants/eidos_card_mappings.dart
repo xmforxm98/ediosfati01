@@ -290,14 +290,10 @@ class EidosCardMappings {
       "https://storage.googleapis.com/innerfive.firebasestorage.app/eidos_cards/The%20Light%20Bearer%20of%20Spiritual%20Enlightener_1.png",
     ],
     "The Guardian of Principles of Honorable Strategist": [
-      "https://storage.googleapis.com/innerfive.firebasestorage.app/eidos_cards/The%20Guardian%20of%20Principles%20of%20Honorable%20Strategist_3.png",
-      "https://storage.googleapis.com/innerfive.firebasestorage.app/eidos_cards/The%20Guardian%20of%20Principles%20of%20Honorable%20Strategist_4.png",
-      "https://storage.googleapis.com/innerfive.firebasestorage.app/eidos_cards/The%20Guardian%20of%20Principles%20of%20Honorable%20Strategist_2.png",
       "https://storage.googleapis.com/innerfive.firebasestorage.app/eidos_cards/The%20Guardian%20of%20Principles%20of%20Honorable%20Strategist_1.png",
       "https://storage.googleapis.com/innerfive.firebasestorage.app/eidos_cards/The%20Guardian%20of%20Principles%20of%20Honorable%20Strategist_2.png",
       "https://storage.googleapis.com/innerfive.firebasestorage.app/eidos_cards/The%20Guardian%20of%20Principles%20of%20Honorable%20Strategist_3.png",
       "https://storage.googleapis.com/innerfive.firebasestorage.app/eidos_cards/The%20Guardian%20of%20Principles%20of%20Honorable%20Strategist_4.png",
-      "https://storage.googleapis.com/innerfive.firebasestorage.app/eidos_cards/The%20Guardian%20of%20Principles%20of%20Honorable%20Strategist_1.png",
     ],
     "The Social Influencer of Golden Pioneer": [
       "https://storage.googleapis.com/innerfive.firebasestorage.app/eidos_cards/The%20Social%20Influencer%20of%20Golden%20Pioneer_3.png",
@@ -366,16 +362,16 @@ class EidosCardMappings {
       "https://storage.googleapis.com/innerfive.firebasestorage.app/eidos_cards/green_mercenary3.png",
     ],
   };
-  
+
   /// Get random card URL for a specific Eidos type
   static String? getRandomCardUrl(String eidosType) {
     final urls = cardUrls[eidosType];
     if (urls == null || urls.isEmpty) return null;
-    
+
     final random = DateTime.now().millisecondsSinceEpoch % urls.length;
     return urls[random];
   }
-  
+
   /// Get all available Eidos types
   static List<String> getAllTypes() {
     return cardUrls.keys.toList();

@@ -41,58 +41,162 @@ class UniqueEidosTypeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Your Unique Type',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title, // Display the specific Eidos type name
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          // 설명 표시
-          if (description != null && description!.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            Text(
-              description!, // Show the full description without simplification
-              style: TextStyle(
-                color: Colors.white.withAlpha(220),
-                fontSize: 15,
-                height: 1.4,
-              ),
-              maxLines: 10,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ] else ...[
-            const SizedBox(height: 16),
-            Text(
-              'No description available',
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
-                fontSize: 16,
-                height: 1.5,
-              ),
+    print('🎴🎴🎴 === UNIQUE EIDOS TYPE CARD BUILD DEBUG ===');
+    print('🎴 Card Title: "$title"');
+    print('🎴 Card Image URL: "$imageUrl"');
+    print('🎴 Card Description: "${description ?? 'null'}"');
+    print('🎴 Keywords: ${keywords?.toString() ?? 'null'}');
+    print('🎴 Title isEmpty: ${title.isEmpty}');
+    print('🎴 ImageUrl isEmpty: ${imageUrl.isEmpty}');
+    print('🎴🎴🎴 === STARTING CARD RENDER ===');
+
+    return AspectRatio(
+      aspectRatio: 0.5, // 1:2 비율 (width:height = 1:2) - FortuneCard와 동일
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        decoration: BoxDecoration(
+          color: Colors.grey[900],
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(20),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
             ),
           ],
-        ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Stack(
+            children: [
+              // 1. Background Image
+              if (imageUrl.isNotEmpty) ...[
+                Positioned.fill(
+                  child: Builder(
+                    builder: (context) {
+                      print('🎴 Rendering FirebaseImage with URL: $imageUrl');
+                      return FirebaseImage(
+                        storageUrl: imageUrl,
+                        fit: BoxFit.cover,
+                      );
+                    },
+                  ),
+                )
+              ] else ...[
+                Positioned.fill(
+                  child: Builder(
+                    builder: (context) {
+                      print('🎴 Using fallback background (grey)');
+                      return Container(color: Colors.grey[900]);
+                    },
+                  ),
+                ),
+              ],
+
+              // 2. Content Scrim - FortuneCard와 동일한 그라디언트
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withAlpha(128),
+                        Colors.black.withAlpha(240),
+                      ],
+                      stops: const [0.3, 0.6, 1.0],
+                    ),
+                  ),
+                ),
+              ),
+
+              // 3. Content - FortuneCard와 동일한 레이아웃
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Builder(
+                  builder: (context) {
+                    print('🎴 Rendering content section');
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Spacer(flex: 3), // 상단 여백
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.psychology, // 에이도스 타입을 나타내는 아이콘
+                              color: Colors.white.withAlpha(150),
+                              size: 16,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Your Unique Type',
+                              style: TextStyle(
+                                color: Colors.white.withAlpha(150),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Builder(
+                          builder: (context) {
+                            print('🎴 Rendering title: "$title"');
+                            return Text(
+                              title,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                height: 1.3,
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Your Personal Eidos Essence',
+                          style: TextStyle(
+                            color: Colors.white.withAlpha(128),
+                            fontSize: 13,
+                            height: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          height: 1,
+                          width: 50,
+                          color: Colors.white.withAlpha(64),
+                        ),
+                        const SizedBox(height: 16),
+                        Expanded(
+                          child: Builder(
+                            builder: (context) {
+                              final displayText = description ??
+                                  'Discover your unique cosmic essence and personal characteristics.';
+                              print(
+                                  '🎴 Rendering description: "${displayText.substring(0, displayText.length > 50 ? 50 : displayText.length)}..."');
+                              return Text(
+                                displayText,
+                                style: TextStyle(
+                                  color: Colors.white.withAlpha(136),
+                                  fontSize: 13,
+                                  height: 1.5,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
