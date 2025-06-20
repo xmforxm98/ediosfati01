@@ -76,26 +76,155 @@ class _TaroScreenState extends State<TaroScreen> {
             print('🎴 Step 2: Found tarot_insight section');
             print('   - Type: ${tarotRaw.runtimeType}');
             print('   - Raw data: $tarotRaw');
+
+            // tarot_insight 내부 구조 상세 분석
+            if (tarotRaw is Map<String, dynamic>) {
+              print(
+                  '🎴 Step 2.1: tarot_insight keys: ${tarotRaw.keys.toList()}');
+              tarotRaw.forEach((key, value) {
+                print('🎴   - $key: "$value" (${value.runtimeType})');
+              });
+            }
           } else {
             print('🎴 Step 2: ❌ NO tarot_insight section found!');
+            print('🎴 Available report keys: ${reportData.keys.toList()}');
           }
 
           final tarotInsight = report.tarotInsight;
 
           // 실제 타로 카드 이름만 추출 (에이도스 타입 제거)
-          String actualTarotCard = "The Fool";
+          String actualTarotCard = "The Emperor"; // 기본값을 The Emperor로 변경
+
+          // 1. cardTitle에서 타로 카드명 추출 시도
           if (tarotInsight.cardTitle.isNotEmpty &&
               tarotInsight.cardTitle != 'N/A') {
             String cardTitle = tarotInsight.cardTitle;
+            print('🎴 Extracting from cardTitle: "$cardTitle"');
 
             // "Card of Destiny: The Magician" 형태에서 타로 카드명만 추출
             if (cardTitle.contains(':')) {
-              actualTarotCard = cardTitle.split(':').last.trim();
-            } else if (cardTitle.contains('The ') &&
-                !cardTitle.contains('Type') &&
-                !cardTitle.contains('Mercenary')) {
-              // "The Magician", "The Fool" 등 실제 타로 카드명만 사용
+              String extracted = cardTitle.split(':').last.trim();
+              if (_isValidTarotCard(extracted)) {
+                actualTarotCard = extracted;
+                print('🎴 Extracted from colon format: "$actualTarotCard"');
+              }
+            }
+            // "The Magician", "The Fool" 등 실제 타로 카드명 확인
+            else if (_isValidTarotCard(cardTitle)) {
               actualTarotCard = cardTitle.trim();
+              print('🎴 Direct tarot card found: "$actualTarotCard"');
+            }
+          }
+
+          // 2. cardMessageText에서 타로 카드명 추출 시도
+          if (actualTarotCard == "The Emperor" &&
+              tarotInsight.cardMessageText.isNotEmpty &&
+              tarotInsight.cardMessageText != 'N/A') {
+            String message = tarotInsight.cardMessageText;
+            print('🎴 Searching in cardMessageText: "$message"');
+
+            // 메시지에서 "The [CardName]" 패턴 찾기
+            RegExp tarotPattern = RegExp(
+                r'The (Fool|Magician|High Priestess|Empress|Emperor|Hierophant|Lovers|Chariot|Strength|Hermit|Wheel of Fortune|Justice|Hanged Man|Death|Temperance|Devil|Tower|Star|Moon|Sun|Judgement|World)',
+                caseSensitive: false);
+            Match? match = tarotPattern.firstMatch(message);
+            if (match != null) {
+              actualTarotCard = "The ${match.group(1)}";
+              print('🎴 Found tarot card in message: "$actualTarotCard"');
+            }
+          }
+
+          // 3. 리포트 전체에서 타로 카드 관련 정보 검색
+          if (actualTarotCard == "The Emperor") {
+            print('🎴 Searching entire report for tarot cards...');
+            String reportString = reportData.toString().toLowerCase();
+            print(
+                '🎴 Report contains "emperor": ${reportString.contains("emperor")}');
+            print(
+                '🎴 Report contains "magician": ${reportString.contains("magician")}');
+            print(
+                '🎴 Report contains "fool": ${reportString.contains("fool")}');
+
+            List<String> tarotCards = [
+              'the fool',
+              'the magician',
+              'the high priestess',
+              'the empress',
+              'the emperor',
+              'the hierophant',
+              'the lovers',
+              'the chariot',
+              'strength',
+              'the hermit',
+              'wheel of fortune',
+              'justice',
+              'the hanged man',
+              'death',
+              'temperance',
+              'the devil',
+              'the tower',
+              'the star',
+              'the moon',
+              'the sun',
+              'judgement',
+              'the world'
+            ];
+
+            // 단순한 카드명도 확인 (without "the")
+            List<String> simpleTarotCards = [
+              'fool',
+              'magician',
+              'empress',
+              'emperor',
+              'hierophant',
+              'lovers',
+              'chariot',
+              'strength',
+              'hermit',
+              'justice',
+              'death',
+              'temperance',
+              'devil',
+              'tower',
+              'star',
+              'moon',
+              'sun',
+              'judgement',
+              'world'
+            ];
+
+            for (String card in tarotCards) {
+              if (reportString.contains(card)) {
+                actualTarotCard = _capitalizeFirst(card);
+                print('🎴 Found "$card" in report, using: "$actualTarotCard"');
+                break;
+              }
+            }
+
+            // "the" 없는 버전도 확인
+            if (actualTarotCard == "The Emperor") {
+              for (String card in simpleTarotCards) {
+                if (reportString.contains(card)) {
+                  if ([
+                    'emperor',
+                    'empress',
+                    'hierophant',
+                    'hermit',
+                    'devil',
+                    'tower',
+                    'star',
+                    'moon',
+                    'sun'
+                  ].contains(card)) {
+                    actualTarotCard = "The ${_capitalizeFirst(card)}";
+                  } else {
+                    actualTarotCard = _capitalizeFirst(card);
+                  }
+                  print(
+                      '🎴 Found simple "$card" in report, using: "$actualTarotCard"');
+                  break;
+                }
+              }
             }
           }
 
@@ -155,6 +284,11 @@ class _TaroScreenState extends State<TaroScreen> {
             'title': actualTarotCard, // 실제 타로 카드명만 사용
             'subtitle': 'Your Personal Tarot Reading',
             'message': tarotMessage,
+            'cardMeaning': tarotInsight.cardMeaning.isNotEmpty &&
+                    tarotInsight.cardMeaning != 'N/A'
+                ? tarotInsight.cardMeaning
+                : cardInfo['meaning'] ??
+                    'This card represents your core spiritual essence and life purpose.',
             'backgroundImageUrl': cardInfo['imageUrl'] ?? '',
           });
 
@@ -274,6 +408,47 @@ class _TaroScreenState extends State<TaroScreen> {
 
     // 기본값
     return 'Seeker';
+  }
+
+  // 유효한 타로 카드인지 확인하는 헬퍼 함수
+  bool _isValidTarotCard(String cardName) {
+    List<String> validTarotCards = [
+      'The Fool',
+      'The Magician',
+      'The High Priestess',
+      'The Empress',
+      'The Emperor',
+      'The Hierophant',
+      'The Lovers',
+      'The Chariot',
+      'Strength',
+      'The Hermit',
+      'Wheel of Fortune',
+      'Justice',
+      'The Hanged Man',
+      'Death',
+      'Temperance',
+      'The Devil',
+      'The Tower',
+      'The Star',
+      'The Moon',
+      'The Sun',
+      'Judgement',
+      'The World'
+    ];
+
+    return validTarotCards
+        .any((card) => card.toLowerCase() == cardName.toLowerCase());
+  }
+
+  // 첫 글자를 대문자로 변환하는 헬퍼 함수
+  String _capitalizeFirst(String text) {
+    if (text.isEmpty) return text;
+
+    return text.split(' ').map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
   }
 
   @override
@@ -447,15 +622,168 @@ class _TaroScreenState extends State<TaroScreen> {
   Widget _buildEidosTarotCard(Map<String, dynamic> tarot) {
     return FractionallySizedBox(
       widthFactor: 0.9,
-      child: FortuneCard(
-        isLoading: false,
-        fortuneData: {
-          'title': tarot['title'],
-          'subtitle': tarot['subtitle'],
-          'message': tarot['message'],
-        },
-        fortuneType: tarot['type'],
-        backgroundImageUrl: tarot['backgroundImageUrl'],
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 15,
+              spreadRadius: 2,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: AspectRatio(
+          aspectRatio: 0.5, // FortuneCard와 동일한 비율
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: LinearGradient(
+                colors: [
+                  Colors.black.withOpacity(0.7),
+                  Colors.black.withOpacity(0.3),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: Stack(
+              children: [
+                // 배경 이미지
+                if (tarot['backgroundImageUrl'] != null &&
+                    tarot['backgroundImageUrl'].toString().isNotEmpty)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.network(
+                      tarot['backgroundImageUrl'],
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF2D1B69), Color(0xFF11998E)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                // 그라디언트 오버레이
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.black.withOpacity(0.4),
+                        Colors.black.withOpacity(0.7),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
+                ),
+
+                // 콘텐츠
+                Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 아이콘과 타입
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.auto_awesome,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              tarot['subtitle'] ?? '',
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // 카드 제목
+                      Text(
+                        tarot['title'] ?? '',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          height: 1.2,
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // 카드 의미 추가
+                      if (tarot['cardMeaning'] != null &&
+                          tarot['cardMeaning'].toString().isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                                color: Colors.white.withOpacity(0.3)),
+                          ),
+                          child: Text(
+                            tarot['cardMeaning'],
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+
+                      const Spacer(),
+
+                      // 메시지
+                      Expanded(
+                        flex: 2,
+                        child: SingleChildScrollView(
+                          child: Text(
+                            tarot['message'] ?? '',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              height: 1.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     )
         .animate()
