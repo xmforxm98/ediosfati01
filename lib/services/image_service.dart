@@ -227,7 +227,7 @@ class ImageService {
   /// 특정 그룹의 랜덤 이미지 가져오기 (확장 가능)
   static Future<String> getRandomImageFromGroup(List<String> imageNames) async {
     if (imageNames.isEmpty) {
-      throw Exception('이미지 그룹이 비어있습니다');
+      throw Exception('Image group is empty');
     }
 
     final random = Random();
@@ -282,7 +282,7 @@ class ImageService {
       return url;
     } catch (e) {
       if (kDebugMode) {
-        print('이미지 업로드 실패: $e');
+        print('Image upload failed: $e');
       }
       return null;
     }
@@ -298,7 +298,7 @@ class ImageService {
       return true;
     } catch (e) {
       if (kDebugMode) {
-        print('이미지 삭제 실패: $e');
+        print('Image deletion failed: $e');
       }
       return false;
     }
@@ -312,7 +312,7 @@ class ImageService {
       return result.items.map((item) => item.name).toList();
     } catch (e) {
       if (kDebugMode) {
-        print('이미지 목록 가져오기 실패: $e');
+        print('Failed to get image list: $e');
       }
       return [];
     }

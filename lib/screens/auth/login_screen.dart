@@ -38,43 +38,22 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     try {
-      final user = await authService.signInWithEmailAndPassword(
+      final result = await authService.signInWithEmailAndPassword(
         _emailController.text,
         _passwordController.text,
       );
 
-      if (user != null && mounted) {
+      if (result['success'] && mounted) {
         // Successfully logged in, pop all screens and return to main app
         Navigator.of(context).popUntil((route) => route.isFirst);
       } else {
         setState(() {
-          _errorMessage = "Incorrect email or password.";
+          _errorMessage = result['message'];
         });
       }
-    } on FirebaseAuthException catch (e) {
-      String message;
-      switch (e.code) {
-        case 'user-not-found':
-          message = "This account does not exist.";
-          break;
-        case 'wrong-password':
-          message = "Incorrect password.";
-          break;
-        case 'invalid-email':
-          message = "The email format is invalid.";
-          break;
-        case 'network-request-failed':
-          message = "Please check your network connection.";
-          break;
-        default:
-          message = "Login failed. Please try again.";
-      }
-      setState(() {
-        _errorMessage = message;
-      });
     } catch (e) {
       setState(() {
-        _errorMessage = "An unknown error occurred.";
+        _errorMessage = "An unexpected error occurred. Please try again.";
       });
     } finally {
       if (mounted) {

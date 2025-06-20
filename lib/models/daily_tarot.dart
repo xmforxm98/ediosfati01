@@ -3,12 +3,24 @@ class DailyTarot {
   final String cardNameDisplay;
   final String cardImageUrl;
   final DailyTarotMessage message;
+  final String userName;
+  final String fortuneMessage;
+  final String themeKeyword;
+  final String luckyColor;
+  final String eidosType;
+  final String eidosGroup;
 
   DailyTarot({
     required this.cardId,
     required this.cardNameDisplay,
     required this.cardImageUrl,
     required this.message,
+    required this.userName,
+    required this.fortuneMessage,
+    required this.themeKeyword,
+    required this.luckyColor,
+    required this.eidosType,
+    required this.eidosGroup,
   });
 
   factory DailyTarot.fromJson(Map<String, dynamic> json) {
@@ -17,20 +29,77 @@ class DailyTarot {
       throw const FormatException('Missing "daily_tarot_draw" in JSON');
     }
 
+    // Safely parse all string fields
+    String cardId = '';
+    String cardNameDisplay = '';
+    String cardImageUrl = '';
+    String userName = '';
+    String fortuneMessage = '';
+    String themeKeyword = '';
+    String luckyColor = '';
+    String eidosType = '';
+    String eidosGroup = '';
+
+    try {
+      cardId = dailyTarotDraw['card_id']?.toString() ?? 'Unknown';
+      cardNameDisplay =
+          dailyTarotDraw['card_name_display']?.toString() ?? 'Unknown Card';
+      cardImageUrl = dailyTarotDraw['card_image_url']?.toString() ?? '';
+      userName = json['user_name']?.toString() ?? 'Seeker';
+      fortuneMessage = json['fortune_message']?.toString() ?? '';
+      themeKeyword = json['theme_keyword']?.toString() ?? '';
+      luckyColor = json['lucky_color']?.toString() ?? '';
+      eidosType = json['eidos_type']?.toString() ?? '';
+      eidosGroup = json['eidos_group']?.toString() ?? '';
+    } catch (e) {
+      print('Error parsing DailyTarot string fields: $e');
+    }
+
+    // Safely parse message
+    DailyTarotMessage message;
+    try {
+      message = DailyTarotMessage.fromJson(dailyTarotDraw['message'] ?? {});
+    } catch (e) {
+      print('Error parsing DailyTarotMessage: $e');
+      // Create default message if parsing fails
+      message = DailyTarotMessage(
+        title: 'Daily Guidance',
+        content: 'Your tarot guidance for today.',
+        sections: [],
+        aphorism: '',
+        hashtags: [],
+        illustrationCue: '',
+      );
+    }
+
     return DailyTarot(
-      cardId: dailyTarotDraw['card_id'] ?? 'Unknown',
-      cardNameDisplay: dailyTarotDraw['card_name_display'] ?? 'Unknown Card',
-      cardImageUrl: dailyTarotDraw['card_image_url'] ?? '',
-      message: DailyTarotMessage.fromJson(dailyTarotDraw['message'] ?? {}),
+      cardId: cardId,
+      cardNameDisplay: cardNameDisplay,
+      cardImageUrl: cardImageUrl,
+      message: message,
+      userName: userName,
+      fortuneMessage: fortuneMessage,
+      themeKeyword: themeKeyword,
+      luckyColor: luckyColor,
+      eidosType: eidosType,
+      eidosGroup: eidosGroup,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'card_id': cardId,
-      'card_name_display': cardNameDisplay,
-      'card_image_url': cardImageUrl,
-      'message': message.toJson(),
+      'daily_tarot_draw': {
+        'card_id': cardId,
+        'card_name_display': cardNameDisplay,
+        'card_image_url': cardImageUrl,
+        'message': message.toJson(),
+      },
+      'user_name': userName,
+      'fortune_message': fortuneMessage,
+      'theme_keyword': themeKeyword,
+      'lucky_color': luckyColor,
+      'eidos_type': eidosType,
+      'eidos_group': eidosGroup,
     };
   }
 }
@@ -53,22 +122,66 @@ class DailyTarotMessage {
   });
 
   factory DailyTarotMessage.fromJson(Map<String, dynamic> json) {
-    var sectionsFromJson = json['sections'] as List<dynamic>?;
-    List<DailyTarotSection> sectionList =
-        sectionsFromJson?.map((i) => DailyTarotSection.fromJson(i)).toList() ??
-            [];
+    List<DailyTarotSection> sectionList = [];
 
-    var hashtagsFromJson = json['hashtags'] as List<dynamic>?;
-    List<String> hashtagList =
-        hashtagsFromJson?.map((i) => i.toString()).toList() ?? [];
+    // Handle sections - API returns Map not List
+    var sectionsFromJson = json['sections'];
+    if (sectionsFromJson != null) {
+      try {
+        if (sectionsFromJson is Map<String, dynamic>) {
+          // Convert Map to List of sections
+          sectionsFromJson.forEach((key, value) {
+            if (value is Map<String, dynamic>) {
+              sectionList.add(DailyTarotSection.fromJson(value, key));
+            }
+          });
+        } else if (sectionsFromJson is List<dynamic>) {
+          // Handle as List (fallback)
+          sectionList = sectionsFromJson
+              .map((i) => DailyTarotSection.fromJson(i as Map<String, dynamic>))
+              .toList();
+        }
+      } catch (e) {
+        print('Error parsing sections in DailyTarotMessage: $e');
+      }
+    }
+
+    var hashtagsFromJson = json['hashtags'];
+    List<String> hashtagList = [];
+
+    // Safely handle hashtags
+    if (hashtagsFromJson != null) {
+      try {
+        if (hashtagsFromJson is List) {
+          hashtagList = hashtagsFromJson.map((i) => i.toString()).toList();
+        }
+      } catch (e) {
+        print('Error parsing hashtags: $e');
+      }
+    }
+
+    // Safely handle string fields
+    String title = '';
+    String content = '';
+    String aphorism = '';
+    String illustrationCue = '';
+
+    try {
+      title = json['title']?.toString() ?? '';
+      content = json['content']?.toString() ?? '';
+      aphorism = json['aphorism']?.toString() ?? '';
+      illustrationCue = json['illustration_cue']?.toString() ?? '';
+    } catch (e) {
+      print('Error parsing DailyTarotMessage string fields: $e');
+    }
 
     return DailyTarotMessage(
-      title: json['title'] ?? '',
-      content: json['content'] ?? '',
+      title: title,
+      content: content,
       sections: sectionList,
-      aphorism: json['aphorism'] ?? '',
+      aphorism: aphorism,
       hashtags: hashtagList,
-      illustrationCue: json['illustration_cue'] ?? '',
+      illustrationCue: illustrationCue,
     );
   }
 
@@ -87,13 +200,51 @@ class DailyTarotMessage {
 class DailyTarotSection {
   final String title;
   final String content;
+  final List<String> points;
+  final String fullText;
+  final String sectionKey;
 
-  DailyTarotSection({required this.title, required this.content});
+  DailyTarotSection({
+    required this.title,
+    required this.content,
+    required this.points,
+    required this.fullText,
+    required this.sectionKey,
+  });
 
-  factory DailyTarotSection.fromJson(Map<String, dynamic> json) {
+  factory DailyTarotSection.fromJson(Map<String, dynamic> json,
+      [String key = '']) {
+    var pointsFromJson = json['points'];
+    List<String> pointsList = [];
+
+    // Safely handle points regardless of type
+    if (pointsFromJson != null) {
+      if (pointsFromJson is List) {
+        pointsList = pointsFromJson.map((i) => i.toString()).toList();
+      } else if (pointsFromJson is String) {
+        pointsList = [pointsFromJson];
+      }
+    }
+
+    // Safely handle all string fields
+    String title = '';
+    String content = '';
+    String fullText = '';
+
+    try {
+      title = json['title']?.toString() ?? '';
+      content = json['content']?.toString() ?? '';
+      fullText = json['full_text']?.toString() ?? '';
+    } catch (e) {
+      print('Error parsing DailyTarotSection field: $e');
+    }
+
     return DailyTarotSection(
-      title: json['title'] ?? '',
-      content: json['content'] ?? '',
+      title: title,
+      content: content,
+      points: pointsList,
+      fullText: fullText,
+      sectionKey: key,
     );
   }
 
@@ -101,6 +252,12 @@ class DailyTarotSection {
     return {
       'title': title,
       'content': content,
+      'points': points,
+      'full_text': fullText,
     };
   }
+
+  bool get hasPoints => points.isNotEmpty;
+  bool get hasContent => content.isNotEmpty;
+  bool get hasFullText => fullText.isNotEmpty;
 }

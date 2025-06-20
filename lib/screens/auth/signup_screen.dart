@@ -117,19 +117,19 @@ class _SignupScreenState extends State<SignupScreen> {
                           return;
                         }
 
-                        final user =
+                        final result =
                             await authService.signUpWithEmailAndPassword(
                           _emailController.text,
                           _passwordController.text,
                         );
-                        if (user != null) {
+
+                        if (result['success']) {
                           Navigator.of(
                             context,
                           ).popUntil((route) => route.isFirst);
                         } else {
                           setState(() {
-                            _errorMessage =
-                                "Sign-up failed. The email might be in use or password is too weak.";
+                            _errorMessage = result['message'];
                           });
                         }
                       },

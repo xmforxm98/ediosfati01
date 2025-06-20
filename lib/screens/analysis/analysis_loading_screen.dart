@@ -26,7 +26,7 @@ class _AnalysisLoadingScreenState extends State<AnalysisLoadingScreen> {
   String _loadingMessage = "Checking authentication...";
   bool _isError = false;
   bool _requiresLogin = false;
-  bool _analysisComplete = false;
+  final bool _analysisComplete = false;
   String? _backgroundUrl;
   Timer? _delayTimer;
 
@@ -50,49 +50,6 @@ class _AnalysisLoadingScreenState extends State<AnalysisLoadingScreen> {
         _backgroundUrl = url;
       });
     }
-  }
-
-  dynamic _sanitizeForFirestore(dynamic data) {
-    if (data == null) {
-      return null;
-    }
-
-    // Convert everything to JSON string first, then parse back to ensure no nested arrays
-    try {
-      String jsonString = jsonEncode(data);
-      Map<String, dynamic> parsedData = jsonDecode(jsonString);
-
-      // Now recursively convert any remaining lists to maps
-      return _convertListsToMaps(parsedData);
-    } catch (e) {
-      // If JSON encoding fails, convert to string
-      return data.toString();
-    }
-  }
-
-  dynamic _convertListsToMaps(dynamic data) {
-    if (data == null) {
-      return null;
-    }
-
-    if (data is Map) {
-      Map<String, dynamic> result = {};
-      data.forEach((key, value) {
-        result[key.toString()] = _convertListsToMaps(value);
-      });
-      return result;
-    }
-
-    if (data is List) {
-      // Convert list to map with index as key
-      Map<String, dynamic> result = {};
-      for (int i = 0; i < data.length; i++) {
-        result[i.toString()] = _convertListsToMaps(data[i]);
-      }
-      return result;
-    }
-
-    return data;
   }
 
   Future<void> _initiateAnalysis() async {
@@ -178,38 +135,21 @@ class _AnalysisLoadingScreenState extends State<AnalysisLoadingScreen> {
 
       print("🔄 Full API response: $reportData");
 
-      final sanitizedReportData = _sanitizeForFirestore(reportData);
-      print("🔄 Sanitized report data");
-
-      final narrativeReport = NarrativeReport.fromJson(reportData);
-      print("✅ Created NarrativeReport successfully");
-      print("✅ Report eidosType: ${narrativeReport.eidosType}");
-      print(
-          "✅ Report summary eidosType: ${narrativeReport.eidosSummary.eidosType}");
-
       print("Saving report to Firestore...");
       await _authService.saveUserData(userId, {
         'userInput': widget.userData.toJson(),
-        'report': sanitizedReportData,
+        'report': reportData,
       });
       print("Report saved to Firestore successfully");
 
+      // Navigate to the main screen, specifically to the Eidos tab (index 1)
       if (mounted) {
-        setState(() {
-          _analysisComplete = true;
-          _loadingMessage = "Analysis Complete!";
-        });
-
-        _delayTimer = Timer(const Duration(seconds: 8), () {
-          if (mounted) {
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(
-                builder: (context) => const MainScreen(initialIndex: 1),
-              ),
-              (route) => false,
-            );
-          }
-        });
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (context) => const MainScreen(initialIndex: 1),
+          ),
+          (Route<dynamic> route) => false,
+        );
       }
     } catch (e, stackTrace) {
       print("Analysis error: $e");

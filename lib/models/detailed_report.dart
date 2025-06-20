@@ -1,3 +1,5 @@
+import 'eidos_summary.dart';
+
 class InnateEidos {
   final String coreEnergyText;
   final String talentText;
@@ -131,47 +133,95 @@ class FiveElementsStrength {
   }
 }
 
+class Section {
+  final String title;
+  final String text;
+  final List<String> points;
+  final String? opening;
+  final String? connection;
+
+  Section({
+    required this.title,
+    required this.text,
+    required this.points,
+    this.opening,
+    this.connection,
+  });
+
+  /// Safely converts dynamic data to List<String>
+  static List<String> _safeListFromDynamic(dynamic data) {
+    if (data == null) return [];
+    if (data is List) {
+      return data.map((e) => e.toString()).toList();
+    }
+    if (data is String && data.isNotEmpty) {
+      // Split by newlines or bullet points if it's a string
+      return data
+          .split(RegExp(r'\n|•'))
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
+    }
+    return [];
+  }
+
+  factory Section.fromJson(Map<String, dynamic> json) {
+    if (json.isEmpty) {
+      return Section(title: '', text: '', points: []);
+    }
+    return Section(
+      title: json['title'] ?? '',
+      text: json['text'] ?? '',
+      points: _safeListFromDynamic(json['points']),
+      opening: json['opening'],
+      connection: json['connection'],
+    );
+  }
+}
+
 class DetailedReport {
-  final InnateEidos? innateEidos;
-  final PersonalityProfile? personalityProfile;
-  final RelationshipInsight? relationshipInsight;
-  final CareerProfile? careerProfile;
-  final Journey? journey;
-  final TarotInsight? tarotInsight;
-  final FiveElementsStrength? fiveElementsStrength;
+  final EidosSummary eidosSummary;
+  final Section personalizedIntroduction;
+  final Section coreIdentitySection;
+  final Section strengthsSection;
+  final Section growthAreasSection;
+  final Section lifeGuidanceSection;
+  final Section traitsSection;
+  final String classificationReasoning;
 
   DetailedReport({
-    this.innateEidos,
-    this.personalityProfile,
-    this.relationshipInsight,
-    this.careerProfile,
-    this.journey,
-    this.tarotInsight,
-    this.fiveElementsStrength,
+    required this.eidosSummary,
+    required this.personalizedIntroduction,
+    required this.coreIdentitySection,
+    required this.strengthsSection,
+    required this.growthAreasSection,
+    required this.lifeGuidanceSection,
+    required this.traitsSection,
+    required this.classificationReasoning,
   });
 
   factory DetailedReport.fromJson(Map<String, dynamic> json) {
+    // Handle classification_reasoning which is an object, not a string
+    String classificationReasoningText = '';
+    final classificationReasoning = json['classification_reasoning'];
+    if (classificationReasoning is Map<String, dynamic>) {
+      classificationReasoningText = classificationReasoning['text'] ?? '';
+    } else if (classificationReasoning is String) {
+      classificationReasoningText = classificationReasoning;
+    }
+
     return DetailedReport(
-      innateEidos: json['innate_eidos'] != null
-          ? InnateEidos.fromJson(json['innate_eidos'])
-          : null,
-      personalityProfile: json['personality_profile'] != null
-          ? PersonalityProfile.fromJson(json['personality_profile'])
-          : null,
-      relationshipInsight: json['relationship_insight'] != null
-          ? RelationshipInsight.fromJson(json['relationship_insight'])
-          : null,
-      careerProfile: json['career_profile'] != null
-          ? CareerProfile.fromJson(json['career_profile'])
-          : null,
-      journey:
-          json['journey'] != null ? Journey.fromJson(json['journey']) : null,
-      tarotInsight: json['tarot_insight'] != null
-          ? TarotInsight.fromJson(json['tarot_insight'])
-          : null,
-      fiveElementsStrength: json['five_elements_strength'] != null
-          ? FiveElementsStrength.fromJson(json['five_elements_strength'])
-          : null,
+      eidosSummary: EidosSummary.fromJson(json),
+      personalizedIntroduction:
+          Section.fromJson(json['personalized_introduction'] ?? {}),
+      coreIdentitySection:
+          Section.fromJson(json['core_identity_section'] ?? {}),
+      strengthsSection: Section.fromJson(json['strengths_section'] ?? {}),
+      growthAreasSection: Section.fromJson(json['growth_areas_section'] ?? {}),
+      lifeGuidanceSection:
+          Section.fromJson(json['life_guidance_section'] ?? {}),
+      traitsSection: Section.fromJson(json['traits_section'] ?? {}),
+      classificationReasoning: classificationReasoningText,
     );
   }
 }

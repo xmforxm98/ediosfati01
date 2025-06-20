@@ -18,7 +18,7 @@ import 'package:innerfive/screens/onboarding/onboarding_flow_screen.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class HomeDashboardScreen extends StatefulWidget {
-  final VoidCallback onNavigateToReport;
+  final Function(NarrativeReport) onNavigateToReport;
 
   const HomeDashboardScreen({super.key, required this.onNavigateToReport});
 
@@ -33,7 +33,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
   String _userNickname = 'User';
   bool _isLoading = true;
   Map<String, List<String>> _eidosCardUrls = {};
-  List<String> _currentEidosImageUrls = [];
+  final List<String> _currentEidosImageUrls = [];
 
   // New state variables for date data
   String _gregorianDate = '';
@@ -145,50 +145,105 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
 
         if (userDoc.exists) {
           final userData = userDoc.data() as Map<String, dynamic>;
+          final displayName =
+              userData['displayName'] ?? _user?.displayName ?? 'User';
+          final nickname = userData['nickname'];
+
+          print('🔍 User data check:');
+          print('   - UID: ${_user!.uid}');
+          print('   - displayName: $displayName');
+          print('   - nickname: $nickname');
+          print('   - userData keys: ${userData.keys.toList()}');
+
           setState(() {
-            _userName = userData['displayName'] ?? _user?.displayName ?? 'User';
-            _userNickname = userData['nickname'] ?? _userName;
+            _userName = displayName;
+            // 닉네임을 우선적으로 사용하고, 없거나 N/A인 경우에만 displayName 사용
+            if (nickname != null &&
+                nickname != 'N/A' &&
+                nickname.toString().trim().isNotEmpty &&
+                nickname.toString().trim() != 'null') {
+              _userNickname = nickname;
+              print('✅ Using nickname: $_userNickname');
+            } else if (displayName != 'N/A' && displayName.trim().isNotEmpty) {
+              _userNickname = displayName;
+              print(
+                  '⚠️ Using displayName: $_userNickname (nickname: $nickname)');
+            } else {
+              // Last resort: generate email-based nickname
+              final emailBasedName = _user?.email?.split('@')[0] ?? 'User';
+              _userNickname = emailBasedName;
+              print('📧 Using email-based nickname: $_userNickname');
+            }
           });
         } else {
+          // Firestore 문서가 없는 경우 - 기본값 설정
+          final displayName =
+              _user?.displayName ?? _user?.email?.split('@')[0] ?? 'User';
+          print('📄 Firestore 문서 없음 - 기본값 설정: $displayName');
           setState(() {
-            _userName = _user?.displayName ?? 'User';
-            _userNickname = _userName;
+            _userName = displayName;
+            _userNickname = displayName;
           });
         }
       } catch (e) {
         print("Error loading user data: $e");
+        final displayName =
+            _user?.displayName ?? _user?.email?.split('@')[0] ?? 'User';
+        print('❌ 사용자 데이터 로드 오류 - 기본값 설정: $displayName');
         setState(() {
-          _userName = _user?.displayName ?? 'User';
-          _userNickname = _userName;
+          _userName = displayName;
+          _userNickname = displayName != 'N/A' && displayName.isNotEmpty
+              ? displayName
+              : (_user?.email?.split('@')[0] ?? 'User');
         });
       }
 
       // Fetch latest report from Firestore
+      await _loadLatestReport();
+    }
+  }
+
+  Future<void> _loadLatestReport() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
       try {
+        print('🏠 Home: Loading latest report for user: ${user.uid}');
         final readingsQuery = await FirebaseFirestore.instance
             .collection('users')
-            .doc(_user!.uid)
+            .doc(user.uid)
             .collection('readings')
             .orderBy('timestamp', descending: true)
             .limit(1)
             .get();
 
+        print('🏠 Home: Found ${readingsQuery.docs.length} readings');
         if (readingsQuery.docs.isNotEmpty) {
           final latestReadingData = readingsQuery.docs.first.data();
-          if (latestReadingData.containsKey('report') &&
-              latestReadingData.containsKey('userInput')) {
-            _latestReport = NarrativeReport.fromJson(
-              latestReadingData['report'] as Map<String, dynamic>,
-            );
-            if (_latestReport != null) {
-              _currentEidosImageUrls =
-                  _eidosCardUrls[_latestReport!.eidosSummary.title] ?? [];
+          if (latestReadingData.containsKey('report')) {
+            dynamic reportData = latestReadingData['report'];
+
+            // Defensive coding: handle case where data might be a JSON string
+            if (reportData is String) {
+              try {
+                reportData = jsonDecode(reportData);
+              } catch (e) {
+                print('Error decoding report string: $e');
+                _latestReport = null;
+              }
+            }
+
+            if (reportData is Map<String, dynamic>) {
+              _latestReport = NarrativeReport.fromJson(reportData);
             }
           }
         }
       } catch (e) {
         print("Error loading latest report: $e");
+        _latestReport = null;
       }
+    }
+    if (mounted) {
+      setState(() {});
     }
   }
 
@@ -222,30 +277,30 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.transparent,
-      body: CustomScrollView(
-        controller: _scrollController,
-        slivers: [
-          SliverAppBar(
-            backgroundColor: Colors.transparent,
-            title: Image.asset(
-              'assets/images/logo.png',
-              height: 32,
-              fit: BoxFit.contain,
+      body: ScrollConfiguration(
+        behavior: const _NoScrollbarBehavior(),
+        child: CustomScrollView(
+          controller: _scrollController,
+          slivers: [
+            SliverAppBar(
+              backgroundColor: Colors.transparent,
+              title: Image.asset(
+                'assets/images/logo.png',
+                height: 32,
+                fit: BoxFit.contain,
+              ),
+              centerTitle: true,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              floating: false,
+              snap: false,
+              pinned: false,
+              expandedHeight: 100,
+              automaticallyImplyLeading: false,
             ),
-            centerTitle: true,
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            floating: false,
-            snap: false,
-            pinned: false,
-            expandedHeight: 100,
-            automaticallyImplyLeading: false,
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: ScrollConfiguration(
-                behavior: const NoScrollbarBehavior(),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: _isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : _latestReport == null
@@ -262,9 +317,18 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                                   .fadeIn(),
                               const SizedBox(height: 16),
                               SummaryCard(
-                                latestReport: _latestReport,
-                                ganzhiDate: _ganzhiDate,
-                                userNickname: _userNickname,
+                                title:
+                                    _latestReport?.eidosSummary.summaryTitle ??
+                                        "Eidos Summary",
+                                description:
+                                    _latestReport?.eidosSummary.eidosType ??
+                                        "Tap to see details",
+                                imageUrl: '',
+                                onTap: () {
+                                  if (_latestReport != null) {
+                                    widget.onNavigateToReport(_latestReport!);
+                                  }
+                                },
                               )
                                   .animate()
                                   .slideX(
@@ -287,8 +351,8 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                           ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -560,8 +624,8 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
   }
 }
 
-class NoScrollbarBehavior extends ScrollBehavior {
-  const NoScrollbarBehavior();
+class _NoScrollbarBehavior extends ScrollBehavior {
+  const _NoScrollbarBehavior();
   @override
   Widget buildScrollbar(
       BuildContext context, Widget child, ScrollableDetails details) {

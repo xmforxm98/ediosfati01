@@ -15,9 +15,9 @@ class InfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C1C1E), // From FortuneCard style
+        color: const Color(0xFF1C1C1E),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white.withOpacity(0.1)),
         boxShadow: [
@@ -30,14 +30,65 @@ class InfoCard extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final bool hasFiniteHeight = constraints.maxHeight.isFinite;
-
-            final textContent = Padding(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (imageUrl != null && imageUrl!.isNotEmpty)
+              Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  Image.network(
+                    imageUrl!,
+                    height: 200,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      height: 200,
+                      color: Colors.grey[850],
+                      child: Center(
+                        child: Icon(
+                          Icons.broken_image_outlined,
+                          color: Colors.white.withOpacity(0.5),
+                          size: 40,
+                        ),
+                      ),
+                    ),
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return SizedBox(
+                        height: 200,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                                : null,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  Container(
+                    height: 200,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.transparent,
+                          const Color(0xFF1C1C1E).withOpacity(0.8),
+                          const Color(0xFF1C1C1E),
+                        ],
+                        stops: const [0.4, 0.8, 1.0],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -52,80 +103,15 @@ class InfoCard extends StatelessWidget {
                   Text(
                     description,
                     style: TextStyle(
-                      color: Colors.white.withAlpha(136),
-                      fontSize: 13,
+                      color: Colors.white.withAlpha(200),
+                      fontSize: 14,
                       height: 1.5,
                     ),
                   ),
                 ],
               ),
-            );
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (imageUrl != null)
-                  Stack(
-                    children: [
-                      Image.network(
-                        imageUrl!,
-                        height: 180,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const SizedBox(
-                                height: 180,
-                                child: Center(
-                                    child: Icon(Icons.error_outline,
-                                        color: Colors.white24))),
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return const SizedBox(
-                            height: 180,
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        },
-                      ),
-                      Positioned.fill(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.transparent,
-                                const Color(0xFF1C1C1E).withOpacity(0.7),
-                                const Color(0xFF1C1C1E),
-                              ],
-                              stops: const [0.5, 0.9, 1.0],
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                if (hasFiniteHeight)
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Padding(
-                        padding: imageUrl != null
-                            ? const EdgeInsets.fromLTRB(20, 0, 20, 20)
-                            : const EdgeInsets.all(20),
-                        child: textContent,
-                      ),
-                    ),
-                  )
-                else
-                  Padding(
-                    padding: imageUrl != null
-                        ? const EdgeInsets.fromLTRB(20, 0, 20, 20)
-                        : const EdgeInsets.all(20),
-                    child: textContent,
-                  ),
-              ],
-            );
-          },
+            ),
+          ],
         ),
       ),
     );

@@ -57,7 +57,6 @@ dependencies:
   # AUTH
   google_sign_in: ^6.2.1
   flutter_web_auth_2: ^2.1.2
-  flutter_dotenv: ^5.1.0
   
   # UTILITIES
   image_picker: ^1.0.7

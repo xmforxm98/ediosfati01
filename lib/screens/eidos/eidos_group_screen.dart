@@ -1,10 +1,16 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:innerfive/services/eidos_group_service.dart';
+import 'package:innerfive/services/api_service.dart';
+import 'package:innerfive/models/analysis_report.dart';
 import 'package:innerfive/widgets/eidos/info_card.dart';
 import 'package:innerfive/widgets/eidos/eidos_type_card.dart';
 import 'package:innerfive/screens/report/detailed_report_screen.dart';
+import 'package:innerfive/screens/report/slide_detailed_report_screen.dart';
 import 'package:innerfive/widgets/eidos/unique_eidos_type_card.dart';
+import 'package:innerfive/screens/eidos_analysis_screen.dart';
 
 class EidosGroupScreen extends StatefulWidget {
   const EidosGroupScreen({super.key});
@@ -21,6 +27,11 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
   PageController? pageController;
   int selectedCardIndex = 0;
   List<Map<String, dynamic>> cardDataList = [];
+
+  // Firebase 인스턴스들
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final ApiService _apiService = ApiService();
 
   final Map<String, IconData> cardIcons = {
     'Core Identity': Icons.person_search,
@@ -67,7 +78,7 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
     cardDataList = [
       {
         'title': 'Core Identity',
-        'description': summary.summaryText,
+        'description': summary.currentEnergyText,
         'imageUrl': cardImageUrls['Core Identity'],
       },
       {
@@ -274,6 +285,7 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
                       ),
                     ),
                   ),
+                  // Header section with padding
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -294,17 +306,65 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
                                 ),
                               ),
                               GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          DetailedReportScreen(
-                                        detailedReport:
-                                            eidosData.detailedReport,
+                                onTap: () async {
+                                  // 카드를 눌러도 슬라이드 상세 리포트로 이동
+                                  try {
+                                    // 기존에 저장된 상세 분석 데이터 확인
+                                    final userAnalysisQuery = await _firestore
+                                        .collection('users')
+                                        .doc(_auth.currentUser?.uid)
+                                        .collection('readings')
+                                        .orderBy('timestamp', descending: true)
+                                        .limit(1)
+                                        .get();
+
+                                    if (userAnalysisQuery.docs.isNotEmpty) {
+                                      final latestReading =
+                                          userAnalysisQuery.docs.first;
+                                      final readingData = latestReading.data();
+
+                                      // 리포트 데이터가 있는지 확인
+                                      if (readingData.containsKey('report') &&
+                                          readingData['report'] != null) {
+                                        final reportData = readingData['report']
+                                            as Map<String, dynamic>;
+
+                                        // 그룹 분석 데이터만으로 간단한 NarrativeReport 생성
+                                        final simplifiedReport =
+                                            _createSimplifiedNarrativeReport(
+                                                reportData);
+
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                SlideDetailedReportScreen(
+                                              report: simplifiedReport,
+                                            ),
+                                          ),
+                                        );
+                                        return;
+                                      }
+                                    }
+
+                                    // 상세 데이터가 없으면 안내 메시지
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                            'Please generate a detailed analysis from the home screen first.'),
+                                        backgroundColor: Colors.orange,
                                       ),
-                                    ),
-                                  );
+                                    );
+                                  } catch (e) {
+                                    print('Error loading detailed report: $e');
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            'Error loading detailed report: $e'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
                                 },
                                 child: ClipRRect(
                                   borderRadius:
@@ -348,21 +408,7 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
                             ],
                           ),
                           const SizedBox(height: 16),
-                          UniqueEidosTypeCard(
-                            imageUrl: eidosData.summary.cardImageUrl,
-                            eidosType: eidosData.summary.eidosType,
-                            description: eidosData.summary.summaryText,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => DetailedReportScreen(
-                                    detailedReport: eidosData.detailedReport,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
+                          _buildUniqueEidosTypeCard(eidosData),
                           const SizedBox(height: 48), // 카드와 하단 네비게이션 바 사이의 간격
                         ],
                       ),
@@ -381,12 +427,109 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
                         ),
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
           ],
         );
+      },
+    );
+  }
+
+  Widget _buildUniqueEidosTypeCard(EidosGroupData eidosData) {
+    final summary = eidosData.summary;
+    final cardImageUrl = eidosData.cardImageUrls[summary.eidosType] ?? '';
+
+    // 백엔드에서 상세한 설명 가져오기 (폴백 대신 실제 데이터 사용)
+    String description = "Your unique essence is being revealed...";
+    List<String> keywords = [];
+
+    // 1. 개인화된 설명 우선 사용
+    if (summary.personalizedExplanation.isNotEmpty &&
+        summary.personalizedExplanation != 'N/A') {
+      description = summary.personalizedExplanation;
+    }
+    // 2. 분류 이유 사용
+    else if (summary.classificationReason.isNotEmpty &&
+        summary.classificationReason != 'N/A') {
+      description = summary.classificationReason;
+    }
+    // 3. 핵심 정체성 설명 사용
+    else if (summary.currentEnergyText.isNotEmpty &&
+        summary.currentEnergyText != 'N/A') {
+      description = summary.currentEnergyText;
+    }
+    // 4. 요약 텍스트 사용
+    else if (summary.summaryText.isNotEmpty && summary.summaryText != 'N/A') {
+      description = summary.summaryText;
+    }
+
+    // 백엔드에서 실제 키워드 가져오기
+    if (summary.strengths.isNotEmpty) {
+      keywords = summary.strengths.take(3).toList();
+    } else if (summary.groupTraits.isNotEmpty) {
+      keywords = summary.groupTraits.take(3).toList();
+    }
+
+    return UniqueEidosTypeCard(
+      title: summary.eidosType ?? summary.summaryTitle,
+      imageUrl: cardImageUrl,
+      description: description,
+      keywords: keywords,
+      onTap: () async {
+        // 기존에 저장된 상세 분석 데이터 확인
+        try {
+          final userAnalysisQuery = await _firestore
+              .collection('users')
+              .doc(_auth.currentUser?.uid)
+              .collection('readings')
+              .orderBy('timestamp', descending: true)
+              .limit(1)
+              .get();
+
+          if (userAnalysisQuery.docs.isNotEmpty) {
+            final latestReading = userAnalysisQuery.docs.first;
+            final readingData = latestReading.data();
+
+            // 리포트 데이터가 있는지 확인
+            if (readingData.containsKey('report') &&
+                readingData['report'] != null) {
+              final reportData = readingData['report'] as Map<String, dynamic>;
+
+              // 그룹 분석 데이터만으로 간단한 NarrativeReport 생성
+              final simplifiedReport =
+                  _createSimplifiedNarrativeReport(reportData);
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SlideDetailedReportScreen(
+                    report: simplifiedReport,
+                  ),
+                ),
+              );
+              return;
+            }
+          }
+
+          // 상세 데이터가 없으면 안내 메시지
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'Please generate a detailed analysis from the home screen first.'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        } catch (e) {
+          print('Error loading detailed report: $e');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error loading detailed report: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       },
     );
   }
@@ -432,6 +575,103 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
           }),
         ),
       ),
+    );
+  }
+
+  /// 그룹 분석 데이터로 간단한 NarrativeReport 생성
+  NarrativeReport _createSimplifiedNarrativeReport(
+      Map<String, dynamic> reportData) {
+    // 그룹 분석 데이터에서 필요한 정보 추출
+    final eidosSummary =
+        reportData['eidos_summary'] as Map<String, dynamic>? ?? {};
+    final classificationReasoning =
+        reportData['classification_reasoning'] as Map<String, dynamic>? ?? {};
+    final coreIdentitySection =
+        reportData['core_identity_section'] as Map<String, dynamic>? ?? {};
+    final strengthsSection =
+        reportData['strengths_section'] as Map<String, dynamic>? ?? {};
+    final growthAreasSection =
+        reportData['growth_areas_section'] as Map<String, dynamic>? ?? {};
+    final lifeGuidanceSection =
+        reportData['life_guidance_section'] as Map<String, dynamic>? ?? {};
+    final traitsSection =
+        reportData['traits_section'] as Map<String, dynamic>? ?? {};
+
+    return NarrativeReport(
+      eidosSummary: EidosSummary(
+        title: eidosSummary['title'] ?? 'Eidos Summary',
+        summaryTitle: eidosSummary['group_name'] ?? 'Your Eidos Type',
+        summaryText: eidosSummary['description'] ?? 'N/A',
+        currentEnergyTitle: 'Current Energy',
+        currentEnergyText: coreIdentitySection['text'] ?? 'N/A',
+        eidosType: eidosSummary['eidos_type'],
+        personalizedExplanation: eidosSummary['description'],
+        groupTraits: eidosSummary['key_traits'] is List
+            ? (eidosSummary['key_traits'] as List)
+                .map((e) => e.toString())
+                .toList()
+            : null,
+        strengths: [strengthsSection['points']?.toString() ?? 'N/A'],
+        growthAreas: [growthAreasSection['points']?.toString() ?? 'N/A'],
+        lifeGuidance: lifeGuidanceSection['text'],
+        classificationReason: classificationReasoning['text'],
+        groupId: reportData['eidos_group_id'],
+      ),
+      innateEidos: InnateEidos(
+        title: 'Innate Nature',
+        coreEnergyTitle: 'Core Energy',
+        coreEnergyText: coreIdentitySection['text'] ?? 'N/A',
+        talentTitle: 'Natural Talents',
+        talentText: strengthsSection['points']?.toString() ?? 'N/A',
+        desireTitle: 'Inner Desires',
+        desireText:
+            'Based on your cosmic blueprint, your desires align with your eidos type.',
+      ),
+      journey: Journey(
+        title: 'Life Journey',
+        daeunTitle: 'Life Path',
+        daeunText: classificationReasoning['text'] ?? 'N/A',
+        currentYearTitle: 'Current Phase',
+        currentYearText:
+            'You are in a phase of understanding your true nature and potential.',
+      ),
+      tarotInsight: TarotInsight(
+        title: 'Tarot Insight',
+        cardTitle: 'Your Current Energy Card',
+        cardMeaning: coreIdentitySection['text'] ?? 'N/A',
+        cardMessageTitle: 'Message for You',
+        cardMessageText: lifeGuidanceSection['text'] ?? 'N/A',
+      ),
+      ryusWisdom: RyusWisdom(
+        title: 'Ryu\'s Wisdom',
+        message: lifeGuidanceSection['text'] ??
+            'Trust your unique essence and let it guide your path forward.',
+      ),
+      personalityProfile: PersonalityProfile(
+        title: 'Personality Profile',
+        coreTraits: strengthsSection['points']?.toString() ?? 'N/A',
+        likes: 'Aligned with your eidos type characteristics',
+        dislikes: 'Things that contradict your natural essence',
+        relationshipStyle: 'Based on your core eidos nature',
+        shadow: growthAreasSection['points']?.toString() ?? 'N/A',
+      ),
+      relationshipInsight: RelationshipInsight(
+        title: 'Relationship Insight',
+        loveStyle: 'Your love style reflects your eidos essence',
+        idealPartner: 'Someone who appreciates your unique nature',
+        relationshipAdvice: 'Be authentic to your true self in relationships',
+      ),
+      careerProfile: CareerProfile(
+        title: 'Career Profile',
+        aptitude: strengthsSection['points']?.toString() ?? 'N/A',
+        workStyle: 'Aligned with your natural eidos characteristics',
+        successStrategy:
+            lifeGuidanceSection['text'] ?? 'Follow your authentic path',
+      ),
+      rawDataForDev: reportData,
+      fiveElementsStrength: {},
+      nameOhaengEnglish: {},
+      eidosType: eidosSummary['eidos_type'],
     );
   }
 }

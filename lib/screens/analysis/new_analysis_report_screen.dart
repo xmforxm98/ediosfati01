@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:innerfive/models/analysis_report.dart';
 import 'package:innerfive/screens/eidos_analysis_screen.dart';
-import 'package:innerfive/screens/eidos_card_screen.dart';
+
 import 'package:innerfive/models/user_data.dart';
 import 'package:innerfive/widgets/custom_button.dart';
 import 'package:innerfive/services/improved_eidos_extractor.dart';
@@ -38,8 +38,6 @@ class NewAnalysisReportScreen extends StatelessWidget {
           children: [
             _buildEidosGroupSection(context),
             const SizedBox(height: 24),
-            _buildEidosCardSection(context),
-            const SizedBox(height: 24),
             _buildFiveElementsBarChart(report.fiveElementsStrength),
             const SizedBox(height: 24),
             _buildEidosSummary(context, report.eidosSummary),
@@ -59,132 +57,6 @@ class NewAnalysisReportScreen extends StatelessWidget {
             _buildCareerProfile(context, report.careerProfile),
             const SizedBox(height: 32),
             _buildEidosAnalysisButton(context),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEidosCardSection(BuildContext context) {
-    // Get Eidos type from report
-    String? eidosType = report.eidosType ?? report.eidosSummary.eidosType;
-
-    // Debug logs removed - feature working correctly
-
-    // If no eidos type found, try to extract from analysis data using EidosExtractor
-    if (eidosType == null && analysisData != null) {
-      eidosType = ImprovedEidosExtractor.extractEidosType(analysisData!);
-    }
-
-    // If still no eidos type, provide a fallback
-    if (eidosType == null || eidosType.isEmpty) {
-      eidosType =
-          'The Inspired Verdant Architect of Green Mercenary'; // Default fallback
-      print('⚠️ Using fallback Eidos Type: $eidosType');
-    } else {
-      print('✅ Using Eidos Type: $eidosType');
-    }
-
-    // Ensure we have a non-null eidosType
-    final String finalEidosType = eidosType;
-
-    return Card(
-      color: Colors.grey[900],
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.auto_awesome, color: Colors.amber, size: 24),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Your Eidos Card',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'Discover your mystical Eidos card based on your unique energy signature.',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.amber.withAlpha(64),
-                    Colors.orange.withAlpha(32),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.amber.withAlpha(128),
-                  width: 1,
-                ),
-              ),
-              child: Column(
-                children: [
-                  const Icon(Icons.style, color: Colors.amber, size: 32),
-                  const SizedBox(height: 8),
-                  Text(
-                    finalEidosType.split(' of ').last,
-                    style: const TextStyle(
-                      color: Colors.amber,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Tap to reveal your card',
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => EidosCardScreen(
-                        eidosType: finalEidosType,
-                        analysisData: analysisData ?? {},
-                      ),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.auto_awesome),
-                label: const Text('Reveal My Eidos Card'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amber.withAlpha(51),
-                  foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),

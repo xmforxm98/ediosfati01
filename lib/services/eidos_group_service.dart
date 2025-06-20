@@ -1,9 +1,11 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:innerfive/models/detailed_report.dart';
 import 'package:innerfive/models/eidos_summary.dart';
 import 'package:innerfive/services/api_service.dart';
 import 'package:innerfive/services/auth_service.dart';
+import '../constants/eidos_card_mappings.dart';
 
 import 'image_service.dart';
 
@@ -14,6 +16,9 @@ class EidosGroupData {
   final Map<String, String?> cardImageUrls;
   final List<String> eidosTypesInGroup;
   final DetailedReport detailedReport;
+  final Map<String, dynamic> originalAnalysisData;
+  final String? cardDescription;
+  final List<String>? cardKeywords;
 
   EidosGroupData({
     required this.summary,
@@ -21,6 +26,9 @@ class EidosGroupData {
     required this.cardImageUrls,
     required this.eidosTypesInGroup,
     required this.detailedReport,
+    required this.originalAnalysisData,
+    this.cardDescription,
+    this.cardKeywords,
   });
 }
 
@@ -202,56 +210,201 @@ class EidosGroupService {
     ],
   };
 
-  // 그룹별 한국어 표시 이름
+  // Group English display names
   static const Map<String, String> _groupDisplayNames = {
-    'abyss_explorer': '심연 탐험가',
-    'compassionate_healer': '자비로운 치유자',
-    'creative_affluent': '창조적 풍요자',
-    'deep-rooted_nurturer': '깊이 뿌리내린 양육자',
-    'destiny_integrator': '운명 통합자',
-    'flexible_strategist': '유연한 전략가',
-    'free_innovator': '자유로운 혁신가',
-    'golden_pioneer': '황금 개척자',
-    'great_manifestor': '위대한 현현자',
-    'green_mercenary': '녹색 용병',
-    'honorable_strategist': '명예로운 전략가',
-    'indomitable_explorer': '불굴의 탐험가',
-    'inner_alchemist': '내면 연금술사',
-    'radiant_creator': '빛나는 창조자',
-    'relationship_artisan': '관계 장인',
-    'resolute_designer': '확고한 설계자',
-    'spiritual_enlightener': '영적 깨달음자',
-    'strong-willed_lighthouse': '의지가 강한 등대',
-    'wise_guide': '현명한 안내자',
-    'wise_ruler': '현명한 통치자',
+    'abyss_explorer': 'Abyss Explorer',
+    'compassionate_healer': 'Compassionate Healer',
+    'creative_affluent': 'Creative Affluent',
+    'deep-rooted_nurturer': 'Deep-rooted Nurturer',
+    'destiny_integrator': 'Destiny Integrator',
+    'flexible_strategist': 'Flexible Strategist',
+    'free_innovator': 'Free Innovator',
+    'golden_pioneer': 'Golden Pioneer',
+    'great_manifestor': 'Great Manifestor',
+    'green_mercenary': 'Green Mercenary',
+    'honorable_strategist': 'Honorable Strategist',
+    'indomitable_explorer': 'Indomitable Explorer',
+    'inner_alchemist': 'Inner Alchemist',
+    'radiant_creator': 'Radiant Creator',
+    'relationship_artisan': 'Relationship Artisan',
+    'resolute_designer': 'Resolute Designer',
+    'spiritual_enlightener': 'Spiritual Enlightener',
+    'strong-willed_lighthouse': 'Strong-willed Lighthouse',
+    'wise_guide': 'Wise Guide',
+    'wise_ruler': 'Wise Ruler',
   };
 
-  // 그룹별 설명
+  // Group descriptions in English
   static const Map<String, String> _groupDescriptions = {
-    'abyss_explorer': '깊은 내면의 세계를 탐험하며 숨겨진 진실을 찾아내는 존재',
-    'compassionate_healer': '타인의 상처를 치유하고 따뜻한 위로를 전하는 존재',
-    'creative_affluent': '창조적 에너지로 풍요로운 삶을 만들어가는 존재',
-    'deep-rooted_nurturer': '깊은 뿌리로 다른 이들을 보살피고 성장시키는 존재',
-    'destiny_integrator': '운명의 흐름을 통합하여 조화로운 길을 만드는 존재',
-    'flexible_strategist': '유연한 사고로 최적의 전략을 세우는 존재',
-    'free_innovator': '자유로운 영혼으로 혁신적인 변화를 이끄는 존재',
-    'golden_pioneer': '황금빛 지혜로 새로운 길을 개척하는 존재',
-    'great_manifestor': '위대한 비전을 현실로 구현해내는 존재',
-    'green_mercenary': '자연과 조화하며 새로운 길을 개척하는 존재',
-    'honorable_strategist': '명예로운 마음으로 전략적 사고를 펼치는 존재',
-    'indomitable_explorer': '불굴의 의지로 미지의 영역을 탐험하는 존재',
-    'inner_alchemist': '내면의 변화를 통해 진정한 가치를 창조하는 존재',
-    'radiant_creator': '빛나는 영감으로 아름다운 창조물을 만드는 존재',
-    'relationship_artisan': '인간관계의 예술가로 조화로운 연결을 만드는 존재',
-    'resolute_designer': '확고한 의지로 미래를 설계하고 구현하는 존재',
-    'spiritual_enlightener': '영적 깨달음을 통해 다른 이들을 인도하는 존재',
-    'strong-willed_lighthouse': '강한 의지로 어둠 속에서 길을 밝히는 존재',
-    'wise_guide': '현명한 지혜로 다른 이들의 길을 안내하는 존재',
-    'wise_ruler': '현명한 통치력으로 조화로운 질서를 만드는 존재',
+    'abyss_explorer':
+        'Beings who explore the deep inner world and discover hidden truths',
+    'compassionate_healer':
+        'Beings who heal others\' wounds and offer warm comfort',
+    'creative_affluent':
+        'Beings who create abundant lives through creative energy',
+    'deep-rooted_nurturer':
+        'Beings who care for and nurture others with deep roots',
+    'destiny_integrator':
+        'Beings who integrate the flow of destiny to create harmonious paths',
+    'flexible_strategist':
+        'Beings who establish optimal strategies through flexible thinking',
+    'free_innovator': 'Beings who lead innovative change with free spirits',
+    'golden_pioneer': 'Beings who pioneer new paths with golden wisdom',
+    'great_manifestor': 'Beings who manifest great visions into reality',
+    'green_mercenary': 'Beings who pioneer new paths in harmony with nature',
+    'honorable_strategist':
+        'Beings who deploy strategic thinking with honorable hearts',
+    'indomitable_explorer':
+        'Beings who explore unknown territories with indomitable will',
+    'inner_alchemist':
+        'Beings who create true value through inner transformation',
+    'radiant_creator':
+        'Beings who create beautiful works with radiant inspiration',
+    'relationship_artisan':
+        'Beings who create harmonious connections as relationship artists',
+    'resolute_designer':
+        'Beings who design and implement the future with firm will',
+    'spiritual_enlightener':
+        'Beings who guide others through spiritual enlightenment',
+    'strong-willed_lighthouse':
+        'Beings who illuminate paths in darkness with strong will',
+    'wise_guide': 'Beings who guide others\' paths with wise wisdom',
+    'wise_ruler': 'Beings who create harmonious order with wise governance',
   };
 
   final ApiService _apiService = ApiService();
   final AuthService _authService = AuthService();
+
+  /// Map individual types to their corresponding card types
+  static String _mapIndividualTypeToCardType(String individualType) {
+    // 먼저 EidosCardMappings에서 직접 찾기 (백엔드에서 온 실제 타입 우선)
+    if (EidosCardMappings.cardUrls.containsKey(individualType)) {
+      print("🎯 Direct match found in EidosCardMappings: $individualType");
+      return individualType;
+    }
+
+    // 백엔드에서 올 수 있는 실제 타입들 (API 응답 기준)
+    const Map<String, String> apiResponseToCardMapping = {
+      // 백엔드 API에서 실제로 반환하는 타입들을 올바른 카드로 매핑
+      "The Ambitious Verdant Architect": "The Ambitious Verdant Architect",
+      "The Inspired Verdant Architect":
+          "The Inspired Verdant Architect of Green Mercenary",
+      "The Resilient Verdant Architect":
+          "The Resilient Verdant Architect of Green Mercenary",
+      "The Fiery Artist": "The Fiery Artist of Radiant Creator",
+      "The Gregarious Visionary": "The Gregarious Visionary of Radiant Creator",
+      "The Passionate Seeker": "The Passionate Seeker of Radiant Creator",
+      "The Firm Foundation Manager":
+          "The Firm Foundation Manager of Deep-rooted Nurturer",
+      "The Gentle Healer": "The Gentle Healer of Deep-rooted Nurturer",
+      "The Community Advocate":
+          "The Community Advocate of Deep-rooted Nurturer",
+      "The Principled Administrator":
+          "The Principled Administrator of Resolute Designer",
+      "The Discerning Analyst": "The Discerning Analyst of Resolute Designer",
+      "The Pragmatic Builder": "The Pragmatic Builder of Resolute Designer",
+      "The Solitary Sage": "The Solitary Sage of Abyss Explorer",
+      "The Intuitive Oracle": "The Intuitive Oracle of Abyss Explorer",
+      "The Flowing Philosopher": "The Flowing Philosopher of Abyss Explorer",
+    };
+
+    // API 응답 기준 매핑 확인
+    final apiMappedType = apiResponseToCardMapping[individualType];
+    if (apiMappedType != null &&
+        EidosCardMappings.cardUrls.containsKey(apiMappedType)) {
+      print("🎯 API response mapping: $individualType -> $apiMappedType");
+      return apiMappedType;
+    }
+
+    // 기존 프론트엔드 개별 타입 매핑 (하위 호환성)
+    const Map<String, String> individualToCardMapping = {
+      // Day Master based individual types to their card counterparts
+      "The Unyielding Pine": "The Passionate Seeker of Radiant Creator",
+      "The Radiant Sun": "The Fiery Artist of Radiant Creator",
+      "The Steadfast Mountain":
+          "The Community Advocate of Deep-rooted Nurturer",
+      "The Tempered Sword":
+          "The Guardian of Principles of Honorable Strategist",
+      "The Gentle Rain": "The Flowing Philosopher of Abyss Explorer",
+      "The Adaptable Willow": "The Strategic Adaptor of Flexible Strategist",
+      "The Illuminating Candle": "The Light Bearer of Spiritual Enlightener",
+      "The Nurturing Garden": "The Gentle Healer of Deep-rooted Nurturer",
+      "The Polished Gem": "The Pragmatic Builder of Resolute Designer",
+      "The Boundless Ocean": "The Solitary Sage of Abyss Explorer",
+
+      // Life Path based individual types to their card counterparts
+      "The Independent Innovator": "The Inspiring Pioneer of Free Innovator",
+      "The Intuitive Diplomat": "The True Unifier of Relationship Artisan",
+      "The Creative Communicator":
+          "The Gregarious Visionary of Radiant Creator",
+      "The Pragmatic Builder": "The Pragmatic Builder of Resolute Designer",
+      "The Freedom-Seeking Adventurer":
+          "The Boundless Explorer of Free Innovator",
+      "The Compassionate Guardian":
+          "The Soulful Nurturer of Compassionate Healer",
+      "The Introspective Sage": "The Serene Scholar of Wise Guide",
+      "The Authoritative Powerhouse":
+          "The Authoritative Mentor of Honorable Strategist",
+      "The Humanistic Visionary": "The Global Transformer of Great Manifestor",
+      "The Master Intuitive": "The Intuitive Oracle of Abyss Explorer",
+      "The Master Builder": "The Architect of Spirit of Great Manifestor",
+    };
+
+    // 기존 매핑 확인
+    final mappedType = individualToCardMapping[individualType];
+    if (mappedType != null &&
+        EidosCardMappings.cardUrls.containsKey(mappedType)) {
+      print("🎯 Found legacy mapping: $individualType -> $mappedType");
+      return mappedType;
+    }
+
+    // 부분 매칭 시도 (키워드 기반)
+    final availableTypes = EidosCardMappings.getAllTypes();
+    for (final availableType in availableTypes) {
+      if (_isPartialMatch(individualType, availableType)) {
+        print("🔍 Partial match found: $individualType -> $availableType");
+        return availableType;
+      }
+    }
+
+    print("❌ No mapping found for: $individualType");
+    return individualType;
+  }
+
+  /// 부분 매칭 로직 개선
+  static bool _isPartialMatch(String individualType, String availableType) {
+    // 핵심 키워드들 추출
+    final individualKeywords = _extractKeywords(individualType);
+    final availableKeywords = _extractKeywords(availableType);
+
+    // 최소 2개 이상의 키워드가 일치하면 매칭
+    int matchCount = 0;
+    for (final keyword in individualKeywords) {
+      if (availableKeywords.contains(keyword)) {
+        matchCount++;
+      }
+    }
+
+    return matchCount >= 2;
+  }
+
+  /// 타입명에서 핵심 키워드 추출
+  static List<String> _extractKeywords(String typeName) {
+    final keywords = <String>[];
+    final cleanName = typeName
+        .toLowerCase()
+        .replaceAll('the ', '')
+        .replaceAll(' of ', ' ')
+        .split(' ');
+
+    for (final word in cleanName) {
+      if (word.length > 3 && !['and', 'for', 'with'].contains(word)) {
+        keywords.add(word);
+      }
+    }
+
+    return keywords;
+  }
 
   static const Map<String, String> _cardTitleToImagePrefix = {
     'Core Identity': 'core_identity',
@@ -290,26 +443,338 @@ class EidosGroupService {
 
   Future<EidosGroupData?> getEidosGroupData() async {
     try {
-      // 1. Get user profile
+      // 1. First try to get existing analysis report from Firestore
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        try {
+          print('🔍 Checking for existing analysis for user: ${user.uid}');
+          final readingsQuery = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('readings')
+              .orderBy('timestamp', descending: true)
+              .limit(1)
+              .get();
+
+          print('📄 Found ${readingsQuery.docs.length} readings');
+          if (readingsQuery.docs.isNotEmpty) {
+            final latestReadingData = readingsQuery.docs.first.data();
+            print(
+                '📄 Latest reading data keys: ${latestReadingData.keys.toList()}');
+            if (latestReadingData.containsKey('report') &&
+                latestReadingData['report'] != null) {
+              print('✅ Found existing report, using it for Eidos group data');
+              final reportData =
+                  latestReadingData['report'] as Map<String, dynamic>;
+
+              // Use existing analysis report
+              final analysisReport = reportData;
+              print('Using existing analysis report for Eidos group data');
+
+              // This is a group analysis structure, look for individual type in other ways
+              print('📊 Found group analysis structure');
+              print('📊 Report data keys: ${reportData.keys.toList()}');
+              print('📊 Group name: ${reportData['eidos_group_name']}');
+
+              // Check if personalized_introduction contains individual type info
+              String? individualEidosType;
+              if (reportData['personalized_introduction'] != null) {
+                final intro = reportData['personalized_introduction']
+                    as Map<String, dynamic>;
+                print('📊 Personalized intro: $intro');
+
+                // Extract individual type from opening text using "As a The [Type]" pattern
+                final opening = intro['opening'] as String?;
+                if (opening != null) {
+                  // Look for "As a The [individual type]" pattern
+                  final regex = RegExp(r'As a (The [^,\.]+)');
+                  final match = regex.firstMatch(opening);
+                  if (match != null) {
+                    individualEidosType = match.group(1)?.trim();
+                    print(
+                        '📊 Found individual type in opening: $individualEidosType');
+                  }
+                }
+
+                // Fallback: Check if title contains individual type
+                if (individualEidosType == null) {
+                  final title = intro['title'] as String?;
+                  if (title != null &&
+                      title.startsWith('The ') &&
+                      title != reportData['eidos_group_name']) {
+                    individualEidosType = title;
+                    print(
+                        '📊 Found individual type in intro title: $individualEidosType');
+                  }
+                }
+              }
+
+              // If still no individual type found, check classification_reasoning
+              if (individualEidosType == null &&
+                  reportData['classification_reasoning'] != null) {
+                final reasoning = reportData['classification_reasoning']
+                    as Map<String, dynamic>;
+                print('📊 Classification reasoning: $reasoning');
+              }
+
+              print('📊 Final individual eidos type: $individualEidosType');
+
+              // Modify the analysis report to use individual eidos type
+              final EidosSummary summary;
+              final DetailedReport detailedReport;
+
+              if (individualEidosType != null) {
+                // Create a modified copy for the summary with individual type
+                final modifiedAnalysisReport =
+                    Map<String, dynamic>.from(analysisReport);
+                modifiedAnalysisReport['eidos_type'] = individualEidosType;
+                print('Individual Eidos Type: $individualEidosType');
+
+                // Continue with existing logic using the modified report
+                summary = EidosSummary.fromJson(modifiedAnalysisReport);
+                detailedReport = DetailedReport.fromJson(analysisReport);
+              } else {
+                // Fallback to original if no individual type found
+                summary = EidosSummary.fromJson(analysisReport);
+                detailedReport = DetailedReport.fromJson(analysisReport);
+              }
+
+              // Get Background Image URL based on existing analysis
+              final imageGroupKey =
+                  getImageGroupFromEidosType(summary.summaryTitle);
+              final imagePaths = _eidosImageMapping[imageGroupKey];
+              if (imagePaths == null || imagePaths.isEmpty) {
+                throw Exception(
+                    "Image mapping not found for group: ${summary.summaryTitle}");
+              }
+              final seed = user.uid.hashCode ?? summary.groupId.hashCode;
+              final deterministicRandom = Random(seed);
+              final imagePath =
+                  imagePaths[deterministicRandom.nextInt(imagePaths.length)];
+              final backgroundImageUrl =
+                  await ImageService.getImageUrl(imagePath, isFullPath: true);
+              if (backgroundImageUrl == null) {
+                throw Exception("Could not get image URL for path: $imagePath");
+              }
+
+              // Get Card Image URLs in parallel
+              final cardImageUrls = <String, String?>{};
+              final futures = <Future>[];
+              _cardTitleToImagePrefix.forEach((cardTitle, imagePrefix) {
+                final cardSeed = seed + cardTitle.hashCode;
+                final imageNumber = Random(cardSeed).nextInt(8) + 1; // 1 to 8
+                final cardImagePath =
+                    'inner_compass/$imagePrefix$imageNumber.png';
+                futures.add(
+                  ImageService.getImageUrl(cardImagePath, isFullPath: true)
+                      .then((url) {
+                    cardImageUrls[cardTitle] = url;
+                  }),
+                );
+              });
+              await Future.wait(futures);
+
+              // Get Unique Eidos Type Card Image URL with fallback
+              if (summary.eidosType.isNotEmpty) {
+                String? uniqueCardUrl;
+
+                // First try to find exact match in EidosCardMappings
+                final cardUrls = EidosCardMappings.cardUrls[summary.eidosType];
+                if (cardUrls != null && cardUrls.isNotEmpty) {
+                  // Use deterministic selection based on user ID
+                  final cardIndex =
+                      deterministicRandom.nextInt(cardUrls.length);
+                  uniqueCardUrl = cardUrls[cardIndex];
+                  print(
+                      "✅ Found exact match in EidosCardMappings: $uniqueCardUrl");
+                } else {
+                  // Fallback: Try different mapping variations
+                  print(
+                      "🔍 Trying mapping variations for: ${summary.eidosType}");
+
+                  // Use consistent mapping function instead of hardcoded mapping
+                  String mappedType =
+                      _mapIndividualTypeToCardType(summary.eidosType);
+                  if (mappedType != summary.eidosType) {
+                    print("🔄 Mapped ${summary.eidosType} -> $mappedType");
+                  }
+
+                  final mappedCardUrls = EidosCardMappings.cardUrls[mappedType];
+                  if (mappedCardUrls != null && mappedCardUrls.isNotEmpty) {
+                    final cardIndex =
+                        deterministicRandom.nextInt(mappedCardUrls.length);
+                    uniqueCardUrl = mappedCardUrls[cardIndex];
+                    print("✅ Found mapped match: $uniqueCardUrl");
+                  } else {
+                    // If no specific mapping found, try to get any random card
+                    print("🎲 No mapping found, selecting random card");
+                    final allCardTypes = EidosCardMappings.getAllTypes();
+                    if (allCardTypes.isNotEmpty) {
+                      final randomTypeIndex =
+                          deterministicRandom.nextInt(allCardTypes.length);
+                      final randomType = allCardTypes[randomTypeIndex];
+                      final randomCardUrls =
+                          EidosCardMappings.cardUrls[randomType];
+                      if (randomCardUrls != null && randomCardUrls.isNotEmpty) {
+                        final cardIndex =
+                            deterministicRandom.nextInt(randomCardUrls.length);
+                        uniqueCardUrl = randomCardUrls[cardIndex];
+                        print("✅ Selected random card: $uniqueCardUrl");
+                      }
+                    }
+                    // If no mapping found, use old Firebase method as final fallback
+                    final groupName = summary.summaryTitle.split(':')[0].trim();
+                    final typeName = summary.eidosType;
+                    final fileNameBase = '$typeName of $groupName';
+                    final variation = deterministicRandom.nextInt(4) + 1;
+                    final finalFileName = '${fileNameBase}_$variation.png';
+                    final uniqueCardImagePath = 'eidos_cards/$finalFileName';
+
+                    try {
+                      uniqueCardUrl = await ImageService.getImageUrl(
+                          uniqueCardImagePath,
+                          isFullPath: true);
+                    } catch (e) {
+                      print(
+                          "⚠️ Could not find unique Eidos card '$uniqueCardImagePath'. Error: $e");
+                    }
+                  }
+                }
+
+                if (uniqueCardUrl == null || uniqueCardUrl.isEmpty) {
+                  print("➡️ Using a random 'Inner Compass' card as fallback.");
+                  final availableInnerCompassCards = cardImageUrls.values
+                      .where((url) => url != null && url.isNotEmpty)
+                      .toList();
+                  if (availableInnerCompassCards.isNotEmpty) {
+                    uniqueCardUrl = availableInnerCompassCards[
+                        Random().nextInt(availableInnerCompassCards.length)];
+                    print("✅ Successfully selected fallback card.");
+                  } else {
+                    print("❌ No 'Inner Compass' cards available for fallback.");
+                  }
+                }
+                summary.cardImageUrl = uniqueCardUrl ?? '';
+              }
+
+              // Get Eidos types for the same group
+              final eidosTypesInGroup = getEidosTypesForGroup(imageGroupKey);
+
+              // 백엔드 데이터에서 설명과 키워드 추출 (EidosCardScreen과 동일한 로직)
+              String? cardDescription;
+              List<String>? cardKeywords;
+
+              // 1. 개인화된 설명 추출
+              final personalizedIntro =
+                  analysisReport['personalized_introduction']
+                      as Map<String, dynamic>?;
+              if (personalizedIntro != null) {
+                final opening = personalizedIntro['opening'] as String?;
+                if (opening != null && opening.isNotEmpty) {
+                  cardDescription = opening;
+                }
+              }
+
+              // 2. 코어 아이덴티티 섹션에서 추가 설명 추출 (fallback)
+              if (cardDescription == null || cardDescription.isEmpty) {
+                final coreIdentitySection =
+                    analysisReport['core_identity_section']
+                        as Map<String, dynamic>?;
+                if (coreIdentitySection != null) {
+                  final coreIdentityText =
+                      coreIdentitySection['text'] as String?;
+                  if (coreIdentityText != null && coreIdentityText.isNotEmpty) {
+                    cardDescription = coreIdentityText;
+                  }
+                }
+              }
+
+              // 3. 키워드 추출 (strengths section에서)
+              final strengthsSection =
+                  analysisReport['strengths_section'] as Map<String, dynamic>?;
+              if (strengthsSection != null) {
+                final points = strengthsSection['points'] as List?;
+                if (points != null && points.isNotEmpty) {
+                  cardKeywords =
+                      points.map((point) => point.toString()).toList();
+                  // 키워드를 4개로 제한
+                  if (cardKeywords.length > 4) {
+                    cardKeywords = cardKeywords.take(4).toList();
+                  }
+                }
+              }
+
+              // Return the combined data using existing analysis
+              return EidosGroupData(
+                summary: summary,
+                backgroundImageUrl: backgroundImageUrl,
+                cardImageUrls: cardImageUrls,
+                eidosTypesInGroup: eidosTypesInGroup,
+                detailedReport: detailedReport,
+                originalAnalysisData: analysisReport,
+                cardDescription: cardDescription, // 추출한 설명
+                cardKeywords: cardKeywords, // 추출한 키워드
+              );
+            } else {
+              print('❌ No report found in latest reading data');
+            }
+          } else {
+            print('❌ No readings found for user');
+          }
+        } catch (e) {
+          print("❌ Error loading existing analysis, will create new one: $e");
+        }
+      } else {
+        print('❌ User is null');
+      }
+
+      // 2. If no existing analysis found, get user profile and create new one
+      print('⚠️ No existing analysis found, creating new one...');
+      print('👤 Getting user profile...');
       final userProfile = await _authService.getUserProfile();
       if (userProfile == null) {
         throw Exception("User profile not found.");
       }
+      print(
+          '👤 User profile loaded successfully: ${userProfile.keys.toList()}');
 
       // Convert Timestamps to a JSON-serializable format first
       final serializableUserProfile = _convertTimestamps(userProfile);
 
       // Prepare the request data for the analysis API
+      final birthDate = serializableUserProfile['birthDate'];
+      final birthTime = serializableUserProfile['birthTime'];
+
+      // Parse birth date
+      int? year, month, day;
+      if (birthDate != null && birthDate.toString().isNotEmpty) {
+        final dateParts = birthDate.toString().split('-');
+        if (dateParts.length >= 3) {
+          year = int.tryParse(dateParts[0]);
+          month = int.tryParse(dateParts[1]);
+          day = int.tryParse(dateParts[2]);
+        }
+      }
+
+      // Parse birth time - default to 12:00 if not available
+      int hour = 12;
+      if (birthTime != null &&
+          birthTime.toString().isNotEmpty &&
+          birthTime.toString() != 'null:null') {
+        final timeParts = birthTime.toString().split(':');
+        if (timeParts.isNotEmpty) {
+          hour = int.tryParse(timeParts[0]) ?? 12;
+        }
+      }
+
       final requestData = {
-        'name': serializableUserProfile['displayName'] ??
-            serializableUserProfile['nickname'],
-        'year': int.tryParse(
-            serializableUserProfile['birthDate']?.split('-')[0] ?? ''),
-        'month': int.tryParse(
-            serializableUserProfile['birthDate']?.split('-')[1] ?? ''),
-        'day': int.tryParse(
-            serializableUserProfile['birthDate']?.split('-')[2] ?? ''),
-        'hour': 12, // Default hour
+        'name': serializableUserProfile['nickname'] ??
+            serializableUserProfile['displayName'] ??
+            'User',
+        'year': year,
+        'month': month,
+        'day': day,
+        'hour': hour,
         'gender': serializableUserProfile['gender'],
         'birth_city': serializableUserProfile['city'],
       };
@@ -317,22 +782,23 @@ class EidosGroupService {
       // Remove null values to prevent API errors
       requestData.removeWhere((key, value) => value == null);
 
-      if (!requestData.containsKey('year') ||
-          !requestData.containsKey('month') ||
-          !requestData.containsKey('day')) {
+      print('👤 User profile birth data:');
+      print('   - birthDate: ${serializableUserProfile['birthDate']}');
+      print('   - birthTime: ${serializableUserProfile['birthTime']}');
+      print('   - city: ${serializableUserProfile['city']}');
+      print('   - Parsed year/month/day: $year/$month/$day');
+      print('Request data for analysis: $requestData');
+
+      if (year == null || month == null || day == null) {
         throw Exception(
-            "Missing required birth information to get Eidos group data.");
+            "Missing required birth information to get Eidos group data. Please complete your profile first.");
       }
 
-      // 2. Get analysis report
+      // 3. Get analysis report (fallback if no existing report found)
       final analysisReport = await _apiService.getAnalysisReport(requestData);
-      final eidosSummaryData = analysisReport['eidos_summary'];
 
-      if (eidosSummaryData == null ||
-          eidosSummaryData is! Map<String, dynamic>) {
-        throw Exception("Eidos summary not found in analysis report.");
-      }
-      final summary = EidosSummary.fromJson(eidosSummaryData);
+      // The new API response is the root of the analysis data.
+      final summary = EidosSummary.fromJson(analysisReport);
       final detailedReport = DetailedReport.fromJson(analysisReport);
 
       // 3. Get Background Image URL
@@ -369,21 +835,67 @@ class EidosGroupService {
 
       // 5. Get Unique Eidos Type Card Image URL with fallback
       if (summary.eidosType.isNotEmpty) {
-        final groupName = summary.summaryTitle.split(':')[0].trim();
-        final typeName = summary.eidosType;
-        final fileNameBase = '$typeName of $groupName';
-        final variation = deterministicRandom.nextInt(4) + 1;
-        final finalFileName = '${fileNameBase}_$variation.png';
-        final uniqueCardImagePath = 'eidos_cards/$finalFileName';
-
         String? uniqueCardUrl;
 
-        try {
-          uniqueCardUrl = await ImageService.getImageUrl(uniqueCardImagePath,
-              isFullPath: true);
-        } catch (e) {
-          print(
-              "⚠️ Could not find unique Eidos card '$uniqueCardImagePath'. Error: $e");
+        // First try to find exact match in EidosCardMappings
+        final cardUrls = EidosCardMappings.cardUrls[summary.eidosType];
+        if (cardUrls != null && cardUrls.isNotEmpty) {
+          // Use deterministic selection based on user ID
+          final cardIndex = deterministicRandom.nextInt(cardUrls.length);
+          uniqueCardUrl = cardUrls[cardIndex];
+          print("✅ Found exact match in EidosCardMappings: $uniqueCardUrl");
+        } else {
+          // Fallback: Try different mapping variations
+          print("🔍 Trying mapping variations for: ${summary.eidosType}");
+
+          // Use consistent mapping function instead of hardcoded mapping
+          String mappedType = _mapIndividualTypeToCardType(summary.eidosType);
+          if (mappedType != summary.eidosType) {
+            print("🔄 Mapped ${summary.eidosType} -> $mappedType");
+          }
+
+          final mappedCardUrls = EidosCardMappings.cardUrls[mappedType];
+          if (mappedCardUrls != null && mappedCardUrls.isNotEmpty) {
+            final cardIndex =
+                deterministicRandom.nextInt(mappedCardUrls.length);
+            uniqueCardUrl = mappedCardUrls[cardIndex];
+            print("✅ Found mapped match: $uniqueCardUrl");
+          } else {
+            // If no specific mapping found, try to get any random card
+            print("🎲 No mapping found, selecting random card");
+            final allCardTypes = EidosCardMappings.getAllTypes();
+            if (allCardTypes.isNotEmpty) {
+              final randomTypeIndex =
+                  deterministicRandom.nextInt(allCardTypes.length);
+              final randomType = allCardTypes[randomTypeIndex];
+              final randomCardUrls = EidosCardMappings.cardUrls[randomType];
+              if (randomCardUrls != null && randomCardUrls.isNotEmpty) {
+                final cardIndex =
+                    deterministicRandom.nextInt(randomCardUrls.length);
+                uniqueCardUrl = randomCardUrls[cardIndex];
+                print("✅ Selected random card: $uniqueCardUrl");
+              }
+            }
+
+            // If still no card found, use old Firebase method as final fallback
+            if (uniqueCardUrl == null || uniqueCardUrl.isEmpty) {
+              final groupName = summary.summaryTitle.split(':')[0].trim();
+              final typeName = summary.eidosType;
+              final fileNameBase = '$typeName of $groupName';
+              final variation = deterministicRandom.nextInt(4) + 1;
+              final finalFileName = '${fileNameBase}_$variation.png';
+              final uniqueCardImagePath = 'eidos_cards/$finalFileName';
+
+              try {
+                uniqueCardUrl = await ImageService.getImageUrl(
+                    uniqueCardImagePath,
+                    isFullPath: true);
+              } catch (e) {
+                print(
+                    "⚠️ Could not find unique Eidos card '$uniqueCardImagePath'. Error: $e");
+              }
+            }
+          }
         }
 
         if (uniqueCardUrl == null || uniqueCardUrl.isEmpty) {
@@ -412,6 +924,11 @@ class EidosGroupService {
         cardImageUrls: cardImageUrls,
         eidosTypesInGroup: eidosTypesInGroup,
         detailedReport: detailedReport,
+        originalAnalysisData: analysisReport,
+        cardDescription: analysisReport['personalized_introduction']
+            ?['description'] as String?,
+        cardKeywords: analysisReport['personalized_introduction']?['keywords']
+            as List<String>?,
       );
     } catch (e) {
       print("Error in getEidosGroupData: $e");

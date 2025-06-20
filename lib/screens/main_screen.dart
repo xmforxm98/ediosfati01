@@ -4,6 +4,8 @@ import 'package:innerfive/screens/home/home_dashboard_screen.dart';
 import 'package:innerfive/screens/eidos/eidos_group_screen.dart';
 import 'package:innerfive/screens/taro/taro_screen.dart';
 import 'package:innerfive/screens/profile/my_page_screen.dart';
+import 'package:innerfive/models/analysis_report.dart';
+import 'package:innerfive/screens/report/slide_detailed_report_screen.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
@@ -29,6 +31,15 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  void _navigateToReport(NarrativeReport report) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SlideDetailedReportScreen(report: report),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -46,7 +57,7 @@ class _MainScreenState extends State<MainScreen> {
         body: IndexedStack(
           index: _selectedIndex,
           children: <Widget>[
-            HomeDashboardScreen(onNavigateToReport: () => _onItemTapped(1)),
+            HomeDashboardScreen(onNavigateToReport: _navigateToReport),
             const EidosGroupScreen(),
             const TaroScreen(),
             const MyPageScreen(),

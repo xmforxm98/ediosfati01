@@ -14,65 +14,51 @@ class DetailedReportScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF242424), Color(0xFF121212)],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(detailedReport.eidosSummary.summaryTitle),
+        backgroundColor: Colors.black,
       ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              centerTitle: true,
-              title: Text(
-                'Detailed Report',
-                style: TextStyle(
-                  fontWeight: FontWeight.normal,
-                  color: Colors.white.withOpacity(0.8),
-                  fontSize: 16,
-                ),
-              ),
-              iconTheme: const IconThemeData(color: Colors.white),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              "Personalized Introduction",
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
-            SliverToBoxAdapter(
-              child: InnateEidosSection(
-                innateEidos: detailedReport.innateEidos,
-              ),
+            const SizedBox(height: 8),
+            Text(detailedReport.personalizedIntroduction.opening ?? ''),
+            const SizedBox(height: 16),
+            Text(
+              "Core Identity",
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
-            SliverToBoxAdapter(
-              child: PersonalityProfileSection(
-                personalityProfile: detailedReport.personalityProfile,
-              ),
+            const SizedBox(height: 8),
+            Text(detailedReport.coreIdentitySection.text),
+            const SizedBox(height: 16),
+            Text(
+              "Strengths",
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
-            SliverToBoxAdapter(
-              child: RelationshipInsightSection(
-                relationshipInsight: detailedReport.relationshipInsight,
-              ),
+            const SizedBox(height: 8),
+            ...detailedReport.strengthsSection.points.map((p) => Text('• $p')),
+            const SizedBox(height: 16),
+            Text(
+              "Growth Areas",
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
-            SliverToBoxAdapter(
-              child: CareerProfileSection(
-                careerProfile: detailedReport.careerProfile,
-              ),
+            const SizedBox(height: 8),
+            ...detailedReport.growthAreasSection.points
+                .map((p) => Text('• $p')),
+            const SizedBox(height: 16),
+            Text(
+              "Life Guidance",
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
-            SliverToBoxAdapter(
-              child: JourneySection(
-                journey: detailedReport.journey,
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: TarotInsightSection(
-                tarotInsight: detailedReport.tarotInsight,
-              ),
-            ),
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 100),
-            ),
+            const SizedBox(height: 8),
+            Text(detailedReport.lifeGuidanceSection.text),
           ],
         ),
       ),

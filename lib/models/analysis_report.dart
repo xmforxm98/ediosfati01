@@ -125,21 +125,20 @@ class EidosSummary {
           json['current_energy_title'] ?? json['currentEnergyTitle'] ?? 'N/A',
       currentEnergyText:
           json['current_energy_text'] ?? json['currentEnergyText'] ?? 'N/A',
-      eidosType: json['eidos_type'] ?? json['eidosType'],
+      eidosType: (json['eidos_type'] ?? json['eidosType'])?.toString(),
       // 새로운 Enhanced API 필드들
-      personalizedExplanation: json['personalizedExplanation'],
+      personalizedExplanation: json['personalizedExplanation']?.toString(),
       groupTraits: json['groupTraits'] != null
-          ? List<String>.from(json['groupTraits'])
+          ? _dynamicToList(json['groupTraits'])
           : null,
-      strengths: json['strengths'] != null
-          ? List<String>.from(json['strengths'])
-          : null,
+      strengths:
+          json['strengths'] != null ? _dynamicToList(json['strengths']) : null,
       growthAreas: json['growthAreas'] != null
-          ? List<String>.from(json['growthAreas'])
+          ? _dynamicToList(json['growthAreas'])
           : null,
-      lifeGuidance: json['lifeGuidance'],
-      classificationReason: json['classificationReason'],
-      groupId: json['groupId'],
+      lifeGuidance: json['lifeGuidance']?.toString(),
+      classificationReason: json['classificationReason']?.toString(),
+      groupId: json['groupId']?.toString(),
     );
   }
 }
@@ -165,13 +164,13 @@ class InnateEidos {
 
   factory InnateEidos.fromJson(Map<String, dynamic> json) {
     return InnateEidos(
-      title: json['title'] ?? 'N/A',
-      coreEnergyTitle: json['core_energy_title'] ?? 'N/A',
-      coreEnergyText: json['core_energy_text'] ?? 'N/A',
-      talentTitle: json['talent_title'] ?? 'N/A',
-      talentText: json['talent_text'] ?? 'N/A',
-      desireTitle: json['desire_title'] ?? 'N/A',
-      desireText: json['desire_text'] ?? 'N/A',
+      title: json['title']?.toString() ?? 'N/A',
+      coreEnergyTitle: json['core_energy_title']?.toString() ?? 'N/A',
+      coreEnergyText: json['core_energy_text']?.toString() ?? 'N/A',
+      talentTitle: json['talent_title']?.toString() ?? 'N/A',
+      talentText: json['talent_text']?.toString() ?? 'N/A',
+      desireTitle: json['desire_title']?.toString() ?? 'N/A',
+      desireText: json['desire_text']?.toString() ?? 'N/A',
     );
   }
 }
@@ -193,11 +192,11 @@ class Journey {
 
   factory Journey.fromJson(Map<String, dynamic> json) {
     return Journey(
-      title: json['title'] ?? 'N/A',
-      daeunTitle: json['daeun_title'] ?? 'N/A',
-      daeunText: json['daeun_text'] ?? 'N/A',
-      currentYearTitle: json['current_year_title'] ?? 'N/A',
-      currentYearText: json['current_year_text'] ?? 'N/A',
+      title: json['title']?.toString() ?? 'N/A',
+      daeunTitle: json['daeun_title']?.toString() ?? 'N/A',
+      daeunText: json['daeun_text']?.toString() ?? 'N/A',
+      currentYearTitle: json['current_year_title']?.toString() ?? 'N/A',
+      currentYearText: json['current_year_text']?.toString() ?? 'N/A',
     );
   }
 }
@@ -219,11 +218,11 @@ class TarotInsight {
 
   factory TarotInsight.fromJson(Map<String, dynamic> json) {
     return TarotInsight(
-      title: json['title'] ?? 'N/A',
-      cardTitle: json['card_title'] ?? 'N/A',
-      cardMeaning: json['card_meaning'] ?? 'N/A',
-      cardMessageTitle: json['card_message_title'] ?? 'N/A',
-      cardMessageText: json['card_message_text'] ?? 'N/A',
+      title: json['title']?.toString() ?? 'N/A',
+      cardTitle: json['card_title']?.toString() ?? 'N/A',
+      cardMeaning: json['card_meaning']?.toString() ?? 'N/A',
+      cardMessageTitle: json['card_message_title']?.toString() ?? 'N/A',
+      cardMessageText: json['card_message_text']?.toString() ?? 'N/A',
     );
   }
 }
@@ -236,8 +235,8 @@ class RyusWisdom {
 
   factory RyusWisdom.fromJson(Map<String, dynamic> json) {
     return RyusWisdom(
-      title: json['title'] ?? 'N/A',
-      message: json['message'] ?? 'N/A',
+      title: json['title']?.toString() ?? 'N/A',
+      message: json['message']?.toString() ?? 'N/A',
     );
   }
 }
@@ -260,14 +259,75 @@ class PersonalityProfile {
   });
 
   factory PersonalityProfile.fromJson(Map<String, dynamic> json) {
-    // Assuming fields like 'likes' or 'dislikes' might be lists from the API
+    // Safe parsing for new API structure
+    String coreTraitsText = 'N/A';
+    String likesText = 'N/A';
+    String dislikesText = 'N/A';
+    String relationshipStyleText = 'N/A';
+    String shadowText = 'N/A';
+
+    try {
+      // Handle both old and new API structures
+      final coreTraitsData = json['core_traits'];
+      if (coreTraitsData is Map<String, dynamic>) {
+        coreTraitsText = coreTraitsData['full_text']?.toString() ??
+            coreTraitsData['text']?.toString() ??
+            'N/A';
+      } else if (coreTraitsData != null) {
+        coreTraitsText = coreTraitsData.toString();
+      }
+
+      final likesData = json['likes'];
+      if (likesData is List) {
+        likesText = _dynamicToList(likesData).join(', ');
+      } else if (likesData is Map<String, dynamic>) {
+        likesText = likesData['full_text']?.toString() ??
+            likesData['text']?.toString() ??
+            'N/A';
+      } else if (likesData != null) {
+        likesText = likesData.toString();
+      }
+
+      final dislikesData = json['dislikes'];
+      if (dislikesData is List) {
+        dislikesText = _dynamicToList(dislikesData).join(', ');
+      } else if (dislikesData is Map<String, dynamic>) {
+        dislikesText = dislikesData['full_text']?.toString() ??
+            dislikesData['text']?.toString() ??
+            'N/A';
+      } else if (dislikesData != null) {
+        dislikesText = dislikesData.toString();
+      }
+
+      final relationshipStyleData = json['relationship_style'];
+      if (relationshipStyleData is Map<String, dynamic>) {
+        relationshipStyleText =
+            relationshipStyleData['full_text']?.toString() ??
+                relationshipStyleData['text']?.toString() ??
+                'N/A';
+      } else if (relationshipStyleData != null) {
+        relationshipStyleText = relationshipStyleData.toString();
+      }
+
+      final shadowData = json['shadow'];
+      if (shadowData is Map<String, dynamic>) {
+        shadowText = shadowData['full_text']?.toString() ??
+            shadowData['text']?.toString() ??
+            'N/A';
+      } else if (shadowData != null) {
+        shadowText = shadowData.toString();
+      }
+    } catch (e) {
+      print('Error parsing PersonalityProfile: $e');
+    }
+
     return PersonalityProfile(
-      title: json['title'] ?? 'N/A',
-      coreTraits: json['core_traits'] ?? 'N/A',
-      likes: _dynamicToList(json['likes']).join(', '),
-      dislikes: _dynamicToList(json['dislikes']).join(', '),
-      relationshipStyle: json['relationship_style'] ?? 'N/A',
-      shadow: json['shadow'] ?? 'N/A',
+      title: json['title']?.toString() ?? 'Personality Profile',
+      coreTraits: coreTraitsText,
+      likes: likesText,
+      dislikes: dislikesText,
+      relationshipStyle: relationshipStyleText,
+      shadow: shadowText,
     );
   }
 }
@@ -286,11 +346,49 @@ class RelationshipInsight {
   });
 
   factory RelationshipInsight.fromJson(Map<String, dynamic> json) {
+    // Safely extract text from the new API structure
+    String loveStyleText = 'N/A';
+    String idealPartnerText = 'N/A';
+    String relationshipAdviceText = 'N/A';
+
+    try {
+      // Handle new API structure where each field is an object with full_text
+      final loveStyleData = json['love_style'];
+      if (loveStyleData is Map<String, dynamic>) {
+        loveStyleText = loveStyleData['full_text']?.toString() ??
+            loveStyleData['text']?.toString() ??
+            'N/A';
+      } else if (loveStyleData is String) {
+        loveStyleText = loveStyleData;
+      }
+
+      final idealPartnerData = json['ideal_partner'];
+      if (idealPartnerData is Map<String, dynamic>) {
+        idealPartnerText = idealPartnerData['full_text']?.toString() ??
+            idealPartnerData['text']?.toString() ??
+            'N/A';
+      } else if (idealPartnerData is String) {
+        idealPartnerText = idealPartnerData;
+      }
+
+      final relationshipAdviceData = json['relationship_advice'];
+      if (relationshipAdviceData is Map<String, dynamic>) {
+        relationshipAdviceText =
+            relationshipAdviceData['full_text']?.toString() ??
+                relationshipAdviceData['text']?.toString() ??
+                'N/A';
+      } else if (relationshipAdviceData is String) {
+        relationshipAdviceText = relationshipAdviceData;
+      }
+    } catch (e) {
+      print('Error parsing RelationshipInsight: $e');
+    }
+
     return RelationshipInsight(
-      title: json['title'] ?? 'N/A',
-      loveStyle: json['love_style'] ?? 'N/A',
-      idealPartner: json['ideal_partner'] ?? 'N/A',
-      relationshipAdvice: json['relationship_advice'] ?? 'N/A',
+      title: json['title']?.toString() ?? 'Relationship Insight',
+      loveStyle: loveStyleText,
+      idealPartner: idealPartnerText,
+      relationshipAdvice: relationshipAdviceText,
     );
   }
 }
@@ -309,11 +407,29 @@ class CareerProfile {
   });
 
   factory CareerProfile.fromJson(Map<String, dynamic> json) {
+    // Safe parsing for aptitude field
+    String aptitudeText = 'N/A';
+
+    try {
+      final aptitudeData = json['aptitude'];
+      if (aptitudeData is List) {
+        aptitudeText = _dynamicToList(aptitudeData).join(', ');
+      } else if (aptitudeData is Map<String, dynamic>) {
+        aptitudeText = aptitudeData['full_text']?.toString() ??
+            aptitudeData['text']?.toString() ??
+            'N/A';
+      } else if (aptitudeData != null) {
+        aptitudeText = aptitudeData.toString();
+      }
+    } catch (e) {
+      print('Error parsing CareerProfile aptitude: $e');
+    }
+
     return CareerProfile(
-      title: json['title'] ?? 'N/A',
-      aptitude: _dynamicToList(json['aptitude']).join(', '),
-      workStyle: json['work_style'] ?? 'N/A',
-      successStrategy: json['success_strategy'] ?? 'N/A',
+      title: json['title']?.toString() ?? 'Career Profile',
+      aptitude: aptitudeText,
+      workStyle: json['work_style']?.toString() ?? 'N/A',
+      successStrategy: json['success_strategy']?.toString() ?? 'N/A',
     );
   }
 }

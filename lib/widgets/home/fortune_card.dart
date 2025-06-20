@@ -6,6 +6,7 @@ class FortuneCard extends StatelessWidget {
   final Map<String, dynamic>? fortuneData;
   final String fortuneType;
   final String? backgroundImageUrl;
+  final String? errorMessage;
 
   const FortuneCard({
     super.key,
@@ -13,6 +14,7 @@ class FortuneCard extends StatelessWidget {
     this.fortuneData,
     required this.fortuneType,
     this.backgroundImageUrl,
+    this.errorMessage,
   });
 
   @override
@@ -80,75 +82,98 @@ class FortuneCard extends StatelessWidget {
               if (!isLoading)
                 Padding(
                   padding: const EdgeInsets.all(24.0),
-                  child: fortuneData == null
-                      ? const Center(
-                          child: Text(
-                            'Coming Soon',
-                            style: TextStyle(color: Colors.white70),
-                            textAlign: TextAlign.center,
+                  child: errorMessage != null
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.error_outline,
+                                color: Colors.white.withAlpha(128),
+                                size: 32,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                errorMessage!,
+                                style: TextStyle(
+                                  color: Colors.white.withAlpha(179),
+                                  fontSize: 14,
+                                  height: 1.4,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
                         )
-                      : Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Spacer(flex: 3), // 상단 여백
-                            Row(
+                      : fortuneData == null
+                          ? const Center(
+                              child: Text(
+                                'Coming Soon',
+                                style: TextStyle(color: Colors.white70),
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                          : Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(
-                                  _getFortuneIcon(fortuneType),
-                                  color: Colors.white.withAlpha(150),
-                                  size: 16,
+                                const Spacer(flex: 3), // 상단 여백
+                                Row(
+                                  children: [
+                                    Icon(
+                                      _getFortuneIcon(fortuneType),
+                                      color: Colors.white.withAlpha(150),
+                                      size: 16,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      _getFortuneTitle(fortuneType),
+                                      style: TextStyle(
+                                        color: Colors.white.withAlpha(150),
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 8),
+                                const SizedBox(height: 12),
                                 Text(
-                                  _getFortuneTitle(fortuneType),
+                                  fortuneData!['title'] ?? '',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    height: 1.3,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  fortuneData!['subtitle'] ?? '',
                                   style: TextStyle(
-                                    color: Colors.white.withAlpha(150),
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white.withAlpha(128),
+                                    fontSize: 13,
+                                    height: 1.4,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Container(
+                                  height: 1,
+                                  width: 50,
+                                  color: Colors.white.withAlpha(64),
+                                ),
+                                const SizedBox(height: 16),
+                                Expanded(
+                                  child: Text(
+                                    fortuneData!['message'] as String? ?? '',
+                                    style: TextStyle(
+                                      color: Colors.white.withAlpha(136),
+                                      fontSize: 13,
+                                      height: 1.5,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 12),
-                            Text(
-                              fortuneData!['title'] ?? '',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                height: 1.3,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              fortuneData!['subtitle'] ?? '',
-                              style: TextStyle(
-                                color: Colors.white.withAlpha(128),
-                                fontSize: 13,
-                                height: 1.4,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Container(
-                              height: 1,
-                              width: 50,
-                              color: Colors.white.withAlpha(64),
-                            ),
-                            const SizedBox(height: 16),
-                            Expanded(
-                              child: Text(
-                                fortuneData!['message'] as String? ?? '',
-                                style: TextStyle(
-                                  color: Colors.white.withAlpha(136),
-                                  fontSize: 13,
-                                  height: 1.5,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
                 ),
             ],
           ),

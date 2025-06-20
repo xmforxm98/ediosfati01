@@ -59,7 +59,7 @@ class AuthService extends ChangeNotifier {
   }
 
   // A simpler sign-up for creating an account without the full user data immediately.
-  Future<User?> signUpWithEmailAndPassword(
+  Future<Map<String, dynamic>> signUpWithEmailAndPassword(
     String email,
     String password,
   ) async {
@@ -78,16 +78,50 @@ class AuthService extends ChangeNotifier {
           'createdAt': FieldValue.serverTimestamp(),
           'lastLogin': FieldValue.serverTimestamp(),
         });
+        return {
+          'success': true,
+          'user': user,
+          'message': 'Account created successfully'
+        };
       }
-      return user;
+      return {
+        'success': false,
+        'user': null,
+        'message': 'Unknown error occurred'
+      };
+    } on FirebaseAuthException catch (e) {
+      print("Firebase Auth Sign Up Error: ${e.code} - ${e.message}");
+      String errorMessage;
+      switch (e.code) {
+        case 'weak-password':
+          errorMessage =
+              'The password is too weak. Please use at least 6 characters.';
+          break;
+        case 'email-already-in-use':
+          errorMessage = 'An account already exists with this email address.';
+          break;
+        case 'invalid-email':
+          errorMessage = 'The email address is not valid.';
+          break;
+        case 'operation-not-allowed':
+          errorMessage = 'Email/password accounts are not enabled.';
+          break;
+        default:
+          errorMessage = 'Sign up failed: ${e.message}';
+      }
+      return {'success': false, 'user': null, 'message': errorMessage};
     } catch (e) {
-      print("Simple Sign Up Error: $e");
-      return null;
+      print("General Sign Up Error: $e");
+      return {
+        'success': false,
+        'user': null,
+        'message': 'An unexpected error occurred. Please try again.'
+      };
     }
   }
 
   // Sign In with Email and Password
-  Future<User?> signInWithEmailAndPassword(
+  Future<Map<String, dynamic>> signInWithEmailAndPassword(
     String email,
     String password,
   ) async {
@@ -101,11 +135,48 @@ class AuthService extends ChangeNotifier {
         await _firestore.collection('users').doc(user.uid).set({
           'lastLogin': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
+        return {'success': true, 'user': user, 'message': 'Sign in successful'};
       }
-      return user;
+      return {
+        'success': false,
+        'user': null,
+        'message': 'Unknown error occurred'
+      };
+    } on FirebaseAuthException catch (e) {
+      print("Firebase Auth Sign In Error: ${e.code} - ${e.message}");
+      String errorMessage;
+      switch (e.code) {
+        case 'user-not-found':
+          errorMessage = 'No account found with this email address.';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Incorrect password. Please try again.';
+          break;
+        case 'invalid-email':
+          errorMessage = 'The email address is not valid.';
+          break;
+        case 'user-disabled':
+          errorMessage = 'This account has been disabled.';
+          break;
+        case 'too-many-requests':
+          errorMessage =
+              'Too many failed login attempts. Please try again later.';
+          break;
+        case 'invalid-credential':
+          errorMessage =
+              'Invalid email or password. Please check your credentials.';
+          break;
+        default:
+          errorMessage = 'Sign in failed: ${e.message}';
+      }
+      return {'success': false, 'user': null, 'message': errorMessage};
     } catch (e) {
-      print("Sign In Error: $e");
-      return null;
+      print("General Sign In Error: $e");
+      return {
+        'success': false,
+        'user': null,
+        'message': 'An unexpected error occurred. Please try again.'
+      };
     }
   }
 

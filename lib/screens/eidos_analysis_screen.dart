@@ -39,14 +39,34 @@ class _EidosAnalysisScreenState extends State<EidosAnalysisScreen> {
     });
 
     try {
-      final eidosData = await _apiService.getEidosAnalysis(
-        _inputController.text.trim(),
-        widget.userData.nickname ??
-            '${widget.userData.firstName} ${widget.userData.lastName}',
-      );
+      // 기존 분석 데이터를 사용하거나 새로운 분석 요청
+      final analysisData = widget.analysisData ??
+          await _apiService.getAnalysisReport({
+            'name': widget.userData.nickname ??
+                '${widget.userData.firstName} ${widget.userData.lastName}',
+            'year': int.tryParse(widget.userData.year ?? '') ?? 1990,
+            'month': int.tryParse(widget.userData.month ?? '') ?? 1,
+            'day': int.tryParse(widget.userData.day ?? '') ?? 1,
+            'hour': int.tryParse(widget.userData.hour ?? '') ?? 12,
+            'gender': widget.userData.gender == Gender.male ? 'male' : 'female',
+            'birth_city': widget.userData.city ?? 'Seoul',
+            'user_input': _inputController.text.trim(), // 사용자 입력 추가
+          });
 
       setState(() {
-        _eidosCard = eidosData['eidos_card'];
+        // 에이도스 카드 정보를 분석 데이터에서 추출
+        _eidosCard = {
+          'name': analysisData['eidos_type'] ?? 'Unknown Type',
+          'type_id': analysisData['eidos_summary']?['group_id'] ?? 'N/A',
+          'main_type':
+              analysisData['eidos_summary']?['title'] ?? 'Eidos Analysis',
+          'core_characteristics': analysisData['eidos_summary']
+                  ?['summary_text'] ??
+              'No description available',
+          'symbol_keywords': analysisData['eidos_summary']
+                  ?['current_energy_text'] ??
+              'No keywords available',
+        };
         _isLoading = false;
       });
     } catch (e) {

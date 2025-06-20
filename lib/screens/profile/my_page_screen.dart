@@ -49,7 +49,24 @@ class _MyPageScreenState extends State<MyPageScreen> {
             final reportData = latestReadingData['report'];
             if (reportData is Map<String, dynamic>) {
               final report = NarrativeReport.fromJson(reportData);
+              // 여러 필드에서 유효한 타이틀 찾기
               _eidosTitle = report.eidosSummary.title;
+              if (_eidosTitle == null ||
+                  _eidosTitle == 'N/A' ||
+                  _eidosTitle!.isEmpty) {
+                _eidosTitle = report.eidosSummary.summaryTitle;
+              }
+              if (_eidosTitle == null ||
+                  _eidosTitle == 'N/A' ||
+                  _eidosTitle!.isEmpty) {
+                _eidosTitle = report.eidosType;
+              }
+              if (_eidosTitle == null ||
+                  _eidosTitle == 'N/A' ||
+                  _eidosTitle!.isEmpty) {
+                _eidosTitle = 'The Essence of Your Eidos';
+              }
+              print('📱 My Page - Eidos title: $_eidosTitle');
             }
           }
         }

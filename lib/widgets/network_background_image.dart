@@ -57,8 +57,7 @@ class _NetworkBackgroundImageState extends State<NetworkBackgroundImage> {
     if (isLoading) {
       return Container(
         decoration: const BoxDecoration(color: Colors.grey),
-        child:
-            widget.loadingWidget ??
+        child: widget.loadingWidget ??
             const Center(child: CircularProgressIndicator(color: Colors.white)),
       );
     }
@@ -66,8 +65,7 @@ class _NetworkBackgroundImageState extends State<NetworkBackgroundImage> {
     if (hasError || imageUrl == null) {
       return Container(
         decoration: const BoxDecoration(color: Colors.grey),
-        child:
-            widget.errorWidget ??
+        child: widget.errorWidget ??
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -78,14 +76,14 @@ class _NetworkBackgroundImageState extends State<NetworkBackgroundImage> {
                     size: 48,
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    '이미지를 불러올 수 없습니다',
-                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                  const Text(
+                    'Failed to load image',
+                    style: TextStyle(color: Colors.white, fontSize: 14),
                   ),
                   const SizedBox(height: 8),
                   ElevatedButton(
                     onPressed: _loadImage,
-                    child: const Text('다시 시도'),
+                    child: const Text('Retry'),
                   ),
                 ],
               ),
