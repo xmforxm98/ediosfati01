@@ -149,10 +149,16 @@ class _TaroScreenState extends State<TaroScreen> {
           print('   - Final tarotMessage: $tarotMessage');
           print('🎴🎴🎴 === END YOUR TAROT DEEP DEBUG ===');
 
-          // Your Tarot도 Daily Tarot API 데이터를 사용하도록 수정
-          // 먼저 Daily Tarot API를 호출하여 데이터를 가져옴
+          // Card 1: Your Tarot (분석 리포트의 tarot_insight 사용 - 개인 고정 타로)
+          tarotCards.add({
+            'type': 'Eidos Tarot',
+            'title': actualTarotCard, // 실제 타로 카드명만 사용
+            'subtitle': 'Your Personal Tarot Reading',
+            'message': tarotMessage,
+            'backgroundImageUrl': cardInfo['imageUrl'] ?? '',
+          });
 
-          // Daily Tarot API를 호출하여 두 탭 모두에 사용
+          // Card 2: Today's Tarot (Daily Tarot API 사용 - 날짜별 변화하는 타로)
           try {
             // 분석 리포트에서 필요한 정보 추출
             final userDoc = await FirebaseFirestore.instance
@@ -197,18 +203,7 @@ class _TaroScreenState extends State<TaroScreen> {
               print(
                   '✅ Daily Tarot loaded successfully: ${dailyTarot.cardNameDisplay}');
 
-              // Card 1: Your Tarot (Daily Tarot API 데이터 사용, FortuneCard 스타일)
-              tarotCards.add({
-                'type': 'Eidos Tarot',
-                'title': dailyTarot.cardNameDisplay,
-                'subtitle': 'Your Personal Tarot Reading',
-                'message': dailyTarot.cardMeaning, // 카드 의미 설명 사용
-                'backgroundImageUrl': _getFirebaseImageUrl(
-                    dailyTarot.cardImageUrl, dailyTarot.cardId),
-                'dailyTarot': dailyTarot, // 전체 데이터 저장
-              });
-
-              // Card 2: Today's Tarot (Daily Tarot API 데이터 사용, 상세 스타일)
+              // Today's Tarot 카드 추가
               tarotCards.add({
                 'type': 'Daily Tarot',
                 'title': dailyTarot.cardNameDisplay,
@@ -222,14 +217,6 @@ class _TaroScreenState extends State<TaroScreen> {
           } catch (e) {
             print("Failed to load daily tarot: $e");
             // API 호출 실패 시 에러메시지를 담은 카드를 추가하여 사용자에게 피드백
-            tarotCards.add({
-              'type': 'Eidos Tarot',
-              'title': 'Error',
-              'subtitle': 'Could not load Your Tarot',
-              'message':
-                  'There was an error fetching your tarot reading. Please try again later.\n\nDetails: $e',
-              'backgroundImageUrl': '',
-            });
             tarotCards.add({
               'type': 'Daily Tarot',
               'title': 'Error',
@@ -458,16 +445,6 @@ class _TaroScreenState extends State<TaroScreen> {
   }
 
   Widget _buildEidosTarotCard(Map<String, dynamic> tarot) {
-    // dailyTarot 데이터가 있으면 카드 의미 설명을 포함한 메시지 구성
-    String message = tarot['message'] ?? '';
-
-    if (tarot.containsKey('dailyTarot')) {
-      final dailyTarot = tarot['dailyTarot'] as DailyTarot;
-      if (dailyTarot.cardMeaning.isNotEmpty) {
-        message = dailyTarot.cardMeaning;
-      }
-    }
-
     return FractionallySizedBox(
       widthFactor: 0.9,
       child: FortuneCard(
@@ -475,7 +452,7 @@ class _TaroScreenState extends State<TaroScreen> {
         fortuneData: {
           'title': tarot['title'],
           'subtitle': tarot['subtitle'],
-          'message': message,
+          'message': tarot['message'],
         },
         fortuneType: tarot['type'],
         backgroundImageUrl: tarot['backgroundImageUrl'],
