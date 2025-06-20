@@ -65,6 +65,21 @@ class _TaroScreenState extends State<TaroScreen> {
           final report = NarrativeReport.fromJson(reportData);
 
           // Card 1: Eidos Tarot (from existing analysis)
+          print('🎴🎴🎴 === YOUR TAROT DEEP DEBUG ===');
+
+          // 1. Raw report data 확인
+          print('🎴 Step 1: Raw report data keys: ${reportData.keys.toList()}');
+
+          // 2. tarot_insight 섹션 확인
+          if (reportData.containsKey('tarot_insight')) {
+            final tarotRaw = reportData['tarot_insight'];
+            print('🎴 Step 2: Found tarot_insight section');
+            print('   - Type: ${tarotRaw.runtimeType}');
+            print('   - Raw data: $tarotRaw');
+          } else {
+            print('🎴 Step 2: ❌ NO tarot_insight section found!');
+          }
+
           final tarotInsight = report.tarotInsight;
 
           // 실제 타로 카드 이름만 추출 (에이도스 타입 제거)
@@ -90,9 +105,13 @@ class _TaroScreenState extends State<TaroScreen> {
           String tarotMessage =
               "Your tarot card reveals deep insights about your spiritual journey.";
 
-          print('🎴 Tarot Message Debug:');
-          print('   - cardMessageText: ${tarotInsight.cardMessageText}');
-          print('   - cardMeaning: ${tarotInsight.cardMeaning}');
+          // 3. NarrativeReport.fromJson 파싱 후 확인
+          print('🎴 Step 3: After NarrativeReport.fromJson parsing:');
+          print('   - cardTitle: "${tarotInsight.cardTitle}"');
+          print('   - cardMessageText: "${tarotInsight.cardMessageText}"');
+          print('   - cardMeaning: "${tarotInsight.cardMeaning}"');
+          print('   - cardMessageTitle: "${tarotInsight.cardMessageTitle}"');
+          print('   - title: "${tarotInsight.title}"');
           print('   - actualTarotCard: $actualTarotCard');
 
           // 백엔드 메시지를 우선적으로 사용 (필터링 완화)
@@ -128,6 +147,7 @@ class _TaroScreenState extends State<TaroScreen> {
           }
 
           print('   - Final tarotMessage: $tarotMessage');
+          print('🎴🎴🎴 === END YOUR TAROT DEEP DEBUG ===');
 
           tarotCards.add({
             'type': 'Eidos Tarot',
@@ -935,24 +955,33 @@ class _TaroScreenState extends State<TaroScreen> {
   }
 
   String _getFirebaseImageUrl(String originalUrl, String cardId) {
-    // 백엔드에서 받은 URL이 유효하면 그대로 사용
-    if (originalUrl.isNotEmpty && originalUrl.startsWith('http')) {
-      return originalUrl;
+    print('🎴 _getFirebaseImageUrl called with:');
+    print('   - originalUrl: "$originalUrl"');
+    print('   - cardId: "$cardId"');
+
+    // 백엔드에서 받은 URL이 잘못된 placeholder인지 확인
+    if (originalUrl.isEmpty ||
+        originalUrl.contains('your-cdn.com') ||
+        !originalUrl.startsWith('https://firebasestorage.googleapis.com')) {
+      print('🎴 Invalid URL detected, using TarotService mapping');
+
+      // 카드 ID를 TarotService 매핑에 맞게 변환
+      String mappedCardId = _mapCardIdToTarotService(cardId);
+
+      // TarotService를 통해 Firebase URL 생성
+      try {
+        final cardInfo = TarotService.getCardInfo(mappedCardId);
+        print(
+            '🎴 TarotService mapping: $cardId -> $mappedCardId -> ${cardInfo['imageUrl']}');
+        return cardInfo['imageUrl'] ?? '';
+      } catch (e) {
+        print('❌ Error getting Firebase tarot image URL: $e');
+        return '';
+      }
     }
 
-    // 카드 ID를 TarotService 매핑에 맞게 변환
-    String mappedCardId = _mapCardIdToTarotService(cardId);
-
-    // TarotService를 통해 Firebase URL 생성
-    try {
-      final cardInfo = TarotService.getCardInfo(mappedCardId);
-      print(
-          '🎴 Tarot card mapping: $cardId -> $mappedCardId -> ${cardInfo['imageUrl']}');
-      return cardInfo['imageUrl'] ?? '';
-    } catch (e) {
-      print('Error getting Firebase tarot image URL: $e');
-      return '';
-    }
+    print('🎴 Using original URL: $originalUrl');
+    return originalUrl;
   }
 
   /// 백엔드 카드 ID를 TarotService 매핑에 맞게 변환
