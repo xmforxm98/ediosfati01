@@ -2,6 +2,7 @@ class DailyTarot {
   final String cardId;
   final String cardNameDisplay;
   final String cardImageUrl;
+  final String cardMeaning;
   final DailyTarotMessage message;
   final String userName;
   final String fortuneMessage;
@@ -14,6 +15,7 @@ class DailyTarot {
     required this.cardId,
     required this.cardNameDisplay,
     required this.cardImageUrl,
+    required this.cardMeaning,
     required this.message,
     required this.userName,
     required this.fortuneMessage,
@@ -33,6 +35,7 @@ class DailyTarot {
     String cardId = '';
     String cardNameDisplay = '';
     String cardImageUrl = '';
+    String cardMeaning = '';
     String userName = '';
     String fortuneMessage = '';
     String themeKeyword = '';
@@ -45,6 +48,7 @@ class DailyTarot {
       cardNameDisplay =
           dailyTarotDraw['card_name_display']?.toString() ?? 'Unknown Card';
       cardImageUrl = dailyTarotDraw['card_image_url']?.toString() ?? '';
+      cardMeaning = json['card_meaning']?.toString() ?? '';
       userName = json['user_name']?.toString() ?? 'Seeker';
       fortuneMessage = json['fortune_message']?.toString() ?? '';
       themeKeyword = json['theme_keyword']?.toString() ?? '';
@@ -76,6 +80,7 @@ class DailyTarot {
       cardId: cardId,
       cardNameDisplay: cardNameDisplay,
       cardImageUrl: cardImageUrl,
+      cardMeaning: cardMeaning,
       message: message,
       userName: userName,
       fortuneMessage: fortuneMessage,
@@ -94,6 +99,7 @@ class DailyTarot {
         'card_image_url': cardImageUrl,
         'message': message.toJson(),
       },
+      'card_meaning': cardMeaning,
       'user_name': userName,
       'fortune_message': fortuneMessage,
       'theme_keyword': themeKeyword,
