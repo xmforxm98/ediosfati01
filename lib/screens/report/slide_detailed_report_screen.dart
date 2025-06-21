@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:innerfive/models/analysis_report.dart';
+import 'package:innerfive/utils/text_formatting_utils.dart';
 
 class SlideDetailedReportScreen extends StatefulWidget {
   final NarrativeReport report;
@@ -298,7 +299,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
           ),
           const SizedBox(height: 16),
         ],
-        Text(
+        TextFormattingUtils.buildFormattedText(
           summary.summaryText.isNotEmpty && summary.summaryText != 'N/A'
               ? summary.summaryText
               : "Your unique Eidos essence defines your core spiritual energy and life purpose.",
@@ -334,7 +335,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
                       ),
                     ),
                     Expanded(
-                      child: Text(
+                      child: TextFormattingUtils.buildFormattedText(
                         trait,
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.9),
@@ -375,7 +376,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
           ),
           const SizedBox(height: 16),
         ],
-        Text(
+        TextFormattingUtils.buildFormattedText(
           tarotInsight.cardMessageText.isNotEmpty &&
                   tarotInsight.cardMessageText != 'N/A'
               ? tarotInsight.cardMessageText
@@ -406,7 +407,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          TextFormattingUtils.buildFormattedText(
             careerProfile.aptitude,
             style: const TextStyle(
               color: Colors.white,
@@ -427,7 +428,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          TextFormattingUtils.buildFormattedText(
             careerProfile.workStyle,
             style: const TextStyle(
               color: Colors.white,
@@ -448,7 +449,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          TextFormattingUtils.buildFormattedText(
             careerProfile.successStrategy,
             style: const TextStyle(
               color: Colors.white,
@@ -476,7 +477,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          TextFormattingUtils.buildFormattedText(
             profile.coreTraits,
             style: const TextStyle(
               color: Colors.white,
@@ -496,7 +497,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          TextFormattingUtils.buildFormattedText(
             profile.likes,
             style: const TextStyle(
               color: Colors.white,
@@ -517,7 +518,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          TextFormattingUtils.buildFormattedText(
             profile.relationshipStyle,
             style: const TextStyle(
               color: Colors.white,
@@ -545,7 +546,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          TextFormattingUtils.buildFormattedText(
             insight.loveStyle,
             style: const TextStyle(
               color: Colors.white,
@@ -566,7 +567,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          TextFormattingUtils.buildFormattedText(
             insight.idealPartner,
             style: const TextStyle(
               color: Colors.white,
@@ -587,7 +588,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          TextFormattingUtils.buildFormattedText(
             insight.relationshipAdvice,
             style: const TextStyle(
               color: Colors.white,
@@ -601,7 +602,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
   }
 
   Widget _buildSectionTextContent(String text) {
-    return Text(
+    return TextFormattingUtils.buildFormattedText(
       text,
       style: const TextStyle(
         color: Colors.white,

@@ -75,6 +75,18 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
     final summary = eidosData.summary;
     final cardImageUrls = eidosData.cardImageUrls;
 
+    // 🔍 DEBUG: 카드 데이터 설정 정보 출력
+    print('🎯🎯🎯 === SETUP PAGE DATA DEBUG ===');
+    print('🎯 Setting up card data...');
+    print('🎯 Summary data:');
+    print('   - currentEnergyText length: ${summary.currentEnergyText.length}');
+    print(
+        '   - personalizedExplanation length: ${summary.personalizedExplanation.length}');
+    print('   - groupTraits count: ${summary.groupTraits.length}');
+    print('   - strengths count: ${summary.strengths.length}');
+    print('   - growthAreas count: ${summary.growthAreas.length}');
+    print('   - lifeGuidance length: ${summary.lifeGuidance.length}');
+
     cardDataList = [
       {
         'title': 'Core Identity',
@@ -107,6 +119,16 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
         'imageUrl': cardImageUrls['Life Guidance'],
       },
     ];
+
+    // 🔍 DEBUG: 생성된 카드 데이터 정보 출력
+    print('🎯 Created ${cardDataList.length} cards:');
+    for (int i = 0; i < cardDataList.length; i++) {
+      final card = cardDataList[i];
+      print(
+          '   - Card $i: "${card['title']}" (desc: ${card['description']?.length ?? 0} chars)');
+    }
+    print('🎯🎯🎯 === END SETUP PAGE DATA DEBUG ===');
+
     pageController = PageController();
   }
 
@@ -297,12 +319,30 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
                     ),
                   ),
                   SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 520,
-                      child: Column(
-                        children: [
-                          _buildTabSelector(),
-                          Expanded(
+                    child: Column(
+                      children: [
+                        _buildTabSelector(),
+                        const SizedBox(height: 16),
+                        // 🔧 FIX: 고정 높이를 완전히 제거하고 카드 내용에 맞춰 flexible하게 조정
+                        Builder(builder: (context) {
+                          final screenSize = MediaQuery.of(context).size;
+                          final availableHeight = screenSize.height;
+                          final safeAreaTop =
+                              MediaQuery.of(context).padding.top;
+                          final safeAreaBottom =
+                              MediaQuery.of(context).padding.bottom;
+
+                          // 동적 높이 계산 - 탭 선택기(~60px), 여백(40px), SafeArea 고려
+                          const tabSelectorHeight = 60.0;
+                          const spacing = 40.0; // 16px + 24px
+                          final dynamicPageViewHeight = availableHeight -
+                              safeAreaTop -
+                              safeAreaBottom -
+                              tabSelectorHeight -
+                              spacing;
+
+                          return SizedBox(
+                            height: dynamicPageViewHeight,
                             child: PageView.builder(
                               controller: pageController,
                               itemCount: cardDataList.length,
@@ -310,19 +350,40 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
                                 setState(() {
                                   selectedCardIndex = index;
                                 });
+
+                                // 🔍 DEBUG: 카드 전환 및 마지막 카드 확인
+                                print('🎯🎯🎯 === CARD NAVIGATION DEBUG ===');
+                                print('🎯 Current card index: $index');
+                                print('🎯 Total cards: ${cardDataList.length}');
+                                print(
+                                    '🎯 Is last card: ${index == cardDataList.length - 1}');
+                                print(
+                                    '🎯 PageView height: $dynamicPageViewHeight');
+                                print(
+                                    '🎯🎯🎯 === END CARD NAVIGATION DEBUG ===');
                               },
                               itemBuilder: (context, index) {
                                 final cardData = cardDataList[index];
-                                return InfoCard(
-                                  title: cardData['title'],
-                                  description: cardData['description'],
-                                  imageUrl: cardData['imageUrl'],
+                                final isLastCard =
+                                    index == cardDataList.length - 1;
+
+                                return SingleChildScrollView(
+                                  padding: EdgeInsets.only(
+                                    bottom:
+                                        isLastCard ? 40 : 20, // 마지막 카드에 추가 여백
+                                  ),
+                                  child: InfoCard(
+                                    title: cardData['title'],
+                                    description: cardData['description'],
+                                    imageUrl: cardData['imageUrl'],
+                                  ),
                                 );
                               },
                             ),
-                          ),
-                        ],
-                      ),
+                          );
+                        }),
+                        const SizedBox(height: 24),
+                      ],
                     ),
                   ),
                   // Header section with padding

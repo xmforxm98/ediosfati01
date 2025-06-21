@@ -3,6 +3,7 @@ import 'package:innerfive/models/user_data.dart';
 import 'package:innerfive/widgets/gradient_blurred_background.dart';
 import 'package:innerfive/services/api_service.dart';
 import 'package:innerfive/widgets/custom_button.dart';
+import 'package:innerfive/utils/text_formatting_utils.dart';
 
 class EidosAnalysisScreen extends StatefulWidget {
   final UserData userData;
@@ -149,156 +150,206 @@ class _EidosAnalysisScreenState extends State<EidosAnalysisScreen> {
 
     return Container(
       margin: const EdgeInsets.only(top: 24),
-      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.purple.withAlpha(64),
-            Colors.blue.withAlpha(64),
-            Colors.indigo.withAlpha(64),
-          ],
-        ),
+        color: Colors.grey[900],
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withAlpha(64), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(64),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: Colors.black.withAlpha(20),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 상단 이미지 영역 (고정 높이)
+            Container(
+              height: 200,
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withAlpha(32),
-                  borderRadius: BorderRadius.circular(20),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.purple.withAlpha(128),
+                      Colors.blue.withAlpha(128),
+                      Colors.indigo.withAlpha(128),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                child: Text(
-                  _eidosCard!['type_id'] ?? '',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.auto_awesome,
+                          color: Colors.amber, size: 48),
+                      const SizedBox(height: 12),
+                      Text(
+                        _eidosCard!['name'] ?? 'Unknown Type',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(32),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          _eidosCard!['type_id'] ?? '',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              const Spacer(),
-              const Icon(Icons.auto_awesome, color: Colors.amber, size: 24),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _eidosCard!['name'] ?? 'Unknown Type',
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _eidosCard!['main_type'] ?? '',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.white.withAlpha(128),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white.withAlpha(32),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              _eidosCard!['core_characteristics'] ?? '',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white.withAlpha(192),
-                height: 1.5,
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Row(
-            children: [
-              Icon(Icons.palette, color: Colors.amber, size: 16),
-              SizedBox(width: 8),
-              Text(
-                'Symbols:',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
+
+            // 하단 텍스트 정보 영역 (유연한 높이)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.grey[900],
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _eidosCard!['symbol_keywords'] ?? '',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.white.withAlpha(128),
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.amber.withAlpha(64),
-                  Colors.orange.withAlpha(64),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Row(
-                  children: [
-                    Icon(Icons.auto_stories, color: Colors.amber, size: 16),
-                    SizedBox(width: 8),
-                    Text(
-                      'Your Destiny Message',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _eidosCard!['main_type'] ?? 'Core Identity',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "🌟 Your Eidos Essence",
+                    style: TextStyle(
+                      color: Colors.white.withAlpha(179),
+                      fontSize: 14,
+                      height: 1.4,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormattingUtils.buildFormattedText(
+                    _eidosCard!['core_characteristics'] ?? '',
+                    style: TextStyle(
+                      color: Colors.white.withAlpha(136),
+                      fontSize: 13,
+                      height: 1.5,
+                    ),
+                  ),
+                  if (_eidosCard!['symbol_keywords'] != null &&
+                      _eidosCard!['symbol_keywords']!.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Icon(Icons.palette,
+                            color: Colors.amber.withAlpha(179), size: 16),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Symbols:',
+                          style: TextStyle(
+                            color: Colors.white.withAlpha(179),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormattingUtils.buildFormattedText(
+                      _eidosCard!['symbol_keywords'] ?? '',
                       style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                        fontSize: 13,
+                        color: Colors.white.withAlpha(136),
+                        fontStyle: FontStyle.italic,
+                        height: 1.4,
                       ),
                     ),
                   ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  _eidosCard!['card_message'] ?? '',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.white,
-                    height: 1.5,
-                  ),
-                ),
-              ],
+                  if (_eidosCard!['card_message'] != null &&
+                      _eidosCard!['card_message']!.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.amber.withAlpha(32),
+                            Colors.orange.withAlpha(32),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                            color: Colors.amber.withAlpha(64), width: 1),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.auto_stories,
+                                  color: Colors.amber.withAlpha(179), size: 16),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Your Destiny Message',
+                                style: TextStyle(
+                                  color: Colors.white.withAlpha(179),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          TextFormattingUtils.buildFormattedText(
+                            _eidosCard!['card_message'] ?? '',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.white.withAlpha(136),
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

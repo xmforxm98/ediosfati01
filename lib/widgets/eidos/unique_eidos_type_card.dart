@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:innerfive/widgets/firebase_image.dart';
+import 'package:innerfive/utils/text_formatting_utils.dart';
 
 class UniqueEidosTypeCard extends StatelessWidget {
   final String title;
@@ -172,26 +173,41 @@ class UniqueEidosTypeCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
                         Expanded(
-                          child: Builder(
-                            builder: (context) {
-                              final displayText = description ??
-                                  'Discover your unique cosmic essence and personal characteristics.';
-                              print(
-                                  '🎴 Rendering description: "${displayText.substring(0, displayText.length > 50 ? 50 : displayText.length)}..."');
-                              return Text(
-                                displayText,
-                                style: TextStyle(
-                                  color: Colors.white.withAlpha(136),
-                                  fontSize: 13,
-                                  height: 1.5,
-                                ),
-                              );
-                            },
+                          child: SingleChildScrollView(
+                            child: Builder(
+                              builder: (context) {
+                                final displayText = description ??
+                                    'Discover your unique cosmic essence and personal characteristics.';
+                                final formattedText =
+                                    _formatDescription(displayText);
+                                print(
+                                    '🎴 Rendering description with formatting: "${formattedText.substring(0, formattedText.length > 50 ? 50 : formattedText.length)}..."');
+
+                                return TextFormattingUtils.buildFormattedText(
+                                  formattedText,
+                                  style: TextStyle(
+                                    color: Colors.white.withAlpha(136),
+                                    fontSize: 13,
+                                    height: 1.5,
+                                  ),
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ],
                     );
                   },
+                ),
+              ),
+
+              // 4. GestureDetector for tap
+              Positioned.fill(
+                child: GestureDetector(
+                  onTap: onTap,
+                  child: Container(
+                    color: Colors.transparent,
+                  ),
                 ),
               ),
             ],
