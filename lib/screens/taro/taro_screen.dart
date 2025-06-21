@@ -6,6 +6,7 @@ import 'package:innerfive/models/daily_tarot.dart';
 import 'package:innerfive/services/api_service.dart';
 import 'package:innerfive/services/tarot_service.dart';
 import 'package:innerfive/widgets/home/fortune_card.dart';
+import 'package:innerfive/utils/text_formatting_utils.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class TaroScreen extends StatefulWidget {
@@ -620,6 +621,29 @@ class _TaroScreenState extends State<TaroScreen> {
   }
 
   Widget _buildEidosTarotCard(Map<String, dynamic> tarot) {
+    // 🔍 DEBUG: 타로 카드 데이터 확인
+    print('🎴🎴🎴 === YOUR TAROT CARD DEBUG ===');
+    print('🎴 Raw tarot data keys: ${tarot.keys.toList()}');
+    print('🎴 Card title: "${tarot['title'] ?? 'N/A'}"');
+    print('🎴 Card subtitle: "${tarot['subtitle'] ?? 'N/A'}"');
+    print('🎴 Card meaning: "${tarot['cardMeaning'] ?? 'N/A'}"');
+    print('🎴 Card message: "${tarot['message'] ?? 'N/A'}"');
+    print('🎴 Background image URL: "${tarot['backgroundImageUrl'] ?? 'N/A'}"');
+
+    // 실제 타로 카드 이름 확인
+    if (tarot['message'] != null) {
+      final message = tarot['message'].toString().toLowerCase();
+      if (message.contains('emperor')) {
+        print(
+            '🎴 ⚠️ CARD MISMATCH: Message contains "emperor" but title shows "${tarot['title']}"');
+      }
+      if (message.contains('magician')) {
+        print(
+            '🎴 ✅ CARD MATCH: Message contains "magician" and title shows "${tarot['title']}"');
+      }
+    }
+    print('🎴🎴🎴 === END YOUR TAROT CARD DEBUG ===');
+
     return FractionallySizedBox(
       widthFactor: 0.9,
       child: Container(
@@ -634,149 +658,149 @@ class _TaroScreenState extends State<TaroScreen> {
             ),
           ],
         ),
-        child: AspectRatio(
-          aspectRatio: 0.5, // FortuneCard와 동일한 비율
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              gradient: LinearGradient(
-                colors: [
-                  Colors.black.withOpacity(0.7),
-                  Colors.black.withOpacity(0.3),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          decoration: BoxDecoration(
+            color: Colors.grey[900],
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(20),
+                blurRadius: 15,
+                offset: const Offset(0, 5),
               ),
-            ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
             child: Stack(
               children: [
-                // 배경 이미지
+                // 1. Background Image
                 if (tarot['backgroundImageUrl'] != null &&
-                    tarot['backgroundImageUrl'].toString().isNotEmpty)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
+                    tarot['backgroundImageUrl'].toString().isNotEmpty) ...[
+                  Positioned.fill(
                     child: Image.network(
                       tarot['backgroundImageUrl'],
                       fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
                       errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF2D1B69), Color(0xFF11998E)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                          ),
-                        );
+                        return Container(color: Colors.grey[900]);
                       },
                     ),
+                  )
+                ] else ...[
+                  Positioned.fill(
+                    child: Container(color: Colors.grey[900]),
                   ),
+                ],
 
-                // 그라디언트 오버레이
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.black.withOpacity(0.4),
-                        Colors.black.withOpacity(0.7),
-                      ],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
+                // 2. Content Scrim - UniqueEidosTypeCard와 동일한 그라디언트
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withAlpha(128),
+                          Colors.black.withAlpha(240),
+                        ],
+                        stops: const [0.3, 0.6, 1.0],
+                      ),
                     ),
                   ),
                 ),
 
-                // 콘텐츠
+                // 3. Content - 유연한 레이아웃으로 변경
                 Padding(
                   padding: const EdgeInsets.all(24.0),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 아이콘과 타입
+                      const Spacer(flex: 2), // 상단 여백 줄임
                       Row(
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Icon(
-                              Icons.auto_awesome,
-                              color: Colors.white,
-                              size: 20,
-                            ),
+                          Icon(
+                            Icons.auto_awesome, // 타로 카드를 나타내는 아이콘
+                            color: Colors.white.withAlpha(150),
+                            size: 16,
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              tarot['subtitle'] ?? '',
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
+                          const SizedBox(width: 8),
+                          Text(
+                            tarot['subtitle'] ?? 'Your Tarot',
+                            style: TextStyle(
+                              color: Colors.white.withAlpha(150),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
                       ),
-
-                      const SizedBox(height: 16),
-
-                      // 카드 제목
+                      const SizedBox(height: 12),
                       Text(
                         tarot['title'] ?? '',
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 24,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          height: 1.2,
+                          height: 1.3,
                         ),
                       ),
-
+                      const SizedBox(height: 8),
+                      Text(
+                        'Your Personal Tarot Guidance',
+                        style: TextStyle(
+                          color: Colors.white.withAlpha(128),
+                          fontSize: 13,
+                          height: 1.4,
+                        ),
+                      ),
                       const SizedBox(height: 16),
-
-                      // 카드 의미 추가
-                      if (tarot['cardMeaning'] != null &&
-                          tarot['cardMeaning'].toString().isNotEmpty)
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                                color: Colors.white.withOpacity(0.3)),
-                          ),
-                          child: Text(
-                            tarot['cardMeaning'],
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              height: 1.4,
-                            ),
-                          ),
-                        ),
-
-                      const Spacer(),
-
-                      // 메시지
-                      Expanded(
-                        flex: 2,
+                      Container(
+                        height: 1,
+                        width: 50,
+                        color: Colors.white.withAlpha(64),
+                      ),
+                      const SizedBox(height: 16),
+                      // 유연한 텍스트 영역 - AspectRatio 제거하고 Flexible 사용
+                      Flexible(
                         child: SingleChildScrollView(
-                          child: Text(
-                            tarot['message'] ?? '',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              height: 1.5,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // 카드 의미 (네모 박스 제거하고 일반 텍스트로)
+                              if (tarot['cardMeaning'] != null &&
+                                  tarot['cardMeaning']
+                                      .toString()
+                                      .isNotEmpty) ...[
+                                TextFormattingUtils.buildFormattedText(
+                                  tarot['cardMeaning'],
+                                  style: TextStyle(
+                                    color: Colors.white.withAlpha(200),
+                                    fontSize: 14,
+                                    height: 1.5,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                              ],
+                              // 메시지
+                              TextFormattingUtils.buildFormattedText(
+                                tarot['message'] ??
+                                    'Your tarot guidance will appear here.',
+                                style: TextStyle(
+                                  color: Colors.white.withAlpha(180),
+                                  fontSize: 13,
+                                  height: 1.6,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
+                      const SizedBox(height: 16), // 하단 여백
                     ],
                   ),
                 ),
