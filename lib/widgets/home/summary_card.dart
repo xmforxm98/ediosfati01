@@ -43,18 +43,22 @@ class SummaryCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              // 상단 고정 이미지 영역
               SizedBox(
-                height: 180,
+                height: 200,
                 width: double.infinity,
                 child: FirebaseImage(
                   storageUrl: hasImage ? imageUrl : defaultImageUrl,
                   fit: BoxFit.cover,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
+              // 하단 텍스트 영역 - 유연한 높이
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       title,
@@ -62,21 +66,20 @@ class SummaryCard extends StatelessWidget {
                         color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        height: 1.3,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     Text(
                       description,
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.8),
                         fontSize: 14,
-                        height: 1.5,
+                        height: 1.6,
                       ),
-                      maxLines: 10,
-                      overflow: TextOverflow.ellipsis,
+                      // maxLines와 overflow 제거하여 전체 텍스트 표시
                     ),
+                    const SizedBox(height: 8), // 하단 여백
                   ],
                 ),
               ),

@@ -117,7 +117,7 @@ class FortuneCard extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Spacer(flex: 3), // 상단 여백
+                                const Spacer(flex: 2), // 상단 여백 줄임 (3 -> 2)
                                 Row(
                                   children: [
                                     Icon(

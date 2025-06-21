@@ -51,9 +51,10 @@ class UniqueEidosTypeCard extends StatelessWidget {
     print('🎴 ImageUrl isEmpty: ${imageUrl.isEmpty}');
     print('🎴🎴🎴 === STARTING CARD RENDER ===');
 
-    return AspectRatio(
-      aspectRatio: 0.5, // 1:2 비율 (width:height = 1:2) - FortuneCard와 동일
+    return GestureDetector(
+      onTap: onTap,
       child: Container(
+        width: double.infinity, // width 100%
         margin: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
           color: Colors.grey[900],
@@ -68,146 +69,118 @@ class UniqueEidosTypeCard extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(20),
-          child: Stack(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // 1. Background Image
-              if (imageUrl.isNotEmpty) ...[
-                Positioned.fill(
-                  child: Builder(
-                    builder: (context) {
-                      print('🎴 Rendering FirebaseImage with URL: $imageUrl');
-                      return FirebaseImage(
-                        storageUrl: imageUrl,
-                        fit: BoxFit.cover,
-                      );
-                    },
-                  ),
-                )
-              ] else ...[
-                Positioned.fill(
-                  child: Builder(
-                    builder: (context) {
-                      print('🎴 Using fallback background (grey)');
-                      return Container(color: Colors.grey[900]);
-                    },
-                  ),
-                ),
-              ],
-
-              // 2. Content Scrim - FortuneCard와 동일한 그라디언트
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withAlpha(128),
-                        Colors.black.withAlpha(240),
-                      ],
-                      stops: const [0.3, 0.6, 1.0],
+              // 상단 이미지 영역 (내부 마스크 적용)
+              Container(
+                padding: const EdgeInsets.all(16), // 카드 안쪽 여백
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16), // 내부 이미지 radius
+                  child: AspectRatio(
+                    aspectRatio: 0.5, // 1:2 비율 (width:height = 1:2)
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: imageUrl.isNotEmpty
+                          ? FirebaseImage(
+                              storageUrl: imageUrl,
+                              fit: BoxFit.cover,
+                            )
+                          : Container(color: Colors.grey[900]),
                     ),
                   ),
                 ),
               ),
 
-              // 3. Content - FortuneCard와 동일한 레이아웃
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Builder(
-                  builder: (context) {
-                    print('🎴 Rendering content section');
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              // 하단 텍스트 영역 (간결하게 정리)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20.0),
+                decoration: BoxDecoration(
+                  color: Colors.grey[900],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
                       children: [
-                        const Spacer(flex: 3), // 상단 여백
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.psychology, // 에이도스 타입을 나타내는 아이콘
-                              color: Colors.white.withAlpha(150),
-                              size: 16,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Your Unique Type',
-                              style: TextStyle(
-                                color: Colors.white.withAlpha(150),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
+                        Icon(
+                          Icons.psychology,
+                          color: Colors.white.withAlpha(150),
+                          size: 16,
                         ),
-                        const SizedBox(height: 12),
-                        Builder(
-                          builder: (context) {
-                            print('🎴 Rendering title: "$title"');
-                            return Text(
-                              title,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                height: 1.3,
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Your Personal Eidos Essence',
-                          style: TextStyle(
-                            color: Colors.white.withAlpha(128),
-                            fontSize: 13,
-                            height: 1.4,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          height: 1,
-                          width: 50,
-                          color: Colors.white.withAlpha(64),
-                        ),
-                        const SizedBox(height: 16),
+                        const SizedBox(width: 8),
                         Expanded(
-                          child: SingleChildScrollView(
-                            child: Builder(
-                              builder: (context) {
-                                final displayText = description ??
-                                    'Discover your unique cosmic essence and personal characteristics.';
-                                final formattedText =
-                                    _formatDescription(displayText);
-                                print(
-                                    '🎴 Rendering description with formatting: "${formattedText.substring(0, formattedText.length > 50 ? 50 : formattedText.length)}..."');
-
-                                return TextFormattingUtils.buildFormattedText(
-                                  formattedText,
-                                  style: TextStyle(
-                                    color: Colors.white.withAlpha(136),
-                                    fontSize: 13,
-                                    height: 1.5,
-                                  ),
-                                );
-                              },
+                          child: Text(
+                            'Your Unique Type',
+                            style: TextStyle(
+                              color: Colors.white.withAlpha(150),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
                       ],
-                    );
-                  },
-                ),
-              ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        height: 1.3,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Your Personal Eidos Essence',
+                      style: TextStyle(
+                        color: Colors.white.withAlpha(128),
+                        fontSize: 13,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
 
-              // 4. GestureDetector for tap
-              Positioned.fill(
-                child: GestureDetector(
-                  onTap: onTap,
-                  child: Container(
-                    color: Colors.transparent,
-                  ),
+                    // Read more 버튼
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: onTap,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white.withAlpha(26),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Read more',
+                              style: TextStyle(
+                                color: Colors.white.withAlpha(230),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(
+                              Icons.arrow_forward_ios,
+                              color: Colors.white.withAlpha(230),
+                              size: 12,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

@@ -58,9 +58,6 @@ class InfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      // 🔍 DEBUG: 카드 렌더링 상태 확인
-      print('📋 Rendering card: "$title" (${description.length} chars)');
-
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 24),
         decoration: BoxDecoration(
