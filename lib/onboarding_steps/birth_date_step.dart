@@ -24,6 +24,7 @@ class _BirthDateStepState extends State<BirthDateStep> {
   late final TextEditingController _yearController;
   late final TextEditingController _monthController;
   late final TextEditingController _dayController;
+  bool _hasRequiredDate = false;
 
   @override
   void initState() {
@@ -31,6 +32,8 @@ class _BirthDateStepState extends State<BirthDateStep> {
     _yearController = TextEditingController(text: widget.userData.year);
     _monthController = TextEditingController(text: widget.userData.month);
     _dayController = TextEditingController(text: widget.userData.day);
+
+    _checkRequiredDate();
   }
 
   @override
@@ -41,7 +44,17 @@ class _BirthDateStepState extends State<BirthDateStep> {
     super.dispose();
   }
 
+  void _checkRequiredDate() {
+    setState(() {
+      _hasRequiredDate = _yearController.text.trim().isNotEmpty &&
+          _monthController.text.trim().isNotEmpty &&
+          _dayController.text.trim().isNotEmpty;
+    });
+  }
+
   void _handleNextStep() {
+    if (!_hasRequiredDate) return;
+
     if (_formKey.currentState!.validate()) {
       widget.userData.year = _yearController.text.trim();
       widget.userData.month = _monthController.text.trim();
@@ -80,10 +93,12 @@ class _BirthDateStepState extends State<BirthDateStep> {
           const SizedBox(height: 30),
           CustomButton(
             text: 'Next Step',
-            onPressed: _handleNextStep,
+            onPressed: _hasRequiredDate ? _handleNextStep : null,
             isOutlined: true,
-            textColor: Colors.white,
-            borderColor: Colors.white,
+            textColor:
+                _hasRequiredDate ? Colors.white : Colors.white.withAlpha(128),
+            borderColor:
+                _hasRequiredDate ? Colors.white : Colors.white.withAlpha(128),
           ).animateOnPageLoad(delay: 800.ms),
           const SizedBox(height: 20),
         ],
@@ -104,6 +119,7 @@ class _BirthDateStepState extends State<BirthDateStep> {
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             maxLength: 4,
+            onChanged: (_) => _checkRequiredDate(),
             validator: (value) {
               if (value == null || value.length != 4) {
                 return '4 digits';
@@ -121,6 +137,7 @@ class _BirthDateStepState extends State<BirthDateStep> {
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             maxLength: 2,
+            onChanged: (_) => _checkRequiredDate(),
             validator: (value) {
               if (value == null || value.isEmpty) return 'Required';
               final month = int.tryParse(value);
@@ -138,6 +155,7 @@ class _BirthDateStepState extends State<BirthDateStep> {
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             maxLength: 2,
+            onChanged: (_) => _checkRequiredDate(),
             validator: (value) {
               if (value == null || value.isEmpty) return 'Required';
               final day = int.tryParse(value);

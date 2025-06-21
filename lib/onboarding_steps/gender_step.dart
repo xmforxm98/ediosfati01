@@ -23,62 +23,81 @@ class _GenderStepState extends State<GenderStep> {
   void initState() {
     super.initState();
     _selectedGender = widget.userData.gender;
+
+    // 화면이 로드될 때 키패드 숨기기
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        FocusScope.of(context).unfocus();
+        // 추가적으로 시스템 UI 모드 설정
+        FocusManager.instance.primaryFocus?.unfocus();
+      }
+    });
   }
 
   void _handleNext() {
-    if (_selectedGender == null) {
-      CustomErrorMessage.show(context, 'Please select a gender to continue.');
-      return;
-    }
+    if (_selectedGender == null) return; // 성별이 선택되지 않으면 아무것도 하지 않음
+
     widget.userData.gender = _selectedGender;
     widget.onNext();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Gender information has a subtle but significant impact on the flow and interpretation of destiny. This is because even with the same Four Pillars of Destiny, the flow of Great Fortune can differ based on gender.',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                    height: 1.5,
-                  ),
-                ).animateOnPageLoad(delay: 400.ms),
-                const SizedBox(height: 30),
-                const Text(
-                  'Next Step: Your Gender\nAre you male or female?',
-                  style: TextStyle(
-                    fontSize: 22,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ).animateOnPageLoad(delay: 600.ms),
-                const SizedBox(height: 20),
-                _buildGenderButtons().animateOnPageLoad(delay: 800.ms),
-                const SizedBox(height: 30),
-                _buildTransgenderInfo().animateOnPageLoad(delay: 1000.ms),
-              ],
+    return GestureDetector(
+      onTap: () {
+        // Gender 화면에서만 키패드 숨기기 (텍스트 입력이 없으므로)
+        FocusScope.of(context).unfocus();
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Gender information has a subtle but significant impact on the flow and interpretation of destiny. This is because even with the same Four Pillars of Destiny, the flow of Great Fortune can differ based on gender.',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white,
+                      height: 1.5,
+                    ),
+                  ).animateOnPageLoad(delay: 400.ms),
+                  const SizedBox(height: 30),
+                  const Text(
+                    'Next Step: Your Gender\nAre you male or female?',
+                    style: TextStyle(
+                      fontSize: 22,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ).animateOnPageLoad(delay: 600.ms),
+                  const SizedBox(height: 20),
+                  _buildGenderButtons().animateOnPageLoad(delay: 800.ms),
+                  const SizedBox(height: 30),
+                  _buildTransgenderInfo().animateOnPageLoad(delay: 1000.ms),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 30),
-          CustomButton(
-            text: 'Next',
-            onPressed: _handleNext,
-            isOutlined: true,
-            textColor: Colors.white,
-            borderColor: Colors.white,
-          ).animateOnPageLoad(delay: 1200.ms),
-          const SizedBox(height: 20),
-        ],
+            const SizedBox(height: 30),
+            CustomButton(
+              text: 'Next',
+              onPressed: _selectedGender != null
+                  ? _handleNext
+                  : null, // 성별이 선택되었을 때만 활성화
+              isOutlined: true,
+              textColor: _selectedGender != null
+                  ? Colors.white
+                  : Colors.white.withAlpha(128), // 비활성화 시 투명도 적용
+              borderColor: _selectedGender != null
+                  ? Colors.white
+                  : Colors.white.withAlpha(128), // 테두리도 투명도 적용
+            ).animateOnPageLoad(delay: 1200.ms),
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }

@@ -20,6 +20,7 @@ class _CityStepState extends State<CityStep> {
   String? _country;
   String? _state;
   String? _city;
+  bool _hasRequiredSelections = false;
 
   @override
   void initState() {
@@ -28,9 +29,20 @@ class _CityStepState extends State<CityStep> {
     _country = widget.userData.country;
     _state = widget.userData.state;
     _city = widget.userData.city;
+
+    // 초기 상태 확인
+    _checkRequiredSelections();
+  }
+
+  void _checkRequiredSelections() {
+    setState(() {
+      _hasRequiredSelections = _country != null && _city != null;
+    });
   }
 
   void _handleContinue() {
+    if (!_hasRequiredSelections) return;
+
     if (_country == null || _city == null) {
       _showError('Please select your country and city of birth.');
       return;
@@ -78,10 +90,14 @@ class _CityStepState extends State<CityStep> {
           const SizedBox(height: 30),
           CustomButton(
             text: 'Start Analysis',
-            onPressed: _handleContinue,
+            onPressed: _hasRequiredSelections ? _handleContinue : null,
             isOutlined: true,
-            textColor: Colors.white,
-            borderColor: Colors.white,
+            textColor: _hasRequiredSelections
+                ? Colors.white
+                : Colors.white.withAlpha(128),
+            borderColor: _hasRequiredSelections
+                ? Colors.white
+                : Colors.white.withAlpha(128),
           ).animate().fadeIn(delay: 800.ms),
           const SizedBox(height: 20),
         ],
@@ -111,9 +127,15 @@ class _CityStepState extends State<CityStep> {
         ),
       ),
       child: CSCPickerPlus(
-        onCountryChanged: (value) => setState(() => _country = value),
+        onCountryChanged: (value) {
+          setState(() => _country = value);
+          _checkRequiredSelections();
+        },
         onStateChanged: (value) => setState(() => _state = value),
-        onCityChanged: (value) => setState(() => _city = value),
+        onCityChanged: (value) {
+          setState(() => _city = value);
+          _checkRequiredSelections();
+        },
         countryDropdownLabel: _country ?? "Country / Region",
         stateDropdownLabel: _state ?? "State / Province",
         cityDropdownLabel: _city ?? "City",

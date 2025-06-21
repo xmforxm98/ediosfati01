@@ -83,10 +83,7 @@ class SettingsSection extends StatelessWidget {
             _buildListTile(
               icon: Icons.logout,
               title: 'Log Out',
-              onTap: () async {
-                await authService.signOut();
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              },
+              onTap: () => _handleLogOut(context, authService),
             ),
             _buildListTile(
               icon: Icons.delete_outline,
@@ -100,6 +97,61 @@ class SettingsSection extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _handleLogOut(
+      BuildContext context, AuthService authService) async {
+    try {
+      // 로그아웃 확인 다이얼로그 표시
+      final shouldLogOut = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: Colors.grey[850],
+          title: const Text('Log Out', style: TextStyle(color: Colors.white)),
+          content: const Text(
+            'Are you sure you want to log out?',
+            style: TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child:
+                  const Text('Cancel', style: TextStyle(color: Colors.white)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Log Out',
+                  style: TextStyle(color: Colors.redAccent)),
+            ),
+          ],
+        ),
+      );
+
+      if (shouldLogOut == true) {
+        // 로그아웃 실행
+        print('🚪 로그아웃 버튼 클릭됨');
+        await authService.signOut();
+        print('🚪 AuthService.signOut() 완료');
+
+        // AuthWrapper가 자동으로 InitialScreen으로 이동하도록
+        // 모든 라우트를 제거하고 첫 번째 라우트로 이동
+        if (context.mounted) {
+          print('🚪 네비게이션 리셋 시작');
+          Navigator.of(context).popUntil((route) => route.isFirst);
+          print('🚪 네비게이션 리셋 완료');
+        }
+      }
+    } catch (e) {
+      print('로그아웃 오류: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('로그아웃 중 오류가 발생했습니다: $e'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    }
   }
 
   void _showDeleteAccountDialog(BuildContext context) {

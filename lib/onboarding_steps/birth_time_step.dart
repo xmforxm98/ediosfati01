@@ -23,12 +23,15 @@ class _BirthTimeStepState extends State<BirthTimeStep> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _hourController;
   late final TextEditingController _minuteController;
+  bool _hasRequiredTime = false;
 
   @override
   void initState() {
     super.initState();
     _hourController = TextEditingController(text: widget.userData.hour);
     _minuteController = TextEditingController(text: widget.userData.minute);
+
+    _checkRequiredTime();
   }
 
   @override
@@ -38,7 +41,16 @@ class _BirthTimeStepState extends State<BirthTimeStep> {
     super.dispose();
   }
 
+  void _checkRequiredTime() {
+    setState(() {
+      _hasRequiredTime = _hourController.text.trim().isNotEmpty &&
+          _minuteController.text.trim().isNotEmpty;
+    });
+  }
+
   void _handleComplete() {
+    if (!_hasRequiredTime) return;
+
     if (_formKey.currentState!.validate()) {
       widget.userData.hour = _hourController.text.trim();
       widget.userData.minute = _minuteController.text.trim();
@@ -84,10 +96,12 @@ class _BirthTimeStepState extends State<BirthTimeStep> {
           const SizedBox(height: 30),
           CustomButton(
             text: 'Next',
-            onPressed: _handleComplete,
+            onPressed: _hasRequiredTime ? _handleComplete : null,
             isOutlined: true,
-            textColor: Colors.white,
-            borderColor: Colors.white,
+            textColor:
+                _hasRequiredTime ? Colors.white : Colors.white.withAlpha(128),
+            borderColor:
+                _hasRequiredTime ? Colors.white : Colors.white.withAlpha(128),
           ).animateOnPageLoad(delay: 1000.ms),
           const SizedBox(height: 20),
         ],
@@ -108,6 +122,7 @@ class _BirthTimeStepState extends State<BirthTimeStep> {
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             maxLength: 2,
+            onChanged: (_) => _checkRequiredTime(),
             validator: (value) {
               if (value == null || value.isEmpty) return 'Required';
               final hour = int.tryParse(value);
@@ -129,6 +144,7 @@ class _BirthTimeStepState extends State<BirthTimeStep> {
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             maxLength: 2,
+            onChanged: (_) => _checkRequiredTime(),
             validator: (value) {
               if (value == null || value.isEmpty) return 'Required';
               final minute = int.tryParse(value);
@@ -155,7 +171,7 @@ class _BirthTimeStepState extends State<BirthTimeStep> {
           child: OutlinedButton(
             onPressed: _handleSkip,
             style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.white,
+              foregroundColor: Colors.white60,
               side: BorderSide(color: Colors.white.withAlpha(128)),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),

@@ -183,9 +183,13 @@ class AuthService extends ChangeNotifier {
   // Sign Out
   Future<void> signOut() async {
     try {
+      print('로그아웃 시작...');
       await _auth.signOut();
+      print('로그아웃 완료');
+      notifyListeners(); // Provider에게 상태 변경 알림
     } catch (e) {
-      // It's rare for signOut to fail, but we log or handle it here if needed.
+      print('로그아웃 오류: $e');
+      throw Exception('로그아웃 중 오류가 발생했습니다: $e');
     }
   }
 

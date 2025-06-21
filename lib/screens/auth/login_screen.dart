@@ -172,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     CustomButton(
                       text: _isLoading ? 'Signing In...' : 'Sign In',
                       onPressed:
-                          _isLoading ? () {} : () => _handleSignIn(authService),
+                          _isLoading ? null : () => _handleSignIn(authService),
                       backgroundColor: Colors.white,
                       textColor: Colors.black,
                       isOutlined: false,
