@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inner Five - Support</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 20px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            font-weight: bold;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .app-description {
+            font-size: 1.1rem;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .feature {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .faq-item {
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+            padding-left: 20px;
+        }
+        
+        .faq-question {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .faq-answer {
+            color: #555;
+            line-height: 1.7;
+        }
+        
+        .contact-info {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-align: center;
+            padding: 30px;
+            border-radius: 15px;
+        }
+        
+        .contact-email {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 15px 0;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            display: inline-block;
+        }
+        
+        .contact-email a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .contact-email a:hover {
+            text-decoration: underline;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">I5</div>
+            <h1>Inner Five</h1>
+            <p class="subtitle">Discover Your Cosmic Blueprint Through Ancient Wisdom</p>
+        </div>
+        
+        <div class="section">
+            <h2>🌟 About Inner Five</h2>
+            <p class="app-description">
+                Inner Five is a revolutionary app that combines ancient Eastern wisdom with modern technology to reveal your unique cosmic blueprint. Through the power of Eidos analysis, daily fortune readings, and personalized tarot insights, discover who you truly are and unlock your potential.
+            </p>
+            
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🔮</div>
+                    <h3>Eidos Analysis</h3>
+                    <p>Discover your unique personality archetype through our advanced cosmic analysis system.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">💝</div>
+                    <h3>Daily Fortune</h3>
+                    <p>Get personalized daily insights for love, career, and life guidance tailored to your cosmic profile.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🃏</div>
+                    <h3>Tarot Readings</h3>
+                    <p>Receive meaningful tarot card interpretations that resonate with your personal journey.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🌙</div>
+                    <h3>Cosmic Insights</h3>
+                    <p>Understand your place in the universe through Five Elements theory and numerology.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>❓ Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question">What is Eidos Analysis?</div>
+                <div class="faq-answer">
+                    Eidos Analysis is our proprietary system that combines Eastern Five Elements theory, numerology, and cosmic energy patterns to create a comprehensive personality profile. It reveals your core motivations, strengths, and life path.
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">How accurate are the daily fortune readings?</div>
+                <div class="faq-answer">
+                    Our fortune readings are generated using advanced algorithms that consider your personal cosmic blueprint, current planetary alignments, and ancient wisdom traditions. They're designed to provide meaningful guidance rather than predict specific events.
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">Is my personal information secure?</div>
+                <div class="faq-answer">
+                    Yes, we take privacy seriously. All personal data is encrypted and stored securely. We never share your information with third parties, and you can delete your account and data at any time.
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">Can I use the app without creating an account?</div>
+                <div class="faq-answer">
+                    While you can explore some features, creating an account allows for personalized readings and saves your cosmic profile for more accurate insights over time.
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">How often should I check my daily fortune?</div>
+                <div class="faq-answer">
+                    Daily fortune readings are updated each day and are most relevant when checked in the morning. However, you can revisit them throughout the day for continued guidance.
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">What if I don't resonate with my Eidos type?</div>
+                <div class="faq-answer">
+                    Eidos types are meant to be guiding insights rather than rigid categories. If something doesn't resonate, consider it as one perspective among many, and focus on the aspects that feel meaningful to you.
+                </div>
+            </div>
+        </div>
+        
+        <div class="contact-info">
+            <h2>📧 Contact & Support</h2>
+            <p>Need help or have questions? We're here to assist you on your cosmic journey.</p>
+            <div class="contact-email">
+                <a href="mailto:support@innerfive.app">support@innerfive.app</a>
+            </div>
+            <p>We typically respond within 24 hours. For technical issues, please include your device model and app version.</p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2024 Inner Five. All rights reserved.</p>
+            <p>Made with ✨ cosmic energy and 💜 for seekers of wisdom</p>
+        </div>
+    </div>
+</body>
+</html>
