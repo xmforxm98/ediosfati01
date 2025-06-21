@@ -93,14 +93,29 @@ class _TaroScreenState extends State<TaroScreen> {
 
           final tarotInsight = report.tarotInsight;
 
-          // 실제 타로 카드 이름만 추출 (에이도스 타입 제거)
-          String actualTarotCard = "The Emperor"; // 기본값을 The Emperor로 변경
+          // 🎴 Step 4: 백엔드에서 직접 card_name_display 사용 (가장 신뢰할 수 있는 소스)
+          String actualTarotCard = "The Emperor"; // 기본값
 
-          // 1. cardTitle에서 타로 카드명 추출 시도
-          if (tarotInsight.cardTitle.isNotEmpty &&
+          // 백엔드 tarot_insight에서 card_name_display 직접 확인
+          if (reportData.containsKey('tarot_insight')) {
+            final tarotRaw =
+                reportData['tarot_insight'] as Map<String, dynamic>;
+            if (tarotRaw.containsKey('card_name_display')) {
+              String backendCardName = tarotRaw['card_name_display'].toString();
+              if (backendCardName.isNotEmpty && backendCardName != 'null') {
+                actualTarotCard = backendCardName;
+                print(
+                    '🎴 ✅ Using backend card_name_display: "$actualTarotCard"');
+              }
+            }
+          }
+
+          // 백업: cardTitle에서 타로 카드명 추출 시도 (백엔드 데이터가 없을 경우만)
+          if (actualTarotCard == "The Emperor" &&
+              tarotInsight.cardTitle.isNotEmpty &&
               tarotInsight.cardTitle != 'N/A') {
             String cardTitle = tarotInsight.cardTitle;
-            print('🎴 Extracting from cardTitle: "$cardTitle"');
+            print('🎴 Fallback: Extracting from cardTitle: "$cardTitle"');
 
             // "Card of Destiny: The Magician" 형태에서 타로 카드명만 추출
             if (cardTitle.contains(':')) {
