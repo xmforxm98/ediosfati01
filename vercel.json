@@ -1,6 +1,21 @@
 {
-  "buildCommand": "echo 'Using pre-built files'",
-  "outputDirectory": "build/web",
+  "buildCommand": "echo 'Using static files'",
+  "outputDirectory": "docs",
   "installCommand": "echo 'No install needed'",
-  "framework": null
+  "framework": null,
+  "functions": {},
+  "routes": [
+    {
+      "src": "/privacy-policy",
+      "dest": "/privacy-policy.html"
+    },
+    {
+      "src": "/account-deletion",
+      "dest": "/account-deletion.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
 } 
