@@ -18,25 +18,230 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="Eidos Fati - 당신의 내면을 탐구하는 AI 점성술 및 타로 분석 앱">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1A1A2E">
+  
+  <!-- Open Graph meta tags for social sharing -->
+  <meta property="og:title" content="Eidos Fati - Inner Five">
+  <meta property="og:description" content="AI 기반 점성술과 타로 분석으로 당신의 내면을 탐구해보세요">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="icons/Icon-192.png">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="innerfive">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Eidos Fati">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>innerfive</title>
+  <title>Eidos Fati - Inner Five</title>
   <link rel="manifest" href="manifest.json">
 
   <!-- Firebase Web SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(180deg, #242424 0%, #5E605F 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      color: white;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    
+    .loading-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(180deg, #242424 0%, #5E605F 100%);
+      z-index: 9999;
+    }
+    
+    .logo-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 50px;
+    }
+    
+    .app-logo {
+      width: 120px;
+      height: 120px;
+      background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: white;
+      font-weight: bold;
+      margin-bottom: 20px;
+      box-shadow: 0 20px 40px rgba(255, 107, 107, 0.3);
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    .app-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    .app-subtitle {
+      font-size: 1.2rem;
+      color: rgba(255, 255, 255, 0.7);
+      text-align: center;
+      max-width: 400px;
+      line-height: 1.6;
+    }
+    
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(78, 205, 196, 0.3);
+      border-top: 4px solid #4ECDC4;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .loading-text {
+      margin-top: 20px;
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
+    
+    /* Hide loading screen when Flutter app loads */
+    .flutter-loading-hidden {
+      display: none !important;
+    }
+    
+    /* Responsive design for web */
+    @media (min-width: 768px) {
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+      
+      #flutter-container {
+        width: 100%;
+        max-width: 450px;
+        height: 100vh;
+        max-height: 900px;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
+        border-radius: 20px;
+        overflow: hidden;
+        background: linear-gradient(180deg, #242424 0%, #5E605F 100%);
+      }
+    }
+    
+    @media (max-width: 767px) {
+      #flutter-container {
+        width: 100%;
+        height: 100vh;
+      }
+    }
+  </style>
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+  <!-- Loading Screen -->
+  <div id="loading-screen" class="loading-container">
+    <div class="logo-container">
+      <div class="app-logo">EF</div>
+      <h1 class="app-title">Eidos Fati</h1>
+      <p class="app-subtitle" id="app-subtitle">AI가 읽어주는 당신의 내면, 점성술과 타로의 신비로운 세계로 떠나보세요</p>
+    </div>
+    <div class="loading-spinner"></div>
+    <div class="loading-text" id="loading-text">앱을 불러오는 중...</div>
+  </div>
+  
+  <!-- Flutter App Container -->
+  <div id="flutter-container">
+    <script>
+      // Browser language detection and localization
+      function updateLoadingTexts() {
+        const lang = navigator.language.toLowerCase();
+        const subtitleElement = document.getElementById('app-subtitle');
+        const loadingTextElement = document.getElementById('loading-text');
+        
+        const translations = {
+          'ko': {
+            subtitle: 'AI가 읽어주는 당신의 내면, 점성술과 타로의 신비로운 세계로 떠나보세요',
+            loading: '앱을 불러오는 중...'
+          },
+          'ja': {
+            subtitle: 'AIが読み解くあなたの内面、占星術とタロットの神秘的な世界へ',
+            loading: '読み込み中...'
+          },
+          'zh': {
+            subtitle: 'AI解读您的内心，踏入占星术与塔罗牌的神秘世界',
+            loading: '加载中...'
+          },
+          'ar': {
+            subtitle: 'اكتشف ذاتك الداخلية بتحليل الذكاء الاصطناعي للتنجيم والتاروت',
+            loading: 'جاري التحميل...'
+          },
+          'en': {
+            subtitle: 'Explore your inner self with AI-powered astrology and tarot analysis',
+            loading: 'Loading...'
+          }
+        };
+        
+        let selectedLang = 'en'; // default
+        if (lang.startsWith('ko')) selectedLang = 'ko';
+        else if (lang.startsWith('ja')) selectedLang = 'ja';
+        else if (lang.startsWith('zh')) selectedLang = 'zh';
+        else if (lang.startsWith('ar')) selectedLang = 'ar';
+        
+        if (translations[selectedLang]) {
+          subtitleElement.textContent = translations[selectedLang].subtitle;
+          loadingTextElement.textContent = translations[selectedLang].loading;
+          
+          // RTL support for Arabic
+          if (selectedLang === 'ar') {
+            subtitleElement.style.direction = 'rtl';
+            loadingTextElement.style.direction = 'rtl';
+          }
+        }
+      }
+      
+      // Apply translations on page load
+      updateLoadingTexts();
+      
+      // Hide loading screen when Flutter loads
+      window.addEventListener('flutter-first-frame', function () {
+        document.getElementById('loading-screen').classList.add('flutter-loading-hidden');
+      });
+      
+      // Fallback: Hide loading screen after 10 seconds
+      setTimeout(function() {
+        document.getElementById('loading-screen').classList.add('flutter-loading-hidden');
+      }, 10000);
+    </script>
+    <script src="flutter_bootstrap.js" async></script>
+  </div>
 </body>
 </html>

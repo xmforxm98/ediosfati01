@@ -42,15 +42,6 @@ class UniqueEidosTypeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('🎴🎴🎴 === UNIQUE EIDOS TYPE CARD BUILD DEBUG ===');
-    print('🎴 Card Title: "$title"');
-    print('🎴 Card Image URL: "$imageUrl"');
-    print('🎴 Card Description: "${description ?? 'null'}"');
-    print('🎴 Keywords: ${keywords?.toString() ?? 'null'}');
-    print('🎴 Title isEmpty: ${title.isEmpty}');
-    print('🎴 ImageUrl isEmpty: ${imageUrl.isEmpty}');
-    print('🎴🎴🎴 === STARTING CARD RENDER ===');
-
     return GestureDetector(
       onTap: onTap,
       child: Container(

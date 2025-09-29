@@ -3,7 +3,9 @@ import 'package:app_settings/app_settings.dart';
 import 'package:innerfive/services/auth_service.dart';
 import 'package:innerfive/screens/legal/privacy_policy_screen.dart';
 import 'package:innerfive/screens/legal/terms_of_use_screen.dart';
+import 'package:innerfive/widgets/language_selector.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SettingsSection extends StatelessWidget {
   const SettingsSection({super.key});
@@ -11,13 +13,14 @@ class SettingsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context, listen: false);
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Settings',
-          style: TextStyle(
+        Text(
+          l10n.settings,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 16,
             fontWeight: FontWeight.normal,
@@ -26,6 +29,11 @@ class SettingsSection extends StatelessWidget {
         const SizedBox(height: 12),
         _buildSectionContainer(
           children: [
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: const LanguageSelector(),
+            ),
+            _buildDivider(),
             _buildListTile(
               icon: Icons.notifications_outlined,
               title: 'Notifications',
@@ -102,6 +110,7 @@ class SettingsSection extends StatelessWidget {
   Future<void> _handleLogOut(
       BuildContext context, AuthService authService) async {
     try {
+      print('🔍 [DEBUG] _handleLogOut 메서드 호출됨');
       // 로그아웃 확인 다이얼로그 표시
       final shouldLogOut = await showDialog<bool>(
         context: context,
@@ -225,6 +234,10 @@ class SettingsSection extends StatelessWidget {
         );
       },
     );
+  }
+
+  Widget _buildDivider() {
+    return const Divider(color: Colors.white24, height: 1);
   }
 
   Widget _buildSectionContainer({required List<Widget> children}) {

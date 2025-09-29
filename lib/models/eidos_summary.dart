@@ -75,12 +75,18 @@ class EidosSummary {
     String individualType = '';
     final introOpening = intro['opening']?.toString() ?? '';
 
+    print('🔍 Individual type extraction debug:');
+    print('   - intro keys: ${intro.keys.toList()}');
+    print('   - introOpening: "$introOpening"');
+
     // "As a The Tempered Sword" 형태에서 개인 타입 추출
     final asAPattern = RegExp(r'As a (The [^,\.]+)');
     final match = asAPattern.firstMatch(introOpening);
     if (match != null) {
       individualType = match.group(1)?.trim() ?? '';
       print('🎯 Extracted individual type from intro: "$individualType"');
+    } else {
+      print('❌ No individual type pattern found in opening text');
     }
 
     // 개인 타입이 없으면 그룹명 사용

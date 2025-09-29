@@ -193,13 +193,24 @@ class NotificationService extends ChangeNotifier {
       return;
     }
 
+    // Cancel any existing scheduled notifications
+    await _cancelAllScheduledNotifications();
+
+    // Schedule morning fortune notification (9:00 AM)
+    await _scheduleMorningFortune();
+
+    // Schedule afternoon tarot notification (1:00 PM)
+    await _scheduleAfternoonTarot();
+  }
+
+  Future<void> _scheduleMorningFortune() async {
     final now = tz.TZDateTime.now(tz.local);
     var scheduledDate = tz.TZDateTime(
       tz.local,
       now.year,
       now.month,
       now.day,
-      9,
+      9, // 9:00 AM
       0,
     );
 
@@ -208,18 +219,62 @@ class NotificationService extends ChangeNotifier {
     }
 
     await _flutterLocalNotificationsPlugin.zonedSchedule(
-      1,
-      'Daily Inner Five Briefing',
-      'Check out your daily insights and compatibility updates!',
+      1, // ID for morning notification
+      'Good Morning! ☀️',
+      'Start your day with today\'s fortune and cosmic insights.',
       scheduledDate,
       const NotificationDetails(
         android: AndroidNotificationDetails(
-          'daily_briefing',
-          'Daily Briefing',
-          channelDescription: 'Daily briefing notifications',
+          'morning_fortune',
+          'Morning Fortune',
+          channelDescription: 'Daily morning fortune notifications',
           importance: Importance.high,
+          priority: Priority.high,
         ),
-        iOS: DarwinNotificationDetails(),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
+  }
+
+  Future<void> _scheduleAfternoonTarot() async {
+    final now = tz.TZDateTime.now(tz.local);
+    var scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      13, // 1:00 PM
+      0,
+    );
+
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
+    await _flutterLocalNotificationsPlugin.zonedSchedule(
+      2, // ID for afternoon notification
+      'Tarot Time 🔮',
+      'Discover what the cards reveal about your afternoon and evening.',
+      scheduledDate,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'afternoon_tarot',
+          'Afternoon Tarot',
+          channelDescription: 'Daily afternoon tarot notifications',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
@@ -228,7 +283,13 @@ class NotificationService extends ChangeNotifier {
 
   Future<void> _cancelDailyBriefing() async {
     if (kIsWeb) return; // Skip on web
-    await _flutterLocalNotificationsPlugin.cancel(1);
+    await _cancelAllScheduledNotifications();
+  }
+
+  Future<void> _cancelAllScheduledNotifications() async {
+    if (kIsWeb) return; // Skip on web
+    await _flutterLocalNotificationsPlugin.cancel(1); // Morning fortune
+    await _flutterLocalNotificationsPlugin.cancel(2); // Afternoon tarot
   }
 
   Future<void> showAnalysisCompleteNotification() async {
@@ -246,6 +307,126 @@ class NotificationService extends ChangeNotifier {
     await _showNotification(
       'Time for your analysis!',
       'Discover new insights about yourself with Inner Five.',
+    );
+  }
+
+  // Core notification methods for app functionality
+  Future<void> showDailyFortuneNotification() async {
+    if (!_notificationsEnabled || !_insightUpdatesEnabled) return;
+
+    await _showNotification(
+      'Daily Insights Ready! ✨',
+      'Your tarot reading and eidos guidance are waiting for you.',
+    );
+  }
+
+  Future<void> showNewAnalysisNotification() async {
+    if (!_notificationsEnabled || !_insightUpdatesEnabled) return;
+
+    await _showNotification(
+      'New Analysis Available 🔮',
+      'Your personalized numerology insights have been updated.',
+    );
+  }
+
+  Future<void> showWeeklyInsightNotification() async {
+    if (!_notificationsEnabled || !_insightUpdatesEnabled) return;
+
+    await _showNotification(
+      'Weekly Eidos Insight 🌟',
+      'Discover new patterns in your cosmic energy this week.',
+    );
+  }
+
+  // Custom time scheduling methods
+  Future<void> scheduleCustomDailyNotifications({
+    int morningHour = 9,
+    int morningMinute = 0,
+    int afternoonHour = 13,
+    int afternoonMinute = 0,
+  }) async {
+    if (!_dailyBriefingEnabled || kIsWeb) return;
+
+    await _cancelAllScheduledNotifications();
+    await _scheduleCustomMorningFortune(morningHour, morningMinute);
+    await _scheduleCustomAfternoonTarot(afternoonHour, afternoonMinute);
+  }
+
+  Future<void> _scheduleCustomMorningFortune(int hour, int minute) async {
+    final now = tz.TZDateTime.now(tz.local);
+    var scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
+    );
+
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
+    await _flutterLocalNotificationsPlugin.zonedSchedule(
+      1,
+      'Good Morning! ☀️',
+      'Start your day with today\'s fortune and cosmic insights.',
+      scheduledDate,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'morning_fortune',
+          'Morning Fortune',
+          channelDescription: 'Daily morning fortune notifications',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
+  }
+
+  Future<void> _scheduleCustomAfternoonTarot(int hour, int minute) async {
+    final now = tz.TZDateTime.now(tz.local);
+    var scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
+    );
+
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
+    await _flutterLocalNotificationsPlugin.zonedSchedule(
+      2,
+      'Tarot Time 🔮',
+      'Discover what the cards reveal about your afternoon and evening.',
+      scheduledDate,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'afternoon_tarot',
+          'Afternoon Tarot',
+          channelDescription: 'Daily afternoon tarot notifications',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time,
     );
   }
 }

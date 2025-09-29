@@ -17,5 +17,15 @@
       "src": "/(.*)",
       "dest": "/$1"
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/account-deletion",
+      "destination": "/account-deletion.html"
+    },
+    {
+      "source": "/privacy-policy", 
+      "destination": "/privacy-policy.html"
+    }
   ]
 } 

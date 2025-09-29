@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eidos Fati - Account Deletion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="email"]:focus, input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        }
+        
+        .btn-danger:hover {
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+        }
+        
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">Eidos Fati</div>
+        <h1>Account Deletion</h1>
+        
+        <div class="warning">
+            <strong>⚠️ Warning</strong><br>
+            Deleting your account will permanently remove all your data and cannot be undone.<br>
+            • Personal Eidos analysis results<br>
+            • Daily fortune history<br>
+            • Tarot card records<br>
+            • All profile information
+        </div>
+        
+        <div id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="Enter your account email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter your current password" required>
+            </div>
+            
+            <button class="btn" onclick="loginUser()" id="loginBtn">
+                Sign In
+            </button>
+        </div>
+        
+        <div id="deleteForm" class="hidden">
+            <p style="margin: 20px 0; color: #666;">
+                You are now signed in. Do you want to proceed with account deletion?
+            </p>
+            
+            <button class="btn btn-danger" onclick="deleteAccount()" id="deleteBtn">
+                Permanently Delete Account
+            </button>
+            
+            <button class="btn" onclick="logout()" style="background: #6c757d;">
+                Cancel
+            </button>
+        </div>
+        
+        <div id="status" class="status hidden"></div>
+        
+        <a href="index.html" class="back-link">← Back to Home</a>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            deleteUser,
+            EmailAuthProvider,
+            reauthenticateWithCredential,
+            signOut
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { 
+            getFirestore, 
+            doc, 
+            deleteDoc,
+            collection,
+            query,
+            where,
+            getDocs
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase configuration (same as Flutter app)
+        const firebaseConfig = {
+            apiKey: "AIzaSyB7-qcpY8gg0aaGDlHgRYSLIpK8PTEhGk8",
+            authDomain: "innerfive-e9583.firebaseapp.com",
+            projectId: "innerfive-e9583",
+            storageBucket: "innerfive-e9583.firebasestorage.app",
+            messagingSenderId: "543654806439",
+            appId: "1:543654806439:web:3fb98e8c45e89d6b6ad7e7",
+            measurementId: "G-4JRXN6PJCX"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Global functions
+        window.loginUser = async function() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+
+            if (!email || !password) {
+                showStatus('Please enter both email and password.', 'error');
+                return;
+            }
+
+            try {
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<span class="loading"></span> Signing in...';
+
+                await signInWithEmailAndPassword(auth, email, password);
+                
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('deleteForm').classList.remove('hidden');
+                showStatus('Successfully signed in! You can now proceed with account deletion.', 'success');
+
+            } catch (error) {
+                console.error('Login error:', error);
+                let errorMessage = 'Login failed.';
+                
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                        errorMessage = 'No account found with this email.';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = 'Incorrect password.';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'Invalid email format.';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = 'Too many failed attempts. Please try again later.';
+                        break;
+                    default:
+                        errorMessage = `Error: ${error.message}`;
+                }
+                
+                showStatus(errorMessage, 'error');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = 'Sign In';
+            }
+        };
+
+        window.deleteAccount = async function() {
+            const deleteBtn = document.getElementById('deleteBtn');
+            const user = auth.currentUser;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (!user) {
+                showStatus('Please sign in first.', 'error');
+                return;
+            }
+
+            if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                deleteBtn.disabled = true;
+                deleteBtn.innerHTML = '<span class="loading"></span> Deleting...';
+
+                showStatus('Deleting account data...', 'info');
+
+                // 1. Delete user data from Firestore
+                await deleteUserData(user.uid);
+
+                // 2. Re-authenticate (required for account deletion)
+                const credential = EmailAuthProvider.credential(email, password);
+                await reauthenticateWithCredential(user, credential);
+
+                // 3. Delete user account from Firebase Auth
+                await deleteUser(user);
+
+                showStatus('Account successfully deleted.', 'success');
+                
+                // Hide form
+                document.getElementById('deleteForm').classList.add('hidden');
+
+            } catch (error) {
+                console.error('Account deletion error:', error);
+                let errorMessage = 'Account deletion failed.';
+                
+                switch (error.code) {
+                    case 'auth/requires-recent-login':
+                        errorMessage = 'Please sign in again for security purposes.';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = 'Incorrect password.';
+                        break;
+                    default:
+                        errorMessage = `Error: ${error.message}`;
+                }
+                
+                showStatus(errorMessage, 'error');
+            } finally {
+                deleteBtn.disabled = false;
+                deleteBtn.innerHTML = 'Permanently Delete Account';
+            }
+        };
+
+        // Delete user data from Firestore
+        async function deleteUserData(userId) {
+            try {
+                // Delete user document
+                const userRef = doc(db, 'users', userId);
+                await deleteDoc(userRef);
+
+                // Delete user's analysis reports
+                const reportsQuery = query(
+                    collection(db, 'analysis_reports'),
+                    where('userId', '==', userId)
+                );
+                const reportsSnapshot = await getDocs(reportsQuery);
+                
+                for (const reportDoc of reportsSnapshot.docs) {
+                    await deleteDoc(reportDoc.ref);
+                }
+
+                // Delete user's daily fortune
+                const fortuneQuery = query(
+                    collection(db, 'daily_fortune'),
+                    where('userId', '==', userId)
+                );
+                const fortuneSnapshot = await getDocs(fortuneQuery);
+                
+                for (const fortuneDoc of fortuneSnapshot.docs) {
+                    await deleteDoc(fortuneDoc.ref);
+                }
+
+                console.log('Firestore data deletion completed');
+            } catch (error) {
+                console.error('Firestore data deletion error:', error);
+                throw error;
+            }
+        }
+
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                document.getElementById('loginForm').classList.remove('hidden');
+                document.getElementById('deleteForm').classList.add('hidden');
+                document.getElementById('email').value = '';
+                document.getElementById('password').value = '';
+                showStatus('Signed out successfully.', 'info');
+            } catch (error) {
+                console.error('Logout error:', error);
+                showStatus('Error occurred during sign out.', 'error');
+            }
+        };
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.classList.remove('hidden');
+            
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    status.classList.add('hidden');
+                }, 5000);
+            }
+        }
+
+        // Enter key event handling
+        document.getElementById('email').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('password').focus();
+            }
+        });
+
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                window.loginUser();
+            }
+        });
+    </script>
+</body>
+</html> 

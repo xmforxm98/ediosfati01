@@ -1,11 +1,11 @@
 {
-    "name": "innerfive",
-    "short_name": "innerfive",
+    "name": "Eidos Fati - Inner Five",
+    "short_name": "Eidos Fati",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#hexcode",
-    "theme_color": "#hexcode",
-    "description": "A new Flutter project.",
+    "background_color": "#1A1A2E",
+    "theme_color": "#1A1A2E",
+    "description": "AI 기반 점성술과 타로 분석으로 당신의 내면을 탐구하는 앱",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

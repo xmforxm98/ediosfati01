@@ -10,6 +10,7 @@ import 'package:innerfive/models/analysis_report.dart';
 import 'package:innerfive/screens/auth/login_screen.dart';
 import 'package:innerfive/screens/main_screen.dart';
 import 'package:innerfive/widgets/gradient_blurred_background.dart';
+import 'package:innerfive/widgets/web_layout_wrapper.dart';
 
 class AnalysisLoadingScreen extends StatefulWidget {
   final UserData userData;
@@ -165,77 +166,79 @@ class _AnalysisLoadingScreenState extends State<AnalysisLoadingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      body: GradientBlurredBackground(
-        imageUrl: _backgroundUrl,
-        isLoading: _backgroundUrl == null,
-        overlayOpacity: 0.3,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.3),
+    return WebLayoutWrapper(
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
           ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24.0,
-                vertical: 20.0,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Spacer(flex: 14),
+        ),
+        body: GradientBlurredBackground(
+          imageUrl: _backgroundUrl,
+          isLoading: _backgroundUrl == null,
+          overlayOpacity: 0.3,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.3),
+            ),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 20.0,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Spacer(flex: 14),
 
-                  // 분석 상태에 따른 타이틀
-                  Text(
-                    _analysisComplete
-                        ? 'Analysis Complete!'
-                        : 'Analyzing Your Eidos',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      height: 1.3,
-                    ),
-                  )
-                      .animate(delay: 200.ms)
-                      .fadeIn(duration: 500.ms)
-                      .slideY(begin: 0.2, end: 0),
+                    // 분석 상태에 따른 타이틀
+                    Text(
+                      _analysisComplete
+                          ? 'Analysis Complete!'
+                          : 'Analyzing Your Eidos',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        height: 1.3,
+                      ),
+                    )
+                        .animate(delay: 200.ms)
+                        .fadeIn(duration: 500.ms)
+                        .slideY(begin: 0.2, end: 0),
 
-                  const SizedBox(height: 30),
+                    const SizedBox(height: 30),
 
-                  // 메시지 내용
-                  Text(
-                    _getAnalysisMessage(),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.white70,
-                      height: 1.6,
-                    ),
-                  )
-                      .animate(delay: 400.ms)
-                      .fadeIn(duration: 500.ms)
-                      .slideY(begin: 0.2, end: 0),
+                    // 메시지 내용
+                    Text(
+                      _getAnalysisMessage(),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.white70,
+                        height: 1.6,
+                      ),
+                    )
+                        .animate(delay: 400.ms)
+                        .fadeIn(duration: 500.ms)
+                        .slideY(begin: 0.2, end: 0),
 
-                  const Spacer(flex: 3),
+                    const Spacer(flex: 3),
 
-                  // 에러나 로그인 필요 시 버튼 표시
-                  if (_isError || _requiresLogin)
-                    _buildActionButton()
-                        .animate(delay: 600.ms)
-                        .fadeIn(duration: 500.ms),
+                    // 에러나 로그인 필요 시 버튼 표시
+                    if (_isError || _requiresLogin)
+                      _buildActionButton()
+                          .animate(delay: 600.ms)
+                          .fadeIn(duration: 500.ms),
 
-                  const SizedBox(height: 60),
-                ],
+                    const SizedBox(height: 60),
+                  ],
+                ),
               ),
             ),
           ),

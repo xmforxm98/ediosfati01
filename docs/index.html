@@ -266,6 +266,47 @@
             </div>
         </div>
         
+        <div class="section">
+            <h2>🗑️ Account Deletion</h2>
+            <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 20px;">Need to delete your account? Sign in below to permanently remove all your data.</p>
+            
+            <div style="background: rgba(255, 243, 205, 0.1); border: 1px solid rgba(255, 234, 167, 0.3); color: #ffc107; padding: 15px; border-radius: 10px; margin: 20px 0; font-size: 14px;">
+                <strong>⚠️ Warning:</strong> This will permanently delete all your Eidos analysis, daily fortune history, tarot records, and profile data. This action cannot be undone.
+            </div>
+            
+            <div id="loginForm" style="max-width: 400px; margin: 20px auto;">
+                <div style="margin: 15px 0; text-align: left;">
+                    <label style="display: block; margin-bottom: 5px; color: rgba(255, 255, 255, 0.9); font-weight: 500;">Email</label>
+                    <input type="email" id="email" placeholder="Enter your account email" required style="width: 100%; padding: 12px; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: white; font-size: 16px; box-sizing: border-box;">
+                </div>
+                
+                <div style="margin: 15px 0; text-align: left;">
+                    <label style="display: block; margin-bottom: 5px; color: rgba(255, 255, 255, 0.9); font-weight: 500;">Password</label>
+                    <input type="password" id="password" placeholder="Enter your current password" required style="width: 100%; padding: 12px; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: white; font-size: 16px; box-sizing: border-box;">
+                </div>
+                
+                <button onclick="loginUser()" id="loginBtn" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; margin: 10px 0; transition: transform 0.2s, box-shadow 0.2s;">
+                    Sign In to Delete Account
+                </button>
+            </div>
+            
+            <div id="deleteForm" style="max-width: 400px; margin: 20px auto; display: none;">
+                <p style="margin: 20px 0; color: rgba(255, 255, 255, 0.8); text-align: center;">
+                    You are now signed in. Click below to permanently delete your account.
+                </p>
+                
+                <button onclick="deleteAccount()" id="deleteBtn" style="background: linear-gradient(135deg, #ff6b6b, #ee5a24); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; margin: 10px 0; transition: transform 0.2s, box-shadow 0.2s;">
+                    Permanently Delete Account
+                </button>
+                
+                <button onclick="logout()" style="background: #6c757d; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px;">
+                    Cancel
+                </button>
+            </div>
+            
+            <div id="status" style="margin: 20px 0; padding: 15px; border-radius: 10px; font-weight: 500; text-align: center; display: none;"></div>
+        </div>
+        
         <div class="contact-info">
             <h2>📧 Contact & Support</h2>
             <p>Need help or have questions? We're here to assist you on your cosmic journey.</p>
@@ -283,5 +324,228 @@
             <p>Made with ✨ cosmic energy and 💜 for seekers of wisdom</p>
         </div>
     </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            deleteUser,
+            EmailAuthProvider,
+            reauthenticateWithCredential,
+            signOut
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { 
+            getFirestore, 
+            doc, 
+            deleteDoc,
+            collection,
+            query,
+            where,
+            getDocs
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB7-qcpY8gg0aaGDlHgRYSLIpK8PTEhGk8",
+            authDomain: "innerfive-e9583.firebaseapp.com",
+            projectId: "innerfive-e9583",
+            storageBucket: "innerfive-e9583.firebasestorage.app",
+            messagingSenderId: "543654806439",
+            appId: "1:543654806439:web:3fb98e8c45e89d6b6ad7e7",
+            measurementId: "G-4JRXN6PJCX"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.loginUser = async function() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+
+            if (!email || !password) {
+                showStatus('Please enter both email and password.', 'error');
+                return;
+            }
+
+            try {
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = 'Signing in...';
+
+                await signInWithEmailAndPassword(auth, email, password);
+                
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('deleteForm').style.display = 'block';
+                showStatus('Successfully signed in! You can now proceed with account deletion.', 'success');
+
+            } catch (error) {
+                console.error('Login error:', error);
+                let errorMessage = 'Login failed.';
+                
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                        errorMessage = 'No account found with this email.';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = 'Incorrect password.';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'Invalid email format.';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = 'Too many failed attempts. Please try again later.';
+                        break;
+                    default:
+                        errorMessage = `Error: ${error.message}`;
+                }
+                
+                showStatus(errorMessage, 'error');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = 'Sign In to Delete Account';
+            }
+        };
+
+        window.deleteAccount = async function() {
+            const deleteBtn = document.getElementById('deleteBtn');
+            const user = auth.currentUser;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (!user) {
+                showStatus('Please sign in first.', 'error');
+                return;
+            }
+
+            if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                deleteBtn.disabled = true;
+                deleteBtn.innerHTML = 'Deleting...';
+
+                showStatus('Deleting account data...', 'info');
+
+                await deleteUserData(user.uid);
+
+                const credential = EmailAuthProvider.credential(email, password);
+                await reauthenticateWithCredential(user, credential);
+
+                await deleteUser(user);
+
+                showStatus('Account successfully deleted.', 'success');
+                
+                document.getElementById('deleteForm').style.display = 'none';
+
+            } catch (error) {
+                console.error('Account deletion error:', error);
+                let errorMessage = 'Account deletion failed.';
+                
+                switch (error.code) {
+                    case 'auth/requires-recent-login':
+                        errorMessage = 'Please sign in again for security purposes.';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = 'Incorrect password.';
+                        break;
+                    default:
+                        errorMessage = `Error: ${error.message}`;
+                }
+                
+                showStatus(errorMessage, 'error');
+            } finally {
+                deleteBtn.disabled = false;
+                deleteBtn.innerHTML = 'Permanently Delete Account';
+            }
+        };
+
+        async function deleteUserData(userId) {
+            try {
+                const userRef = doc(db, 'users', userId);
+                await deleteDoc(userRef);
+
+                const reportsQuery = query(
+                    collection(db, 'analysis_reports'),
+                    where('userId', '==', userId)
+                );
+                const reportsSnapshot = await getDocs(reportsQuery);
+                
+                for (const reportDoc of reportsSnapshot.docs) {
+                    await deleteDoc(reportDoc.ref);
+                }
+
+                const fortuneQuery = query(
+                    collection(db, 'daily_fortune'),
+                    where('userId', '==', userId)
+                );
+                const fortuneSnapshot = await getDocs(fortuneQuery);
+                
+                for (const fortuneDoc of fortuneSnapshot.docs) {
+                    await deleteDoc(fortuneDoc.ref);
+                }
+
+                console.log('Firestore data deletion completed');
+            } catch (error) {
+                console.error('Firestore data deletion error:', error);
+                throw error;
+            }
+        }
+
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                document.getElementById('loginForm').style.display = 'block';
+                document.getElementById('deleteForm').style.display = 'none';
+                document.getElementById('email').value = '';
+                document.getElementById('password').value = '';
+                showStatus('Signed out successfully.', 'info');
+            } catch (error) {
+                console.error('Logout error:', error);
+                showStatus('Error occurred during sign out.', 'error');
+            }
+        };
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.style.display = 'block';
+            
+            if (type === 'success') {
+                status.style.background = 'rgba(212, 237, 218, 0.2)';
+                status.style.color = '#4caf50';
+                status.style.border = '1px solid rgba(76, 175, 80, 0.3)';
+            } else if (type === 'error') {
+                status.style.background = 'rgba(248, 215, 218, 0.2)';
+                status.style.color = '#f44336';
+                status.style.border = '1px solid rgba(244, 67, 54, 0.3)';
+            } else if (type === 'info') {
+                status.style.background = 'rgba(209, 236, 241, 0.2)';
+                status.style.color = '#2196f3';
+                status.style.border = '1px solid rgba(33, 150, 243, 0.3)';
+            }
+            
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        document.getElementById('email').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('password').focus();
+            }
+        });
+
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                window.loginUser();
+            }
+        });
+    </script>
 </body>
 </html>

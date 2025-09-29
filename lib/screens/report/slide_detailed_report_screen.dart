@@ -95,49 +95,58 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      backgroundColor: const Color(0xFF0A0A0A), // 어두운 배경색 추가
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF242424), Color(0xFF5E605F)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
         ),
-        title: Text(
-          '${_currentPage + 1} of ${_sections.length}',
-          style: const TextStyle(color: Colors.white),
-        ),
-        centerTitle: true,
       ),
-      body: Column(
-        children: [
-          // 상단 여백 (앱바 높이 고려)
-          const SizedBox(height: 100),
-
-          // 진행 상황 표시 (홈 화면 스타일로 개선)
-          _buildProgressIndicator(),
-
-          // 메인 콘텐츠
-          Expanded(
-            child: PageView.builder(
-              controller: _pageController,
-              onPageChanged: (page) {
-                setState(() {
-                  _currentPage = page;
-                });
-              },
-              itemCount: _sections.length,
-              itemBuilder: (context, index) {
-                return _buildSectionPage(index);
-              },
-            ),
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
           ),
+          title: Text(
+            '${_currentPage + 1} of ${_sections.length}',
+            style: const TextStyle(color: Colors.white),
+          ),
+          centerTitle: true,
+        ),
+        body: Column(
+          children: [
+            // 상단 여백 (앱바 높이 고려)
+            const SizedBox(height: 100),
 
-          // 네비게이션 버튼 (홈 화면 스타일로 개선)
-          _buildNavigationButtons(),
-        ],
+            // 진행 상황 표시 (홈 화면 스타일로 개선)
+            _buildProgressIndicator(),
+
+            // 메인 콘텐츠
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                onPageChanged: (page) {
+                  setState(() {
+                    _currentPage = page;
+                  });
+                },
+                itemCount: _sections.length,
+                itemBuilder: (context, index) {
+                  return _buildSectionPage(index);
+                },
+              ),
+            ),
+
+            // 네비게이션 버튼 (홈 화면 스타일로 개선)
+            _buildNavigationButtons(),
+          ],
+        ),
       ),
     );
   }
@@ -172,74 +181,45 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 섹션 헤더 (홈 화면 스타일로 개선)
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.2),
-                width: 1,
+          // 섹션 헤더 (박스 없이 깔끔하게)
+          Row(
+            children: [
+              Icon(
+                section['icon'],
+                color: Colors.white,
+                size: 28,
               ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    section['icon'],
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        section['title'],
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      section['title'],
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        section['subtitle'],
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
-                          fontSize: 14,
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      section['subtitle'],
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.7),
+                        fontSize: 16,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
 
-          // 섹션 콘텐츠 (홈 화면 스타일의 카드로 개선)
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.1),
-                width: 1,
-              ),
-            ),
-            child: _buildSectionContent(index),
-          ),
+          // 섹션 콘텐츠 (박스 없이 직접 표시)
+          _buildSectionContent(index),
         ],
       ),
     );
@@ -315,7 +295,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             "Key Strengths",
             style: TextStyle(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -339,8 +319,8 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
                         trait,
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.9),
-                          fontSize: 14,
-                          height: 1.5,
+                          fontSize: 16,
+                          height: 1.6,
                         ),
                       ),
                     ),
@@ -369,7 +349,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
               tarotInsight.cardTitle,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 16,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -402,7 +382,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             "Career Aptitude",
             style: TextStyle(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -411,8 +391,8 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             careerProfile.aptitude,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 14,
-              height: 1.5,
+              fontSize: 16,
+              height: 1.6,
             ),
           ),
           const SizedBox(height: 16),
@@ -423,7 +403,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             "Work Style",
             style: TextStyle(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -432,8 +412,8 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             careerProfile.workStyle,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 14,
-              height: 1.5,
+              fontSize: 16,
+              height: 1.6,
             ),
           ),
           const SizedBox(height: 16),
@@ -444,7 +424,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             "Success Strategy",
             style: TextStyle(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -453,8 +433,8 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             careerProfile.successStrategy,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 14,
-              height: 1.5,
+              fontSize: 16,
+              height: 1.6,
             ),
           ),
         ],
@@ -472,7 +452,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             "Core Traits",
             style: TextStyle(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -481,8 +461,8 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             profile.coreTraits,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 14,
-              height: 1.5,
+              fontSize: 16,
+              height: 1.6,
             ),
           ),
           const SizedBox(height: 16),
@@ -492,7 +472,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             "Likes",
             style: TextStyle(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -501,8 +481,8 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             profile.likes,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 14,
-              height: 1.5,
+              fontSize: 16,
+              height: 1.6,
             ),
           ),
           const SizedBox(height: 16),
@@ -513,7 +493,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             "Relationship Style",
             style: TextStyle(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -522,8 +502,8 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             profile.relationshipStyle,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 14,
-              height: 1.5,
+              fontSize: 16,
+              height: 1.6,
             ),
           ),
         ],
@@ -541,7 +521,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             "Love Style",
             style: TextStyle(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -550,8 +530,8 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             insight.loveStyle,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 14,
-              height: 1.5,
+              fontSize: 16,
+              height: 1.6,
             ),
           ),
           const SizedBox(height: 16),
@@ -562,7 +542,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             "Ideal Partner",
             style: TextStyle(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -571,8 +551,8 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             insight.idealPartner,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 14,
-              height: 1.5,
+              fontSize: 16,
+              height: 1.6,
             ),
           ),
           const SizedBox(height: 16),
@@ -583,7 +563,7 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             "Relationship Advice",
             style: TextStyle(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -592,8 +572,8 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
             insight.relationshipAdvice,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 14,
-              height: 1.5,
+              fontSize: 16,
+              height: 1.6,
             ),
           ),
         ],
@@ -614,104 +594,89 @@ class _SlideDetailedReportScreenState extends State<SlideDetailedReportScreen> {
 
   Widget _buildNavigationButtons() {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       child: Row(
         children: [
           // 이전 버튼
           if (_currentPage > 0)
             Expanded(
-              child: ElevatedButton(
-                onPressed: _previousPage,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white.withOpacity(0.1),
-                  foregroundColor: Colors.white,
-                  side: BorderSide(color: Colors.white.withOpacity(0.3)),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.arrow_back, size: 18),
-                    SizedBox(width: 8),
-                    Text(
-                      'Previous',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
+              child: Container(
+                margin: const EdgeInsets.only(right: 8),
+                child: ElevatedButton(
+                  onPressed: _previousPage,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black.withAlpha(77),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(100),
                     ),
-                  ],
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.arrow_back, size: 18),
+                      SizedBox(width: 8),
+                      Text(
+                        'Previous',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-
-          // 공간 확보
-          if (_currentPage > 0 && _currentPage < _sections.length - 1)
-            const SizedBox(width: 16),
 
           // 다음/완료 버튼
-          if (_currentPage < _sections.length - 1)
-            Expanded(
+          Expanded(
+            child: Container(
+              margin: EdgeInsets.only(left: _currentPage > 0 ? 8 : 0),
               child: ElevatedButton(
-                onPressed: _nextPage,
+                onPressed: _currentPage < _sections.length - 1
+                    ? _nextPage
+                    : () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: Colors.black,
+                  elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(100),
                   ),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'Next',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                    if (_currentPage < _sections.length - 1) ...[
+                      const Text(
+                        'Next',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    SizedBox(width: 8),
-                    Icon(Icons.arrow_forward, size: 18),
-                  ],
-                ),
-              ),
-            )
-          else
-            // 마지막 페이지에서 완료 버튼
-            Expanded(
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.check, size: 18),
-                    SizedBox(width: 8),
-                    Text(
-                      'Complete',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                      const SizedBox(width: 8),
+                      const Icon(Icons.arrow_forward, size: 18),
+                    ] else ...[
+                      const Icon(Icons.check, size: 18),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Complete',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
             ),
+          ),
         ],
       ),
     );

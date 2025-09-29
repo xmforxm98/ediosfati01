@@ -332,119 +332,13 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 48),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Your Unique Eidos Type',
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.8),
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () async {
-                                  // 카드를 눌러도 슬라이드 상세 리포트로 이동
-                                  try {
-                                    // 기존에 저장된 상세 분석 데이터 확인
-                                    final userAnalysisQuery = await _firestore
-                                        .collection('users')
-                                        .doc(_auth.currentUser?.uid)
-                                        .collection('readings')
-                                        .orderBy('timestamp', descending: true)
-                                        .limit(1)
-                                        .get();
-
-                                    if (userAnalysisQuery.docs.isNotEmpty) {
-                                      final latestReading =
-                                          userAnalysisQuery.docs.first;
-                                      final readingData = latestReading.data();
-
-                                      // 리포트 데이터가 있는지 확인
-                                      if (readingData.containsKey('report') &&
-                                          readingData['report'] != null) {
-                                        final reportData = readingData['report']
-                                            as Map<String, dynamic>;
-
-                                        // 그룹 분석 데이터만으로 간단한 NarrativeReport 생성
-                                        final simplifiedReport =
-                                            _createSimplifiedNarrativeReport(
-                                                reportData);
-
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                SlideDetailedReportScreen(
-                                              report: simplifiedReport,
-                                            ),
-                                          ),
-                                        );
-                                        return;
-                                      }
-                                    }
-
-                                    // 상세 데이터가 없으면 안내 메시지
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                            'Please generate a detailed analysis from the home screen first.'),
-                                        backgroundColor: Colors.orange,
-                                      ),
-                                    );
-                                  } catch (e) {
-                                    print('Error loading detailed report: $e');
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                            'Error loading detailed report: $e'),
-                                        backgroundColor: Colors.red,
-                                      ),
-                                    );
-                                  }
-                                },
-                                child: ClipRRect(
-                                  borderRadius:
-                                      BorderRadius.circular(100), // Pill shape
-                                  child: BackdropFilter(
-                                    filter:
-                                        ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 12, vertical: 8),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.16),
-                                        borderRadius:
-                                            BorderRadius.circular(100),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            'Read more',
-                                            style: TextStyle(
-                                              color:
-                                                  Colors.white.withOpacity(0.9),
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Icon(
-                                            Icons.arrow_forward_ios,
-                                            color:
-                                                Colors.white.withOpacity(0.9),
-                                            size: 10,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              )
-                            ],
+                          Text(
+                            'Your Unique Eidos Type',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.8),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           const SizedBox(height: 16),
                           _buildUniqueEidosTypeCard(eidosData),
@@ -515,7 +409,7 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
     }
 
     return UniqueEidosTypeCard(
-      title: summary.eidosType ?? summary.summaryTitle,
+      title: summary.eidosType ?? summary.summaryTitle, // 개인 타입 우선 사용
       imageUrl: cardImageUrl,
       description: description,
       keywords: keywords,
@@ -623,6 +517,20 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
   /// 그룹 분석 데이터로 간단한 NarrativeReport 생성
   NarrativeReport _createSimplifiedNarrativeReport(
       Map<String, dynamic> reportData) {
+    // 개인화된 소개 섹션 확인
+    final personalizedIntro =
+        reportData['personalized_introduction'] as Map<String, dynamic>? ?? {};
+
+    // 개인 타입 추출 (개인화된 소개에서)
+    String? individualEidosType;
+    if (personalizedIntro.containsKey('opening')) {
+      final openingText = personalizedIntro['opening'] as String;
+      final match = RegExp(r'As a (The [^,]+),').firstMatch(openingText);
+      if (match != null) {
+        individualEidosType = match.group(1);
+      }
+    }
+
     // 그룹 분석 데이터에서 필요한 정보 추출
     final eidosSummary =
         reportData['eidos_summary'] as Map<String, dynamic>? ?? {};
@@ -639,15 +547,34 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
     final traitsSection =
         reportData['traits_section'] as Map<String, dynamic>? ?? {};
 
+    // 타로 인사이트 섹션도 확인
+    final tarotInsight =
+        reportData['tarot_insight'] as Map<String, dynamic>? ?? {};
+
+    // 관계 인사이트 섹션 확인
+    final relationshipInsight =
+        reportData['relationship_insight'] as Map<String, dynamic>? ?? {};
+
+    // 백엔드에서 새로 배포된 프로필 섹션들
+    final personalityProfile =
+        reportData['personality_profile'] as Map<String, dynamic>? ?? {};
+    final careerProfile =
+        reportData['career_profile'] as Map<String, dynamic>? ?? {};
+
     return NarrativeReport(
       eidosSummary: EidosSummary(
-        title: eidosSummary['title'] ?? 'Eidos Summary',
-        summaryTitle: eidosSummary['group_name'] ?? 'Your Eidos Type',
-        summaryText: eidosSummary['description'] ?? 'N/A',
+        title: personalizedIntro['title'] ?? 'Your Unique Essence',
+        summaryTitle: individualEidosType ??
+            eidosSummary['group_name'] ??
+            'Your Eidos Type',
+        summaryText: personalizedIntro['opening'] ??
+            eidosSummary['description'] ??
+            'N/A',
         currentEnergyTitle: 'Current Energy',
         currentEnergyText: coreIdentitySection['text'] ?? 'N/A',
-        eidosType: eidosSummary['eidos_type'],
-        personalizedExplanation: eidosSummary['description'],
+        eidosType: individualEidosType ?? eidosSummary['eidos_type'],
+        personalizedExplanation:
+            personalizedIntro['opening'] ?? eidosSummary['description'],
         groupTraits: eidosSummary['key_traits'] is List
             ? (eidosSummary['key_traits'] as List)
                 .map((e) => e.toString())
@@ -678,11 +605,16 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
             'You are in a phase of understanding your true nature and potential.',
       ),
       tarotInsight: TarotInsight(
-        title: 'Tarot Insight',
-        cardTitle: 'Your Current Energy Card',
-        cardMeaning: coreIdentitySection['text'] ?? 'N/A',
+        title: tarotInsight['title'] ?? 'Tarot Insight',
+        cardTitle:
+            tarotInsight['card_name_display'] ?? 'Your Current Energy Card',
+        cardMeaning: tarotInsight['card_meaning'] ??
+            coreIdentitySection['text'] ??
+            'N/A',
         cardMessageTitle: 'Message for You',
-        cardMessageText: lifeGuidanceSection['text'] ?? 'N/A',
+        cardMessageText: tarotInsight['card_message_text'] ??
+            lifeGuidanceSection['text'] ??
+            'N/A',
       ),
       ryusWisdom: RyusWisdom(
         title: 'Ryu\'s Wisdom',
@@ -690,30 +622,45 @@ class _EidosGroupScreenState extends State<EidosGroupScreen> {
             'Trust your unique essence and let it guide your path forward.',
       ),
       personalityProfile: PersonalityProfile(
-        title: 'Personality Profile',
-        coreTraits: strengthsSection['points']?.toString() ?? 'N/A',
-        likes: 'Aligned with your eidos type characteristics',
-        dislikes: 'Things that contradict your natural essence',
-        relationshipStyle: 'Based on your core eidos nature',
-        shadow: growthAreasSection['points']?.toString() ?? 'N/A',
+        title: personalityProfile['title'] ?? 'Personality Profile',
+        coreTraits: personalityProfile['coreTraits'] ??
+            (coreIdentitySection['text'] ?? 'N/A'),
+        likes: personalityProfile['likes'] ??
+            (strengthsSection['full_text'] ??
+                'Aligned with your eidos type characteristics'),
+        dislikes: personalityProfile['dislikes'] ??
+            'Things that contradict your natural essence',
+        relationshipStyle: personalityProfile['relationshipStyle'] ??
+            'Based on your core eidos nature',
+        shadow: personalityProfile['shadow'] ??
+            (growthAreasSection['full_text'] ?? 'N/A'),
       ),
       relationshipInsight: RelationshipInsight(
-        title: 'Relationship Insight',
-        loveStyle: 'Your love style reflects your eidos essence',
-        idealPartner: 'Someone who appreciates your unique nature',
-        relationshipAdvice: 'Be authentic to your true self in relationships',
+        title: relationshipInsight['title'] ?? 'Relationship Insight',
+        loveStyle: relationshipInsight['love_style']?['full_text'] ??
+            'Your love style reflects your eidos essence',
+        idealPartner: relationshipInsight['ideal_partner']?['full_text'] ??
+            'Someone who appreciates your unique nature',
+        relationshipAdvice: relationshipInsight['relationship_advice']
+                ?['full_text'] ??
+            'Be authentic to your true self in relationships',
       ),
       careerProfile: CareerProfile(
-        title: 'Career Profile',
-        aptitude: strengthsSection['points']?.toString() ?? 'N/A',
-        workStyle: 'Aligned with your natural eidos characteristics',
-        successStrategy:
-            lifeGuidanceSection['text'] ?? 'Follow your authentic path',
+        title: careerProfile['title'] ?? 'Career Profile',
+        aptitude: careerProfile['aptitude'] ??
+            (strengthsSection['full_text'] ??
+                'Career paths that align with your eidos type'),
+        workStyle: careerProfile['workStyle'] ??
+            (coreIdentitySection['text'] ??
+                'Work approach based on your core nature'),
+        successStrategy: careerProfile['successStrategy'] ??
+            (lifeGuidanceSection['text'] ??
+                'Success strategies for your eidos type'),
       ),
       rawDataForDev: reportData,
       fiveElementsStrength: {},
       nameOhaengEnglish: {},
-      eidosType: eidosSummary['eidos_type'],
+      eidosType: individualEidosType ?? eidosSummary['eidos_type'],
     );
   }
 }

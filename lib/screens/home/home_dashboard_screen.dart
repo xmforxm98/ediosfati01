@@ -289,10 +289,10 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
         _isLoadingFortune = false;
       });
     } catch (e) {
+      print('❌ Error loading fortune data: $e');
       setState(() {
         _isLoadingFortune = false;
       });
-      print('Error loading fortune data: $e');
     }
   }
 

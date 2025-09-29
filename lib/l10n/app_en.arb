@@ -1,0 +1,115 @@
+{
+  "@@locale": "en",
+  "appTitle": "Eidos Fati - Inner Five",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "appSubtitle": "Explore your inner self with AI-powered astrology and tarot analysis",
+  "@appSubtitle": {
+    "description": "The subtitle of the application"
+  },
+  "loading": "Loading...",
+  "@loading": {
+    "description": "Loading text"
+  },
+  "signIn": "Sign In",
+  "@signIn": {
+    "description": "Sign in button text"
+  },
+  "signOut": "Sign Out",
+  "@signOut": {
+    "description": "Sign out button text"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Email field label"
+  },
+  "password": "Password",
+  "@password": {
+    "description": "Password field label"
+  },
+  "emailHint": "Enter your email address",
+  "@emailHint": {
+    "description": "Email field hint text"
+  },
+  "passwordHint": "Enter your password",
+  "@passwordHint": {
+    "description": "Password field hint text"
+  },
+  "welcome": "Welcome",
+  "@welcome": {
+    "description": "Welcome message"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings page title"
+  },
+  "language": "Language",
+  "@language": {
+    "description": "Language setting label"
+  },
+  "selectLanguage": "Select Language",
+  "@selectLanguage": {
+    "description": "Select language dialog title"
+  },
+  "dailyFortune": "Daily Fortune",
+  "@dailyFortune": {
+    "description": "Daily fortune section title"
+  },
+  "tarotReading": "Tarot Reading",
+  "@tarotReading": {
+    "description": "Tarot reading section title"
+  },
+  "analysis": "Analysis",
+  "@analysis": {
+    "description": "Analysis section title"
+  },
+  "profile": "Profile",
+  "@profile": {
+    "description": "Profile section title"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  "confirm": "Confirm",
+  "@confirm": {
+    "description": "Confirm button text"
+  },
+  "error": "Error",
+  "@error": {
+    "description": "Error message title"
+  },
+  "success": "Success",
+  "@success": {
+    "description": "Success message title"
+  },
+  "tryAgain": "Try Again",
+  "@tryAgain": {
+    "description": "Try again button text"
+  },
+  "languageSystem": "System Default",
+  "@languageSystem": {
+    "description": "System default language option"
+  },
+  "languageEnglish": "English",
+  "@languageEnglish": {
+    "description": "English language option"
+  },
+  "languageKorean": "한국어",
+  "@languageKorean": {
+    "description": "Korean language option"
+  },
+  "languageJapanese": "日本語",
+  "@languageJapanese": {
+    "description": "Japanese language option"
+  },
+  "languageChinese": "中文",
+  "@languageChinese": {
+    "description": "Chinese language option"
+  },
+  "languageArabic": "العربية",
+  "@languageArabic": {
+    "description": "Arabic language option"
+  }
+}

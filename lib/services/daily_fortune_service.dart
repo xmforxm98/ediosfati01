@@ -54,7 +54,7 @@ class DailyFortuneService {
 
       // Ensure username is ASCII as per the guide
       final safeUserName = userName.replaceAll(RegExp(r'[^\x00-\x7F]+'), '');
-      final finalUserName = safeUserName.isNotEmpty ? safeUserName : 'User';
+      final finalUserName = safeUserName.isNotEmpty ? safeUserName : userName;
 
       print('🌟 Fortune API Request Data:');
       print('   - fortuneType: $fortuneType');

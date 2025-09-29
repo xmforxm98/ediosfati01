@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   http: ^1.2.1
   geolocator: ^12.0.0
   geocoding: ^3.0.0
@@ -56,7 +58,7 @@ dependencies:
 
   # AUTH
   google_sign_in: ^6.2.1
-  flutter_web_auth_2: ^2.1.2
+  flutter_web_auth_2: ^4.1.0
   
   # UTILITIES
   image_picker: ^1.0.7
@@ -64,6 +66,7 @@ dependencies:
   image: ^4.1.7
   permission_handler: ^11.2.0
   url_launcher: ^6.2.3
+  rotation_stage: ^0.3.0
   
   # NOTIFICATIONS
   flutter_local_notifications: ^19.2.1
@@ -95,6 +98,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  
+  # Enable internationalization
+  generate: true
 
   assets:
     - assets/

@@ -355,12 +355,13 @@ class _TaroScreenState extends State<TaroScreen> {
               print(
                   '✅ Daily Tarot loaded successfully: ${dailyTarot.cardNameDisplay}');
 
-              // Today's Tarot 카드 추가
+              // Today's Tarot 카드 추가 (Your Tarot과 동일한 형식)
               tarotCards.add({
                 'type': 'Daily Tarot',
                 'title': dailyTarot.cardNameDisplay,
-                'subtitle': 'Your Personalized Tarot for Today',
+                'subtitle': 'Today\'s Tarot Reading',
                 'message': dailyTarot.message.content,
+                'cardMeaning': dailyTarot.cardMeaning,
                 'backgroundImageUrl': _getFirebaseImageUrl(
                     dailyTarot.cardImageUrl, dailyTarot.cardId),
                 'dailyTarot': dailyTarot, // 전체 데이터 저장
@@ -518,11 +519,11 @@ class _TaroScreenState extends State<TaroScreen> {
 
     return CustomScrollView(
       slivers: [
-        const SliverAppBar(
+        SliverAppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
           centerTitle: true,
-          title: Text(
+          title: const Text(
             'Tarot Guidance',
             style: TextStyle(
               fontWeight: FontWeight.normal,
@@ -531,10 +532,13 @@ class _TaroScreenState extends State<TaroScreen> {
             ),
           ),
           scrolledUnderElevation: 0,
-          floating: false,
-          snap: false,
+          floating: true,
+          snap: true,
           pinned: false,
           automaticallyImplyLeading: false,
+          onStretchTrigger: () async {
+            print('🔍 DEBUG: SliverAppBar stretch triggered');
+          },
         ),
         SliverToBoxAdapter(
           child: _buildTabBar(),
@@ -553,14 +557,7 @@ class _TaroScreenState extends State<TaroScreen> {
               itemBuilder: (context, index) {
                 final tarot = _tarotDataList![index];
 
-                // Daily Tarot 카드인 경우 새로운 UI 사용
-                if (tarot['type'] == 'Daily Tarot' &&
-                    tarot.containsKey('dailyTarot')) {
-                  return _buildDailyTarotCard(
-                      tarot['dailyTarot'] as DailyTarot);
-                }
-
-                // Eidos Tarot 카드는 기존 FortuneCard 사용
+                // 모든 타로 카드를 동일한 스타일로 표시
                 return _buildEidosTarotCard(tarot);
               },
             ),
@@ -579,7 +576,7 @@ class _TaroScreenState extends State<TaroScreen> {
               ),
             ),
           ),
-        )
+        ),
       ],
     );
   }
@@ -638,12 +635,16 @@ class _TaroScreenState extends State<TaroScreen> {
   }
 
   void _showCardDetails(Map<String, dynamic> tarot) {
+    // Daily Tarot인 경우 더 상세한 정보 표시
+    final isDailyTarot =
+        tarot['type'] == 'Daily Tarot' && tarot.containsKey('dailyTarot');
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.8,
+        height: MediaQuery.of(context).size.height * 0.85,
         decoration: BoxDecoration(
           color: Colors.black.withOpacity(0.16), // 블랙 16% 배경
           borderRadius: const BorderRadius.only(
@@ -684,7 +685,7 @@ class _TaroScreenState extends State<TaroScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    // 타이틀 (크기 줄임)
+                    // 타이틀
                     Row(
                       children: [
                         const Icon(
@@ -698,7 +699,7 @@ class _TaroScreenState extends State<TaroScreen> {
                             tarot['title'] ?? 'Tarot Card',
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 20, // 24에서 20으로 줄임
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -710,53 +711,10 @@ class _TaroScreenState extends State<TaroScreen> {
                     // 스크롤 가능한 내용
                     Expanded(
                       child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // 카드 의미 (박스 제거, 직접 텍스트 표시)
-                            if (tarot['cardMeaning'] != null &&
-                                tarot['cardMeaning'].toString().isNotEmpty) ...[
-                              Text(
-                                'Card Meaning',
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.9),
-                                  fontSize: 18, // 여기서 폰트 크기 조절 가능
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              _buildFormattedTextWithParagraphs(
-                                tarot['cardMeaning'],
-                                TextStyle(
-                                  color: Colors.white.withOpacity(0.85),
-                                  fontSize: 15, // 여기서 폰트 크기 조절 가능
-                                  height: 1.6,
-                                ),
-                              ),
-                              const SizedBox(height: 32),
-                            ],
-
-                            // 개인 메시지 (박스 제거, 직접 텍스트 표시)
-                            Text(
-                              'Your Personal Message',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
-                                fontSize: 18, // 여기서 폰트 크기 조절 가능
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            _buildFormattedTextWithParagraphs(
-                              tarot['message'] ??
-                                  'Your tarot guidance will appear here.',
-                              TextStyle(
-                                color: Colors.white.withOpacity(0.85),
-                                fontSize: 15, // 여기서 폰트 크기 조절 가능
-                                height: 1.6,
-                              ),
-                            ),
-                          ],
-                        ),
+                        child: isDailyTarot
+                            ? _buildDailyTarotDetails(
+                                tarot['dailyTarot'] as DailyTarot)
+                            : _buildEidosTarotDetails(tarot),
                       ),
                     ),
                   ],
@@ -806,6 +764,331 @@ class _TaroScreenState extends State<TaroScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: paragraphs,
+    );
+  }
+
+  // Daily Tarot 상세 정보 위젯
+  Widget _buildDailyTarotDetails(DailyTarot dailyTarot) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 카드 의미
+        Text(
+          'Card Meaning',
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.9),
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        _buildFormattedTextWithParagraphs(
+          dailyTarot.cardMeaning,
+          TextStyle(
+            color: Colors.white.withOpacity(0.85),
+            fontSize: 15,
+            height: 1.6,
+          ),
+        ),
+        const SizedBox(height: 32),
+
+        // 오늘의 메시지 (제목 포함)
+        Text(
+          dailyTarot.message.title.isNotEmpty
+              ? dailyTarot.message.title
+              : 'Today\'s Message',
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.9),
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        _buildFormattedTextWithParagraphs(
+          dailyTarot.message.content,
+          TextStyle(
+            color: Colors.white.withOpacity(0.85),
+            fontSize: 15,
+            height: 1.6,
+          ),
+        ),
+        const SizedBox(height: 32),
+
+        // 섹션들 (가장 중요한 누락된 정보!)
+        if (dailyTarot.message.sections.isNotEmpty) ...[
+          ...dailyTarot.message.sections.map((section) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    section.title,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  if (section.hasPoints) ...[
+                    // 포인트 형식으로 표시
+                    ...section.points.map((point) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('• ',
+                                  style: TextStyle(
+                                      color: Colors.white.withOpacity(0.7))),
+                              Expanded(
+                                child: _buildFormattedTextWithParagraphs(
+                                  point,
+                                  TextStyle(
+                                    color: Colors.white.withOpacity(0.85),
+                                    fontSize: 15,
+                                    height: 1.6,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )),
+                  ] else if (section.hasContent) ...[
+                    // 일반 텍스트로 표시
+                    _buildFormattedTextWithParagraphs(
+                      section.content,
+                      TextStyle(
+                        color: Colors.white.withOpacity(0.85),
+                        fontSize: 15,
+                        height: 1.6,
+                      ),
+                    ),
+                  ] else if (section.hasFullText) ...[
+                    // 전체 텍스트로 표시
+                    _buildFormattedTextWithParagraphs(
+                      section.fullText,
+                      TextStyle(
+                        color: Colors.white.withOpacity(0.85),
+                        fontSize: 15,
+                        height: 1.6,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          }),
+        ],
+
+        // 운세 메시지
+        if (dailyTarot.fortuneMessage.isNotEmpty) ...[
+          Text(
+            'Fortune Message',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.9),
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildFormattedTextWithParagraphs(
+            dailyTarot.fortuneMessage,
+            TextStyle(
+              color: Colors.white.withOpacity(0.85),
+              fontSize: 15,
+              height: 1.6,
+            ),
+          ),
+          const SizedBox(height: 32),
+        ],
+
+        // 추가 정보 (테마 키워드, 행운의 색상 등)
+        if (dailyTarot.themeKeyword.isNotEmpty ||
+            dailyTarot.luckyColor.isNotEmpty) ...[
+          Text(
+            'Today\'s Essentials',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.9),
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white.withOpacity(0.2)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (dailyTarot.themeKeyword.isNotEmpty) ...[
+                  Row(
+                    children: [
+                      Icon(Icons.psychology,
+                          color: Colors.white.withOpacity(0.7), size: 16),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Theme: ${dailyTarot.themeKeyword}',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.85),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (dailyTarot.luckyColor.isNotEmpty)
+                    const SizedBox(height: 8),
+                ],
+                if (dailyTarot.luckyColor.isNotEmpty) ...[
+                  Row(
+                    children: [
+                      Icon(Icons.palette,
+                          color: Colors.white.withOpacity(0.7), size: 16),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Lucky Color: ${dailyTarot.luckyColor}',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.85),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+        ],
+
+        // 명언
+        if (dailyTarot.message.aphorism.isNotEmpty) ...[
+          Text(
+            'Daily Wisdom',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.9),
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white.withOpacity(0.2)),
+            ),
+            child: Column(
+              children: [
+                const Icon(Icons.format_quote, color: Colors.white54, size: 32),
+                const SizedBox(height: 12),
+                Text(
+                  dailyTarot.message.aphorism,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.white,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+        ],
+
+        // 해시태그
+        if (dailyTarot.message.hashtags.isNotEmpty) ...[
+          Text(
+            'Keywords',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.9),
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: dailyTarot.message.hashtags
+                .map((tag) => Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(16),
+                        border:
+                            Border.all(color: Colors.white.withOpacity(0.2)),
+                      ),
+                      child: Text(
+                        tag,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ))
+                .toList(),
+          ),
+        ],
+      ],
+    );
+  }
+
+  // Eidos Tarot 상세 정보 위젯
+  Widget _buildEidosTarotDetails(Map<String, dynamic> tarot) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 카드 의미
+        if (tarot['cardMeaning'] != null &&
+            tarot['cardMeaning'].toString().isNotEmpty) ...[
+          Text(
+            'Card Meaning',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.9),
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildFormattedTextWithParagraphs(
+            tarot['cardMeaning'],
+            TextStyle(
+              color: Colors.white.withOpacity(0.85),
+              fontSize: 15,
+              height: 1.6,
+            ),
+          ),
+          const SizedBox(height: 32),
+        ],
+
+        // 개인 메시지
+        Text(
+          'Your Personal Message',
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.9),
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        _buildFormattedTextWithParagraphs(
+          tarot['message'] ?? 'Your tarot guidance will appear here.',
+          TextStyle(
+            color: Colors.white.withOpacity(0.85),
+            fontSize: 15,
+            height: 1.6,
+          ),
+        ),
+      ],
     );
   }
 
@@ -1003,520 +1286,6 @@ class _TaroScreenState extends State<TaroScreen> {
         .animate()
         .scaleXY(end: 1, duration: 500.ms, curve: Curves.easeOutCubic)
         .fadeIn();
-  }
-
-  Widget _buildDailyTarotCard(DailyTarot dailyTarot) {
-    final themeColor = _getThemeColor(dailyTarot.message.illustrationCue);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            // 카드 이미지와 기본 정보
-            _buildCardHeader(dailyTarot, themeColor),
-            const SizedBox(height: 24),
-
-            // 메인 메시지
-            _buildMainMessage(dailyTarot, themeColor),
-            const SizedBox(height: 24),
-
-            // 섹션들
-            _buildSections(dailyTarot),
-            const SizedBox(height: 24),
-
-            // Action Cards
-            _buildActionCards(dailyTarot),
-            const SizedBox(height: 24),
-
-            // 명언과 해시태그
-            _buildWisdomAndHashtags(dailyTarot, themeColor),
-          ],
-        ),
-      ),
-    )
-        .animate()
-        .slideY(duration: 600.ms, begin: 0.3, curve: Curves.easeOutCubic)
-        .fadeIn();
-  }
-
-  Widget _buildCardHeader(DailyTarot dailyTarot, Color themeColor) {
-    final imageUrl =
-        _getFirebaseImageUrl(dailyTarot.cardImageUrl, dailyTarot.cardId);
-    print('🎴 Daily Tarot image URL: ${dailyTarot.cardImageUrl}');
-    print('🎴 Daily Tarot card ID: ${dailyTarot.cardId}');
-    print('🎴 Final image URL: $imageUrl');
-
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
-      ),
-      child: Column(
-        children: [
-          // 카드 이미지
-          Container(
-            height: 200,
-            width: 120,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: themeColor.withOpacity(0.3),
-                  blurRadius: 20,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: imageUrl.isNotEmpty
-                  ? Image.network(
-                      imageUrl,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Container(
-                          color: Colors.grey[800],
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
-                                  : null,
-                              color: themeColor,
-                            ),
-                          ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        print('❌ Image loading error: $error');
-                        return Container(
-                          color: Colors.grey[800],
-                          child: const Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.image_not_supported,
-                                  color: Colors.white54, size: 48),
-                              SizedBox(height: 8),
-                              Text(
-                                'Image failed to load',
-                                style: TextStyle(
-                                  color: Colors.white54,
-                                  fontSize: 12,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    )
-                  : Container(
-                      color: Colors.grey[800],
-                      child: const Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.image, color: Colors.white54, size: 48),
-                          SizedBox(height: 8),
-                          Text(
-                            'No image URL',
-                            style: TextStyle(
-                              color: Colors.white54,
-                              fontSize: 12,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // 카드 이름
-          Text(
-            dailyTarot.cardNameDisplay,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: themeColor,
-            ),
-            textAlign: TextAlign.center,
-          ),
-
-          const SizedBox(height: 12),
-
-          // 카드 의미 설명 추가
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
-            ),
-            child: Text(
-              dailyTarot.cardMeaning,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                height: 1.4,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          // 테마 키워드
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: themeColor.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              dailyTarot.themeKeyword,
-              style: TextStyle(
-                color: themeColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMainMessage(DailyTarot dailyTarot, Color themeColor) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: themeColor.withOpacity(0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            dailyTarot.message.title,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: themeColor,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            dailyTarot.message.content,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.white,
-              height: 1.6,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSections(DailyTarot dailyTarot) {
-    return Column(
-      children: dailyTarot.message.sections.map((section) {
-        // Action Cards는 별도로 처리하므로 여기서 제외
-        if (section.sectionKey == 'daily_actions' ||
-            section.sectionKey == 'daily_cautions') {
-          return const SizedBox.shrink();
-        }
-
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  section.title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  section.content,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    color: Colors.white70,
-                    height: 1.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildActionCards(DailyTarot dailyTarot) {
-    final sections = dailyTarot.message.sections;
-    final actionsSection = sections.firstWhere(
-      (s) => s.sectionKey == 'daily_actions',
-      orElse: () => DailyTarotSection(
-        title: 'Recommended Actions',
-        content: '',
-        points: [],
-        fullText: '',
-        sectionKey: 'daily_actions',
-      ),
-    );
-
-    final cautionsSection = sections.firstWhere(
-      (s) => s.sectionKey == 'daily_cautions',
-      orElse: () => DailyTarotSection(
-        title: 'Things to Avoid',
-        content: '',
-        points: [],
-        fullText: '',
-        sectionKey: 'daily_cautions',
-      ),
-    );
-
-    return Row(
-      children: [
-        // Do Card
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.green.withOpacity(0.2),
-                  Colors.green.withOpacity(0.1)
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.green.withOpacity(0.3)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Text('✅', style: TextStyle(fontSize: 18)),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        actionsSection.title,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                if (actionsSection.hasPoints)
-                  ...actionsSection.points.map((point) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('• ',
-                                style: TextStyle(color: Colors.green)),
-                            Expanded(
-                              child: Text(
-                                point,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.white,
-                                  height: 1.4,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ))
-                else if (actionsSection.hasContent)
-                  Text(
-                    actionsSection.content,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                      height: 1.4,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-
-        const SizedBox(width: 12),
-
-        // Don't Card
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.orange.withOpacity(0.2),
-                  Colors.orange.withOpacity(0.1)
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.orange.withOpacity(0.3)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Text('⚠️', style: TextStyle(fontSize: 18)),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        cautionsSection.title,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.orange,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                if (cautionsSection.hasPoints)
-                  ...cautionsSection.points.map((point) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('• ',
-                                style: TextStyle(color: Colors.orange)),
-                            Expanded(
-                              child: Text(
-                                point,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.white,
-                                  height: 1.4,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ))
-                else if (cautionsSection.hasContent)
-                  Text(
-                    cautionsSection.content,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                      height: 1.4,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildWisdomAndHashtags(DailyTarot dailyTarot, Color themeColor) {
-    return Column(
-      children: [
-        // 명언
-        if (dailyTarot.message.aphorism.isNotEmpty)
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: themeColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: themeColor.withOpacity(0.3)),
-            ),
-            child: Column(
-              children: [
-                const Icon(Icons.format_quote, color: Colors.white54, size: 32),
-                const SizedBox(height: 12),
-                Text(
-                  dailyTarot.message.aphorism,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontStyle: FontStyle.italic,
-                    color: Colors.white,
-                    height: 1.5,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-
-        const SizedBox(height: 16),
-
-        // 해시태그
-        if (dailyTarot.message.hashtags.isNotEmpty)
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            alignment: WrapAlignment.center,
-            children: dailyTarot.message.hashtags
-                .map((tag) => Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(16),
-                        border:
-                            Border.all(color: Colors.white.withOpacity(0.2)),
-                      ),
-                      child: Text(
-                        tag,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.white70,
-                        ),
-                      ),
-                    ))
-                .toList(),
-          ),
-      ],
-    );
-  }
-
-  Color _getThemeColor(String illustrationCue) {
-    if (illustrationCue.contains('Crimson Red')) return const Color(0xFFDC143C);
-    if (illustrationCue.contains('Mystic Teal')) return const Color(0xFF008B8B);
-    if (illustrationCue.contains('Sage Green')) return const Color(0xFF87A96B);
-    if (illustrationCue.contains('Golden Yellow'))
-      return const Color(0xFFFFD700);
-    if (illustrationCue.contains('Metallic Gold'))
-      return const Color(0xFFD4AF37);
-    if (illustrationCue.contains('Royal Purple'))
-      return const Color(0xFF6A0DAD);
-    if (illustrationCue.contains('Deep Blue')) return const Color(0xFF003366);
-    if (illustrationCue.contains('Silver')) return const Color(0xFFC0C0C0);
-    return const Color(0xFF4A90E2); // 기본 색상
   }
 
   String _getFirebaseImageUrl(String originalUrl, String cardId) {

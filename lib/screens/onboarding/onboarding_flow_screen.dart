@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:innerfive/screens/auth_for_analysis_screen.dart';
 import 'package:innerfive/services/image_service.dart';
 import 'package:innerfive/widgets/gradient_blurred_background.dart';
+import 'package:innerfive/widgets/web_layout_wrapper.dart';
 import 'package:innerfive/onboarding_steps/nickname_step.dart';
 import 'package:innerfive/onboarding_steps/name_step.dart';
 import 'package:innerfive/onboarding_steps/birth_date_step.dart';
@@ -113,7 +114,7 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
       CityStep(userData: _userData, onContinue: _nextPage),
     ];
 
-    return Scaffold(
+    final onboardingContent = Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -136,14 +137,27 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
                   horizontal: 24.0,
                   vertical: 20.0,
                 ),
-                child: LinearPercentIndicator(
-                  percent: _progress,
-                  lineHeight: 8,
-                  backgroundColor: Colors.white24,
-                  progressColor: Colors.white,
-                  barRadius: const Radius.circular(10),
-                  animation: true,
-                  animateFromLastPercent: true,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: LinearPercentIndicator(
+                    percent: _progress,
+                    lineHeight: 8,
+                    backgroundColor: Colors.white.withOpacity(0.2),
+                    progressColor: Colors.white,
+                    barRadius: const Radius.circular(10),
+                    animation: true,
+                    animateFromLastPercent: true,
+                    addAutomaticKeepAlive: true,
+                  ),
                 ),
               ),
               Expanded(
@@ -158,5 +172,7 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
         ),
       ),
     );
+
+    return WebLayoutWrapper(child: onboardingContent);
   }
 }
